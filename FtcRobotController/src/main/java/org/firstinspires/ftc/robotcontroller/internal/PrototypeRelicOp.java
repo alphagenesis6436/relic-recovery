@@ -1,48 +1,45 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
 /**
- * Created by Kalvin Chang on 11/3/2017.
- * Jack/Belinda's updated jewel mechanism
- * initial pos of upDown = 255
- * final pos of upDown = 251
- * initial pos of leftRight = 101
- * final pos of leftRight =
- * 1. initialize values for both servos
- * 2. upDown goes down from theta i to theta f
- * 3. leftRight turns left (210) or right
+ * Updated by Kalvin on 11/3/2017.
+ * Vivian's prototype
  *
- *
- * note - leftRight goes opposite
+ * 1. set initial position of continuous servo to be upright
+ * 1b. set initial position of 180 servo to be @ top of arc
+ * 2. continuous rotates down
+ * 3. 180 servo rotates down about 90 degrees
+ * 4. 180 servo rotates back up
  */
-@TeleOp(name = "Jewel Prototype 3", group = "Default")
-public class PrototypeJewelOpMode3 extends OpMode {
+
+@TeleOp(name = "Relic Prototype 1", group = "Default")
+public class PrototypeRelicOp extends OpMode {
     //Declare any motors, servos, and sensors
-    final float UPDOWN_MIN = 0 / 255.0f;       //update later
-    final float UPDOWN_MAX = 255 / 255.0f;
-    final float LEFTRIGHT_MIN = 0 / 255.0f;
-    final float LEFTRIGHT_MAX = 255 / 255.0f;
-    Servo upDownServo;
-    Servo leftRightServo;
-    //ColorSensor color;
+    Servo upDownServo;    //180
+    Servo openCloseServo; //180
 
     //Declare any variables & constants pertaining to specific robot mechanisms (i.e. drive train)
-    public double upDownServoPos = 0;
-    public double leftRightServoPos = 0;
+    final float SERVO_MIN = 0 / 255.0f;
+    final float SERVO_MAX = 255 / 255.0f;
+    double upDownServoPos = 0;
+    double openCloseServoPos = 0;
 
-    public PrototypeJewelOpMode3() {}
+    public PrototypeRelicOp() {}
 
     @Override public void init() {
+        //Initialize motors & set direction
+
         //Initialize servos
         upDownServo = hardwareMap.servo.get("upDown");
-        leftRightServo = hardwareMap.servo.get("leftRight");
-        //color = hardwareMap.colorSensor.get("color");
+        openCloseServo = hardwareMap.servo.get("openClose");
+
+        //Initialize sensors
+
         telemetry();
     }
     @Override public void loop() {
@@ -59,23 +56,37 @@ public class PrototypeJewelOpMode3 extends OpMode {
 
     void updateData() {
         //Add in update methods for specific robot mechanisms
-        updateActuators();
+        if (gamepad1.left_stick_x < 0) {
+            upDownServoPos = (((upDownServoPos * 255.0) + 1) / 255.0);
+        }
+        if (gamepad1.left_stick_x > 0) {
+            upDownServoPos = (((upDownServoPos * 255.0) - 1) / 255.0);
+        }
+        if (gamepad1.right_stick_y < 0) {
+            openCloseServoPos = (((openCloseServoPos * 255.0) + 1) / 255.0);
+        }
+        if (gamepad1.right_stick_button) {
+            openCloseServoPos = 0;
+        }
     }
 
     void initialization() {
         //Clip and Initialize Specific Robot Mechanisms
-        upDownServoPos = Range.clip(upDownServoPos, UPDOWN_MIN, UPDOWN_MAX);
+        upDownServoPos = Range.clip(upDownServoPos, SERVO_MIN, SERVO_MAX);
         upDownServo.setPosition(upDownServoPos);
-        leftRightServoPos = Range.clip(leftRightServoPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
-        leftRightServo.setPosition(leftRightServoPos);
+
+        openCloseServoPos = Range.clip(openCloseServoPos, SERVO_MIN, SERVO_MAX);
+        openCloseServo.setPosition(openCloseServoPos);
     }
+
     void telemetry() {
         //Show Data for Specific Robot Mechanisms
         telemetry.addData("Current upDown servo pos:", String.format("%.0f", upDownServoPos * 255));
-        telemetry.addData("Current leftRight servo pos:", String.format("%.0f", leftRightServoPos * 255));
+        telemetry.addData("Current openClose servo pos:", String.format("%.0f", openCloseServoPos * 255));
     }
 
     //Create Methods that will update the driver data
+
  /*
      All update methods should be commented with:
          //Controlled by Driver (1 or 2)
@@ -85,6 +96,7 @@ public class PrototypeJewelOpMode3 extends OpMode {
   */
 
     //Create variables/methods that will be used in ALL autonomous programs for this specific robot
+
     double setTime; //used to measure the time period of each step in autonomous
     int state = 0; //used to control the steps taken during autonomous
     String stateName = ""; //Overwrite this as the specific step used in Autonomous
@@ -104,24 +116,5 @@ public class PrototypeJewelOpMode3 extends OpMode {
     //used to measure the amount of time passed since a new step in autonomous has started
     boolean waitSec(double elapsedTime) { return (this.time - setTime >= elapsedTime); }
 
-    /*
-    * gamepad1.left_stick_x < 0 = leftRightServo turns left
-    * gamepad1.left_stick_x > 0 = leftRightServo turns right
-    * gamepad1.right_stick_y > 0 = upDownServoPos moves down
-    * gamepad1.right_stick_y < 0 = upDownServoPos moves up
-    */
-    void updateActuators() {
-        if (gamepad1.left_stick_x < 0) {
-            leftRightServoPos = (((leftRightServoPos * 255.0) + 1) / 255.0);
-        }
-        if (gamepad1.left_stick_x > 0) {
-            leftRightServoPos = (((leftRightServoPos * 255.0) - 1) / 255.0);
-        }
-        if (gamepad1.right_stick_y < 0) {
-            upDownServoPos = (((upDownServoPos * 255.0) + 1) / 255.0);
-        }
-        if (gamepad1.right_stick_y > 0) {
-            upDownServoPos = (((upDownServoPos * 255.0) - 1) / 255.0);
-        }
-    }
 }
+

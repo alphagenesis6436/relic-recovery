@@ -7,21 +7,21 @@ import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
 /**
- * Updated by Alex on 6/1/2017.
+ * Updated by Kalvin on 11/3/2017.
+ * Jessica's prototype
  */
 
-@TeleOp(name = "OpMode Template", group = "Default")
-@Disabled
-public class GlyphClawOp extends OpMode {
+@TeleOp(name = "Glyph Prototype 1", group = "Default")
+public class PrototypeGlyphClawOp extends OpMode {
     //Declare any motors, servos, and sensors
     Servo clawServo;
 
     //Declare any variables & constants pertaining to specific robot mechanisms (i.e. drive train)
     final float SERVO_MIN = 0 / 255.0f;
-    final float SERVO_MAX = 0 / 255.0f;
+    final float SERVO_MAX = 255 / 255.0f;
     public double servoPos = 0;
 
-    public GlyphClawOp() {}
+    public PrototypeGlyphClawOp() {}
 
     @Override public void init() {
         //Initialize motors & set direction
@@ -62,7 +62,8 @@ public class GlyphClawOp extends OpMode {
     }
     void telemetry() {
         //Show Data for Specific Robot Mechanisms
-
+        telemetry.addData("Current upDown servo pos:", String.format("%.0f", servoPos * 255));
+        telemetry.addData("Current upDown servo pos:", String.format("%.0f", servoPos * 255));
     }
 
     //Create Methods that will update the driver data

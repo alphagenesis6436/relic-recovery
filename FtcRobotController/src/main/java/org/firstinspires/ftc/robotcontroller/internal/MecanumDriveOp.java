@@ -104,14 +104,60 @@ public class MecanumDriveOp extends OpMode {
     String stateName = ""; //Overwrite this as the specific step used in Autonomous
 
     void resetEncoders() {
-
+        driveFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driveFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driveBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driveBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
-    void runEncoders() {
-
+    void runConstantSpeed() {
+        driveFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        driveFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        driveBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        driveBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
-    void runWithoutEncoders() {
-
+    void runConstantPower() {
+        driveFR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        driveFL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        driveBR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        driveBL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+    void stopDriveMotors() {
+        driveFR.setPower(0.0);
+        driveFL.setPower(0.0);
+        driveBR.setPower(0.0);
+        driveBL.setPower(0.0);
+    }
+    void moveForward(double power) {
+        driveFR.setPower(power);
+        driveFL.setPower(power);
+        driveBR.setPower(power);
+        driveBL.setPower(power);
+    }
+    void moveRight(double power) {
+        driveFR.setPower(-power);
+        driveFL.setPower(power);
+        driveBR.setPower(power);
+        driveBL.setPower(-power);
+    }
+    void moveForwardRight(double power) {
+        driveFR.setPower(0.0);
+        driveFL.setPower(power);
+        driveBR.setPower(power);
+        driveBL.setPower(0.0);
+    }
+    void moveForwardLeft(double power) {
+        driveFR.setPower(power);
+        driveFL.setPower(0.0);
+        driveBR.setPower(0.0);;
+        driveBL.setPower(power);
+    }
+    void turnClockwise(double power) {
+        driveFR.setPower(-power);
+        driveFL.setPower(power);
+        driveBR.setPower(-power);
+        driveBL.setPower(power);
+    }
+
     void resetSensors() {
 
     }

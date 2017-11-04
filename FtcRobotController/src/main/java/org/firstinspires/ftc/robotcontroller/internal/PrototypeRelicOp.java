@@ -7,14 +7,14 @@ import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
 /**
- * Updated by Kalvin on 11/3/2017.
+ * Updated by Kalvin on 11/4/2017.
  * Vivian's prototype
  *
- * 1. set initial position of continuous servo to be upright
- * 1b. set initial position of 180 servo to be @ top of arc
- * 2. continuous rotates down
- * 3. 180 servo rotates down about 90 degrees
- * 4. 180 servo rotates back up
+ * 1. set initial position of upDown servo to be upright
+ * 1b. set initial position of openClose to be @ top of arc
+ * 2. upDowm rotates down (makes sideways arc)
+ * 3. openClose rotates down about 90 degrees
+ * 4. openClose rotates back up
  */
 
 @TeleOp(name = "Relic Prototype 1", group = "Default")
@@ -65,18 +65,18 @@ public class PrototypeRelicOp extends OpMode {
         if (gamepad1.right_stick_y < 0) {
             openCloseServoPos = (((openCloseServoPos * 255.0) + 1) / 255.0);
         }
-        if (gamepad1.right_stick_button) {
-            openCloseServoPos = 0;
+        if (gamepad1.right_stick_y > 0) {
+            openCloseServoPos = (((openCloseServoPos * 255.0) - 1) / 255.0);
         }
     }
 
     void initialization() {
         //Clip and Initialize Specific Robot Mechanisms
         upDownServoPos = Range.clip(upDownServoPos, SERVO_MIN, SERVO_MAX);
-        upDownServo.setPosition(upDownServoPos);
+        upDownServo.setPosition(upDownServoPos);        //replace w/ actual initial position
 
         openCloseServoPos = Range.clip(openCloseServoPos, SERVO_MIN, SERVO_MAX);
-        openCloseServo.setPosition(openCloseServoPos);
+        openCloseServo.setPosition(openCloseServoPos);  //replace w/ actual initial position
     }
 
     void telemetry() {

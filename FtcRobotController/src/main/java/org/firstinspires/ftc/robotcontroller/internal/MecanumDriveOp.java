@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
 /**
- * Updated by Alex on 6/1/2017.
+ * Updated by Alex on 11/1/2017.
  */
 @TeleOp(name = "MecanumDriveOp", group = "Default")
 public class MecanumDriveOp extends OpMode {

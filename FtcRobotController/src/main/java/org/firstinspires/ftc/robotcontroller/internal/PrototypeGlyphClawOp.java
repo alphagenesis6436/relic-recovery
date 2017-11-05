@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
 /**
- * Updated by Kalvin on 11/4/2017.
+ * Updated by Alex on 11/5/2017.
  * Jessica's prototype
  * servos: leftClaw, rightClaw
  * motor: lift
@@ -16,33 +16,32 @@ import com.qualcomm.robotcore.util.Range;
 @TeleOp(name = "Glyph Prototype 1", group = "Default")
 public class PrototypeGlyphClawOp extends OpMode {
     //Declare any motors, servos, and sensors
-    Servo leftClaw;
-    Servo rightClaw;
-    DcMotor lift;
+    Servo leftClaw; //180
+    Servo rightClaw; //180
+    DcMotor lift; //Andymark 40:1
 
-    //Declare any variables & constants pertaining to specific robot mechanisms (i.e. drive train)
-    final float SERVO_MIN_LEFT = 0 / 255.0f;
-    final float SERVO_MAX_LEFT = 255 / 255.0f;
-    final float SERVO_MIN_RIGHT = 0 / 255.0f;
-    final float SERVO_MAX_RIGHT = 255 / 255.0f;
-    final float LIFT_PWR_MAX = 0.50f;
+    //variables & constants pertaining to claw servos
+    final float SERVO_MIN_LEFT = 92 / 255.0f; //left claw is closed
+    final float SERVO_MAX_LEFT = 255 / 255.0f; //left claw is open
+    final float SERVO_MIN_RIGHT = 0 / 255.0f; //right claw is open
+    final float SERVO_MAX_RIGHT = 255 / 255.0f; //right claw is closed
+    double leftClawServoPos = SERVO_MIN_LEFT;
+    double rightClawServoPos = SERVO_MAX_RIGHT;
+    double clawDelta = 0.001;
 
-    //make sure both servos / motors are in sync
-    public double leftClawServoPos = 0;
-    public double rightClawServoPos = 0;
-    public double liftPower = 0;
+    //variables & constants pertaining to lift motor
+    final float LIFT_PWR_MAX = 0.40f;
+    double liftPower = 0;
 
     public PrototypeGlyphClawOp() {}
 
     @Override public void init() {
         //Initialize motors & set direction
+        lift = hardwareMap.dcMotor.get("lift");
 
         //Initialize servos
         leftClaw = hardwareMap.servo.get("leftClaw");
         rightClaw = hardwareMap.servo.get("rightClaw");
-        lift = hardwareMap.dcMotor.get("lift");
-
-        //Initialize sensors
 
         telemetry();
     }
@@ -60,47 +59,39 @@ public class PrototypeGlyphClawOp extends OpMode {
 
     void updateData() {
         //Add in update methods for specific robot mechanisms
-        if (gamepad1.left_stick_x < 0) {
-            leftClawServoPos = (((leftClawServoPos * 255.0) + 1) / 255.0);
-        }
-        if (gamepad1.left_stick_x > 0) {
-            leftClawServoPos = (((leftClawServoPos * 255.0) - 1) / 255.0);
-        }
-        if (gamepad1.right_stick_x < 0) {
-            rightClawServoPos = (((rightClawServoPos * 255.0) + 1) / 255.0);
-        }
-        if (gamepad1.right_stick_x > 0) {
-            rightClawServoPos = (((rightClawServoPos * 255.0) - 1) / 255.0);
-        }
-        if (gamepad2.left_stick_y == 0) {
-            liftPower = 0;
-        }
-        liftPower = -gamepad2.left_stick_y * LIFT_PWR_MAX;
+        updateGlyphClaw();
     }
 
     void initialization() {
         //Clip and Initialize Specific Robot Mechanisms - initialize servo positions
         leftClawServoPos = Range.clip(leftClawServoPos, SERVO_MIN_LEFT, SERVO_MAX_LEFT);
         leftClaw.setPosition(leftClawServoPos);
-        rightClaw.setPosition(clawServoPos);
+        rightClawServoPos = Range.clip(rightClawServoPos, SERVO_MIN_RIGHT, SERVO_MAX_RIGHT);
+        rightClaw.setPosition(rightClawServoPos);
+        liftPower = Range.clip(liftPower, -LIFT_PWR_MAX, LIFT_PWR_MAX);
         lift.setPower(liftPower);
     }
     void telemetry() {
         //Show Data for Specific Robot Mechanisms
-        telemetry.addData("Current leftClaw servo pos:", String.format("%.0f", clawServoPos * 255));
-        telemetry.addData("Current rightClaw servo pos:", String.format("%.0f", clawServoPos * 255));
+        telemetry.addData("Current leftClaw servo pos:", String.format("%.0f", leftClawServoPos * 255));
+        telemetry.addData("Current rightClaw servo pos:", String.format("%.0f", rightClawServoPos * 255));
         telemetry.addData("Current lift motor power", String.format("%.0f", liftPower * 255));
     }
 
-    //Create Methods that will update the driver data
-
- /*
-     All update methods should be commented with:
-         //Controlled by Driver (1 or 2)
-         //Step 1: (Physical Instructions on how to control specific robot mechanism using controller buttons)
-         //Step 2: (Physical Instructions on how to control specific robot mechanism using controller buttons)
-         //Step ...: (Physical Instructions on how to control specific robot mechanism using controller buttons)
-  */
+    //Controlled by Driver 2
+    //Step 1: Open Left/Right Claw by pressing the Left/Right Bumper
+    //Step 2: Close the Left/Right Claw by pressing the Left/Right Trigger
+    void updateGlyphClaw() {
+        liftPower = -gamepad2.left_stick_y * LIFT_PWR_MAX;
+        if (gamepad2.left_bumper)
+            leftClawServoPos += clawDelta;
+        else if (gamepad2.left_trigger > 0.50)
+            leftClawServoPos -= clawDelta;
+        if (gamepad2.right_trigger > 0.50)
+            rightClawServoPos += clawDelta;
+        else if (gamepad2.right_bumper)
+            rightClawServoPos -= clawDelta;
+    }
 
 
     //Create variables/methods that will be used in ALL autonomous programs for this specific robot

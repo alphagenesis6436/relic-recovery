@@ -30,7 +30,7 @@ public class PrototypeGlyphClawOp extends OpMode {
     double clawDelta = 0.001;
 
     //variables & constants pertaining to lift motor
-    final float LIFT_PWR_MAX = 0.50f;
+    final float LIFT_PWR_MAX = 0.70f;
     double liftPower = 0;
 
     public PrototypeGlyphClawOp() {}

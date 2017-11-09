@@ -18,7 +18,7 @@ public class PrototypeGlyphClawOp extends OpMode {
     //Declare any motors, servos, and sensors
     Servo leftClaw; //180
     Servo rightClaw; //180
-    DcMotor lift; //Andymark 40:1
+    DcMotor lift; //Andymark 60:1
 
     //variables & constants pertaining to claw servos
     final float SERVO_MIN_LEFT = 92 / 255.0f; //left claw is closed
@@ -30,7 +30,7 @@ public class PrototypeGlyphClawOp extends OpMode {
     double clawDelta = 0.001;
 
     //variables & constants pertaining to lift motor
-    final float LIFT_PWR_MAX = 0.40f;
+    final float LIFT_PWR_MAX = 0.50f;
     double liftPower = 0;
 
     public PrototypeGlyphClawOp() {}
@@ -75,7 +75,7 @@ public class PrototypeGlyphClawOp extends OpMode {
         //Show Data for Specific Robot Mechanisms
         telemetry.addData("Current leftClaw servo pos:", String.format("%.0f", leftClawServoPos * 255));
         telemetry.addData("Current rightClaw servo pos:", String.format("%.0f", rightClawServoPos * 255));
-        telemetry.addData("Current lift motor power", String.format("%.0f", liftPower * 255));
+        telemetry.addData("Current lift motor power", String.format("%.2f", liftPower));
     }
 
     //Controlled by Driver 2

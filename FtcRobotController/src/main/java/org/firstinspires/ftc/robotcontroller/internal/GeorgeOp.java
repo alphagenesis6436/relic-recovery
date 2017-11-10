@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
 /**
- * Created by Alex on 11/8/2017
+ * Updated by Alex, Kalvin on 11/10/17
  * GeorgeOp is the TeleOp for the Competition Robot
  * Has Following Robot Systems:
  * --Mecanum Drive Train
@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.util.Range;
  * ----Adds turnAbsolute() and turnRelative() methods for autonomous
  * ----Adds calibrateVariables() method for autonomous
  * --Jewel Mechanism
- * ----Follows Same Variables from PrototypeJewelOpMode3
+ * ----Adapted from PrototypeJewelOpMode3
  * ----Modifies updateActuators() method [Renamed to updateJewel()] to accommodate Controls for other Systems
  * ----Adds in the Color Sensor for Autonomous
  */

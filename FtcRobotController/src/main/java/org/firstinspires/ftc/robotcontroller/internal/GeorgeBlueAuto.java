@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
  * --
  */
 @Autonomous(name = "AutoTemplate", group = "default")
-@Disabled
 public class GeorgeBlueAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 

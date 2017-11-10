@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
@@ -32,6 +33,7 @@ public class GeorgeOp extends OpMode {
     ColorSensor colorSensor; //For Jewel Mechanism
     GyroSensor gyroSensor;
     ModernRoboticsI2cGyro gyroMR; //For Mecanum Drive Train
+    ModernRoboticsI2cRangeSensor range; //for detecting the wall in autonomous
 
     //Mecanum Drive Train Variables and Constants
     final double DRIVE_PWR_MAX = 0.90;
@@ -49,6 +51,8 @@ public class GeorgeOp extends OpMode {
     final float UPDOWN_MAX = 255 / 255.0f;
     final float LEFTRIGHT_MIN = 0 / 255.0f;
     final float LEFTRIGHT_MAX = 255 / 255.0f;
+    final int BLUE_THRESHOLD = 2;
+    final int RED_THRESHOLD = 2;
     double upDownPos = 0;
     double leftRightPos = 0;
     double jewelDelta = 0.005;
@@ -271,6 +275,7 @@ public class GeorgeOp extends OpMode {
 
     void calibrateVariables() {//Used if any autonomous methods need initial state variables
         startingIntZVal = gyroMR.getIntegratedZValue();
+        colorSensor.enableLed(false);
     }
     //used to measure the amount of time passed since a new step in autonomous has started
     boolean waitSec(double elapsedTime) { return (this.time - setTime >= elapsedTime); }

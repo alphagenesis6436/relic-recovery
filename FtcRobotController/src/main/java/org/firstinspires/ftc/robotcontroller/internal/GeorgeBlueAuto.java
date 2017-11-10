@@ -2,6 +2,7 @@ package org.firstinspires.ftc.robotcontroller.internal;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.util.Range;
 
 /**
  * Created by Alex on 11/8/2017.
@@ -13,12 +14,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
  * 1. Knock off jewel
  * 2. Move left 36 inches towards the blue tape in order to be centered at the cryptobox
  * 3. Rotate 180 degrees to have glyph face CryptoBox
- * 4.
+ * 4. Drive forward toward CryptoBox until 4 inches away from the wall
+ * 5. Drive right until white tape is seen
+ * 6. Drive forward 3?? inches -> push glyph into the CryptoBox
+ * End. Robot ends up aligned to score glyph in specific column of CryptoBox
  */
 @Autonomous(name = "AutoTemplate", group = "default")
 public class GeorgeBlueAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
-
 
     public GeorgeBlueAuto() {}
 
@@ -38,14 +41,54 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 state++;
                 break;
 
-            case 2: //Describe the Robot’s Goals & Actions in this state
-                stateName = "First State Goal";
-                //Display any current data needed to be seen during this state (if none is needed, omit this comment)
-
-
-                if (true) { //Use a boolean value that reads true when state goal is completed
+            case 2: //Use PID Control to ensure servo moves down slowly and safely
+                stateName = "Knock off jewel 1 - arm down";
+                //upDownServo moves down to max/min?? position
+                upDownPos += 0.005;
+                upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
+                upDownServo.setPosition(upDownPos);
+                if (upDownServo.getPosition() == UPDOWN_MAX)
                     state++;
-                }
+                break;
+
+            case 4:
+                stateName = "Knock off jewel 2 - arm knock";
+                //if leftJewel == red, leftRightServo moves left to knock off red jewel
+                //if leftJewel == blue, leftRightServo moves right to knock off red jewel
+                colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
+                if (colorSensor.red() >= RED_THRESHOLD)
+                    leftRightPos -= 0.01;
+                else if (colorSensor.blue() >= BLUE_THRESHOLD)
+                    leftRightPos += 0.01;
+                leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
+                if (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)
+                    state++;
+                break;
+
+            case 6:
+                stateName = "Knock off jewel 3 - arm up";
+                //upDownServo moves up to max/min?? position
+                upDownPos -= 0.005;
+                upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
+                upDownServo.setPosition(upDownPos);
+                if (upDownServo.getPosition() == UPDOWN_MIN)
+                    state++;
+                break;
+
+            case 8:
+                stateName = "Move Left 36 inches";
+                //have robot drive to position of 36 inches
+                moveRight(-36);
+                if (waitSec(1) && !driveFR.isBusy())
+                    state++;
+                break;
+
+            case 10:
+                stateName = "Move Left 36 inches";
+                //have robot drive to position of 36 inches
+                moveRight(-36);
+                if (waitSec(1) && !driveFR.isBusy())
+                    state++;
                 break;
 
             case 1000: //Run When Autonomous is Complete

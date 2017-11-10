@@ -33,6 +33,7 @@ public class GeorgeOp extends OpMode {
     ColorSensor colorSensor; //For Jewel Mechanism
     GyroSensor gyroSensor;
     ModernRoboticsI2cGyro gyroMR; //For Mecanum Drive Train
+    DistanceSensor rangeSensor;
     ModernRoboticsI2cRangeSensor range; //for detecting the wall in autonomous
 
     //Mecanum Drive Train Variables and Constants
@@ -79,6 +80,7 @@ public class GeorgeOp extends OpMode {
         colorSensor = hardwareMap.colorSensor.get("cs");
         gyroSensor = hardwareMap.gyroSensor.get("gs");
         gyroMR = (ModernRoboticsI2cGyro) gyroSensor;
+        range = (ModernRoboticsI2cRangeSensor) rangeSensor;
 
         telemetry();
     }

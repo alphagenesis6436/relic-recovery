@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
@@ -36,6 +35,10 @@ public class GeorgeOp extends OpMode {
 
     //Mecanum Drive Train Variables and Constants
     final double DRIVE_PWR_MAX = 0.90;
+    final int COUNTS_PER_REVOLUTION = 1440; //AndyMark Motors
+    final double DRIVE_GEAR_RATIO = 1 / 2; //Driven / Driver
+    final double COUNTS_PER_INCH_RF = COUNTS_PER_REVOLUTION / (4 * Math.PI / DRIVE_GEAR_RATIO); //forward / right / backward / left
+    final double COUNTS_PER_INCH_DG = COUNTS_PER_REVOLUTION / (2 * Math.PI * Math.sqrt(2) / DRIVE_GEAR_RATIO); //diagonal
     double forwardRightPower = 0;
     double forwardLeftPower = 0;
     double backwardRightPower = 0;
@@ -176,11 +179,33 @@ public class GeorgeOp extends OpMode {
         driveBR.setPower(power);
         driveBL.setPower(power);
     }
+    void moveForward(double power, int inches) {
+        int target = (int)Math.round(inches * COUNTS_PER_INCH_RF);
+        driveFR.setTargetPosition(target);
+        driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveFL.setTargetPosition(target);
+        driveFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveBR.setTargetPosition(target);
+        driveBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveBL.setTargetPosition(target);
+        driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
     void moveRight(double power) {
         driveFR.setPower(-power);
         driveFL.setPower(power);
         driveBR.setPower(power);
         driveBL.setPower(-power);
+    }
+    void moveRight(int inches) {
+        int target = (int)Math.round(inches * COUNTS_PER_INCH_RF);
+        driveFR.setTargetPosition(-target);
+        driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveFL.setTargetPosition(target);
+        driveFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveBR.setTargetPosition(target);
+        driveBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveBL.setTargetPosition(-target);
+        driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
     void moveForwardRight(double power) {
         driveFR.setPower(0.0);
@@ -188,11 +213,33 @@ public class GeorgeOp extends OpMode {
         driveBR.setPower(power);
         driveBL.setPower(0.0);
     }
+    void moveForwardRight(int inches) {
+        int target = (int)Math.round(inches * COUNTS_PER_INCH_DG);
+        driveFR.setTargetPosition(0);       //motor will not rotate because the motor position resets to 0 at end of each stage
+        driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveFL.setTargetPosition(target);
+        driveFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveBR.setTargetPosition(target);
+        driveBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveBL.setTargetPosition(0);
+        driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
     void moveForwardLeft(double power) {
         driveFR.setPower(power);
         driveFL.setPower(0.0);
         driveBR.setPower(0.0);;
         driveBL.setPower(power);
+    }
+    void moveForwardLeft(int inches) {
+        int target = (int)Math.round(inches * COUNTS_PER_INCH_DG);
+        driveFR.setTargetPosition(target);       //motor will not rotate because the motor position resets to 0 at end of each stage
+        driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveFL.setTargetPosition(0);
+        driveFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveBR.setTargetPosition(0);
+        driveBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveBL.setTargetPosition(target);
+        driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
     void turnClockwise(double power) {
         driveFR.setPower(-power);

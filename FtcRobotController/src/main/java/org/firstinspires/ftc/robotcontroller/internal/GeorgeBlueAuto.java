@@ -6,10 +6,16 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 /**
  * Created by Alex on 11/8/2017.
  * Autonomous Objectives:
- * --
+ * --Knock Off Jewel for 30 Points
+ * --Score 1 Glyph into 1st Column of CryptoBox for 15 points
+ * Pseudocode:
+ * 0. Start on balancing stone, jewel mechanism faces the jewel
+ * 1. Knock off jewel
+ * 2. Move left 36 inches towards the blue tape in order to be centered at the cryptobox
+ * 3. Rotate 180 degrees to have glyph face CryptoBox
+ * 4.
  */
 @Autonomous(name = "AutoTemplate", group = "default")
-@Disabled
 public class GeorgeBlueAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 

@@ -78,7 +78,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 break;
 
             case 8:
-                stateName = "Move Left 36 inches";
+                stateName = "Drive Left 36 inches";
                 //have robot drive to position of 36 inches
                 moveRight(-36);
                 if (waitSec(1) && !driveFR.isBusy())
@@ -98,6 +98,22 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 //have robot drive forward until 4 inches away from wall
                 moveForward(0.30);
                 if (range.getDistance(DistanceUnit.INCH) <= 4)
+                    state = 1000;
+                break;
+
+            case 14:
+                stateName = "Drive right until white tape is seen";
+                //have robot drive right until white tape is seen
+                moveRight(0.40);
+                if (range.getLightDetected() >= WHITE_THRESHOLD)
+                    state = 1000;
+                break;
+
+            case 16:
+                stateName = "Drive forward 3 inches";
+                //have robot drive to position of 3 inches forward to score glyph
+                moveForward(3);
+                if (waitSec(1) && !driveFR.isBusy())
                     state = 1000;
                 break;
 

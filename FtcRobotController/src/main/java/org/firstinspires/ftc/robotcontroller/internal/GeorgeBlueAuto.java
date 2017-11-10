@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 /**
  * Created by Alex on 11/8/2017.
  * Autonomous Objectives:
@@ -48,7 +50,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
                 if (upDownServo.getPosition() == UPDOWN_MAX)
-                    state++;
+                    state = 1000;
                 break;
 
             case 4:
@@ -62,7 +64,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
                     leftRightPos += 0.01;
                 leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
                 if (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)
-                    state++;
+                    state = 1000;
                 break;
 
             case 6:
@@ -72,7 +74,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
                 if (upDownServo.getPosition() == UPDOWN_MIN)
-                    state++;
+                    state = 1000;
                 break;
 
             case 8:
@@ -80,15 +82,23 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 //have robot drive to position of 36 inches
                 moveRight(-36);
                 if (waitSec(1) && !driveFR.isBusy())
-                    state++;
+                    state = 1000;
                 break;
 
             case 10:
-                stateName = "Move Left 36 inches";
-                //have robot drive to position of 36 inches
-                moveRight(-36);
-                if (waitSec(1) && !driveFR.isBusy())
-                    state++;
+                stateName = "Rotate 180 Degrees";
+                //have robot turn clockwise 180 degrees
+                turnClockwise(0.50);
+                if (turnAbsolute(180))
+                    state = 1000;
+                break;
+
+            case 12:
+                stateName = "Drive forward until 4 inches away from Wall";
+                //have robot drive forward until 4 inches away from wall
+                moveForward(0.30);
+                if (range.getDistance(DistanceUnit.INCH) <= 4)
+                    state = 1000;
                 break;
 
             case 1000: //Run When Autonomous is Complete

@@ -92,24 +92,24 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 moveRight(-36);
                 telemetry.addData("FR Encoder", driveFR.getCurrentPosition() / COUNTS_PER_INCH_RF);
                 if (waitSec(1) && !driveFR.isBusy())
-                    state = 1000;
+                    state++;
                 break;
 
             case 10:
                 stateName = "Rotate 180 Degrees";
                 //have robot turn clockwise 180 degrees
-                turnClockwise(0.50);
+                turnClockwise(180);
                 if (turnAbsolute(180))
-                    state = 1000;
+                    state++;
                 break;
 
             case 12:
-                stateName = "Drive forward until 4 inches away from Wall";
-                //have robot drive forward until 4 inches away from wall
-                moveForward(0.30);
-                if (range.getDistance(DistanceUnit.INCH) <= 4)
+                stateName = "Drive forward until 7 inches away from Wall";
+                //have robot drive forward until 7 inches away from wall
+                moveForward(0.25);
+                if (range.getDistance(DistanceUnit.INCH) <= 7)
                     state = 1000;
-                break;
+                break; //End here for league meet 0
 
             case 14:
                 stateName = "Drive right until white tape is seen";

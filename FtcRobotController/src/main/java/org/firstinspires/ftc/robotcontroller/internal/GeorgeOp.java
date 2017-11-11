@@ -184,6 +184,7 @@ public class GeorgeOp extends OpMode {
         driveBL.setPower(0.0);
     }
     void moveForward(double power) {
+        runConstantSpeed();
         driveFR.setPower(power);
         driveFL.setPower(power);
         driveBR.setPower(power);
@@ -191,6 +192,7 @@ public class GeorgeOp extends OpMode {
     }
     void moveForward(double power, int inches) {
         int target = (int)Math.round(inches * COUNTS_PER_INCH_RF);
+        moveForward(power);
         driveFR.setTargetPosition(target);
         driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveFL.setTargetPosition(target);
@@ -201,31 +203,34 @@ public class GeorgeOp extends OpMode {
         driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
     void moveRight(double power) {
+        runConstantSpeed();
         driveFR.setPower(-power);
         driveFL.setPower(power);
         driveBR.setPower(power);
         driveBL.setPower(-power);
     }
-    void moveRight(int inches) {
+    void moveRight(double power, int inches) {
         int target = (int)Math.round(inches * COUNTS_PER_INCH_RF);
-        driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        moveRight(power);
         driveFR.setTargetPosition(-target);
-        driveFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveFL.setTargetPosition(target);
-        driveBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveBR.setTargetPosition(target);
-        driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveBL.setTargetPosition(-target);
-
+        driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
     void moveForwardRight(double power) {
+        runConstantSpeed();
         driveFR.setPower(0.0);
         driveFL.setPower(power);
         driveBR.setPower(power);
         driveBL.setPower(0.0);
     }
-    void moveForwardRight(int inches) {
+    void moveForwardRight(double power, int inches) {
         int target = (int)Math.round(inches * COUNTS_PER_INCH_DG);
+        moveForwardRight(power);
         driveFR.setTargetPosition(0);       //motor will not rotate because the motor position resets to 0 at end of each stage
         driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveFL.setTargetPosition(target);
@@ -236,12 +241,14 @@ public class GeorgeOp extends OpMode {
         driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
     void moveForwardLeft(double power) {
+        runConstantSpeed();
         driveFR.setPower(power);
         driveFL.setPower(0.0);
         driveBR.setPower(0.0);;
         driveBL.setPower(power);
     }
-    void moveForwardLeft(int inches) {
+    void moveForwardLeft(double power, int inches) {
+        moveForwardLeft(power);
         int target = (int)Math.round(inches * COUNTS_PER_INCH_DG);
         driveFR.setTargetPosition(target);       //motor will not rotate because the motor position resets to 0 at end of each stage
         driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -253,15 +260,22 @@ public class GeorgeOp extends OpMode {
         driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
     void turnClockwise(double power) {
+        runConstantSpeed();
         driveFR.setPower(-power);
         driveFL.setPower(power);
         driveBR.setPower(-power);
         driveBL.setPower(power);
     }
+    void turnClockwise(int targetAngle) {
+        double k = 1; //experimentally found
+        double power = k * (targetAngle + gyroMR.getIntegratedZValue()) / Math.abs(targetAngle);
+        if (Math.abs(targetAngle + gyroMR.getIntegratedZValue()) >= 5)
+            turnClockwise(power);
+    }
 
     boolean turnAbsolute(double target) { //Tells robot to rotate to an absolute heading (degrees)
         boolean absoluteReached = false;
-        if (Math.abs(gyroMR.getIntegratedZValue() + target) <= Math.abs(driveFR.getPower() * 95)) {
+        if (Math.abs(gyroMR.getIntegratedZValue() + target) <= 5) {
             stopDriveMotors();
             absoluteReached = true;
         }

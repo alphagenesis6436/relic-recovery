@@ -89,7 +89,7 @@ public class GeorgeRedAuto extends GeorgeOp {
             case 8:
                 stateName = "Drive Left 36 inches";
                 //have robot drive to position of 36 inches
-                moveRight(-36);
+                moveRight(0.50, -36);
                 if (waitSec(1) && !driveFR.isBusy())
                     state = 1000;
                 break;
@@ -97,7 +97,7 @@ public class GeorgeRedAuto extends GeorgeOp {
             case 10:
                 stateName = "Rotate 180 Degrees";
                 //have robot turn clockwise 180 degrees
-                turnClockwise(0.50);
+                turnClockwise(0.40);
                 if (turnAbsolute(180))
                     state = 1000;
                 break;

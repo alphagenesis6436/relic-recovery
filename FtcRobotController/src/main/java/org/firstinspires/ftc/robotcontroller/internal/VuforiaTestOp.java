@@ -6,22 +6,35 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+
 /**
  * Created by Alex on 11/11/2017.
  */
 
 @TeleOp(name = "VuforiaTestOp", group = "Default")
 @Disabled
-public class VuforiaTestOp extends OpMode {
-    //Declare any motors, servos, and sensors
-
-
-    //Declare any variables & constants pertaining to specific robot mechanisms (i.e. drive train)
-
+public class VuforiaTestOp extends APIKey {
+    //Declare any objects for Vuforia
+    VuforiaLocalizer vuforia;
 
     public VuforiaTestOp() {}
 
     @Override public void init() {
+        //Initialize Vuforia
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        parameters.vuforiaLicenseKey = APIKey.apiKey;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT; // Use FRONT Camera (Change to BACK if you want to use that one)
+        parameters.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES; // Display Axes
+
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        VuforiaTrackable relicTemplate = relicTrackables.get(0);
+
         //Initialize motors & set direction
 
         //Initialize servos

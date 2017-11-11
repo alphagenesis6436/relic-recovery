@@ -23,6 +23,7 @@ Thumbs.db
 .idea
 .gradle
 build/
+FtcRobotController/src/main/java/org/firstinspires/ftc/robotcontroller/internal/APIKey.java
 
 *ASUS_PC_01*
 

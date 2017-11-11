@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -22,6 +23,7 @@ import com.qualcomm.robotcore.util.Range;
  * note - leftRight goes opposite
  */
 @TeleOp(name = "Jewel Prototype 3", group = "Default")
+@Disabled
 public class PrototypeJewelOpMode3 extends OpMode {
     //Declare any motors, servos, and sensors
     final float UPDOWN_MIN = 0 / 255.0f;       //update later

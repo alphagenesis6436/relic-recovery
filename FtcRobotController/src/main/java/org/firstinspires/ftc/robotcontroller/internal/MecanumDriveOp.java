@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.util.Range;
  * Updated by Alex on 11/1/2017.
  */
 @TeleOp(name = "MecanumDriveOp", group = "Default")
+@Disabled
 public class MecanumDriveOp extends OpMode {
     //Declare any motors, servos, and sensors
     DcMotor driveFR;

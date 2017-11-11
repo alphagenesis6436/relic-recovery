@@ -91,24 +91,24 @@ public class GeorgeRedAuto extends GeorgeOp {
                 //have robot drive to position of 36 inches
                 moveRight(0.50, -36);
                 if (waitSec(1) && !driveFR.isBusy())
-                    state = 1000;
+                    state++;
                 break;
 
             case 10:
                 stateName = "Rotate 180 Degrees";
                 //have robot turn clockwise 180 degrees
-                turnClockwise(0.40);
+                turnClockwise(180);
                 if (turnAbsolute(180))
-                    state = 1000;
+                    state++;
                 break;
 
             case 12:
                 stateName = "Drive forward until 4 inches away from Wall";
                 //have robot drive forward until 4 inches away from wall
-                moveForward(0.30);
-                if (range.getDistance(DistanceUnit.INCH) <= 4)
+                moveForward(0.25);
+                if (range.getDistance(DistanceUnit.INCH) <= 7)
                     state = 1000;
-                break;
+                break; //End here for League meet 0
 
             case 14:
                 stateName = "Drive right until white tape is seen";

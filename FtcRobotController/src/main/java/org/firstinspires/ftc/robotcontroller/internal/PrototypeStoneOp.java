@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.util.Range;
  * Kalvin 10/06/2017
  */
 @TeleOp(name = "StoneOp", group = "Default")
+@Disabled
 public class PrototypeStoneOp extends OpMode {
     //Declare any motors, servos, and sensors
     Servo servo;

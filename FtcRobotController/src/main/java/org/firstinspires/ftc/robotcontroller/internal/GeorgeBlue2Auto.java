@@ -21,11 +21,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * 6. Drive forward 3?? inches -> push glyph into the CryptoBox
  * End. Robot ends up aligned to score glyph in specific column of CryptoBox
  */
-@Autonomous(name = "GeorgeBlueAuto", group = "default")
-public class GeorgeBlueAuto extends GeorgeOp {
+@Autonomous(name = "GeorgeBlue2Auto", group = "default")
+public class GeorgeBlue2Auto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 
-    public GeorgeBlueAuto() {}
+    public GeorgeBlue2Auto() {}
 
     @Override
     public void loop(){

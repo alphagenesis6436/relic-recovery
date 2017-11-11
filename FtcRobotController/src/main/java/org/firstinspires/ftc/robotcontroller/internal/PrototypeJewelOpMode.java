@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.Range;
  * 2. motor rotates mechanism left / right
  */
 @TeleOp(name = "Jewel Prototype", group = "Default")
+@Disabled
 public class PrototypeJewelOpMode extends OpMode {
     //Declare any motors, servos, and sensors
     final float PWR_MAX = 0.30f;

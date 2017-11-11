@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name = "Relic Prototype 1", group = "Default")
+@Disabled
 public class PrototypeRelicOp extends OpMode {
     //Declare any motors, servos, and sensors
     Servo upDownServo;    //180

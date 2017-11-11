@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 /**
  * Created by Alex on 11/1/2017.
  */
 @Autonomous (name = "SimpleMecAuto", group = "default")
+@Disabled
 public class SimpleMecAuto extends MecanumDriveOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 

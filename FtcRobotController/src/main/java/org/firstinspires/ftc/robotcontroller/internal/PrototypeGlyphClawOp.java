@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name = "Glyph Prototype 1", group = "Default")
+@Disabled
 public class PrototypeGlyphClawOp extends OpMode {
     //Declare any motors, servos, and sensors
     Servo leftClaw; //180

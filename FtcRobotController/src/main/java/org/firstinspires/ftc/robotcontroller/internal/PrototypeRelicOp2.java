@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name = "Relic Prototype 2", group = "Default")
+@Disabled
 public class PrototypeRelicOp2 extends PrototypeRelicOp {
     //Declare any motors, servos, and sensors
     DcMotor winchMotor;

@@ -89,7 +89,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 8:
                 stateName = "Drive Left 36 inches";
                 //have robot drive to position of 36 inches
-                moveRight(0.50, -36);
+                moveRight(-36);
                 telemetry.addData("FR Encoder", driveFR.getCurrentPosition() / COUNTS_PER_INCH_RF);
                 if (waitSec(1) && !driveFR.isBusy())
                     state++;

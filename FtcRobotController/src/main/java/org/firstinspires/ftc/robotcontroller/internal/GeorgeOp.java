@@ -208,14 +208,15 @@ public class GeorgeOp extends OpMode {
     }
     void moveRight(int inches) {
         int target = (int)Math.round(inches * COUNTS_PER_INCH_RF);
-        driveFR.setTargetPosition(-target);
         driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        driveFL.setTargetPosition(target);
+        driveFR.setTargetPosition(-target);
         driveFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        driveBR.setTargetPosition(target);
+        driveFL.setTargetPosition(target);
         driveBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        driveBL.setTargetPosition(-target);
+        driveBR.setTargetPosition(target);
         driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveBL.setTargetPosition(-target);
+
     }
     void moveForwardRight(double power) {
         driveFR.setPower(0.0);

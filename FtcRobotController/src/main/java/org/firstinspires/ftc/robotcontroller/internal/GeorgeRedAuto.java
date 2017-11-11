@@ -83,7 +83,7 @@ public class GeorgeRedAuto extends GeorgeOp {
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
                 if (upDownServo.getPosition() == UPDOWN_MAX)
-                    state = 1000;
+                    state++;
                 break;
 
             case 8:

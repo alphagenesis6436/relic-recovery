@@ -83,13 +83,14 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
                 if (upDownServo.getPosition() == UPDOWN_MAX)
-                    state = 1000;
+                    state++;
                 break;
 
             case 8:
                 stateName = "Drive Left 36 inches";
                 //have robot drive to position of 36 inches
                 moveRight(-36);
+                telemetry.addData("FR Encoder", driveFR.getCurrentPosition() / COUNTS_PER_INCH_RF);
                 if (waitSec(1) && !driveFR.isBusy())
                     state = 1000;
                 break;

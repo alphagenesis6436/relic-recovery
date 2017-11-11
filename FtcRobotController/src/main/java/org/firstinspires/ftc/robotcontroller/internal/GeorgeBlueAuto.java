@@ -21,7 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * 6. Drive forward 3?? inches -> push glyph into the CryptoBox
  * End. Robot ends up aligned to score glyph in specific column of CryptoBox
  */
-@Autonomous(name = "AutoTemplate", group = "default")
+@Autonomous(name = "GeorgeBlueAuto", group = "default")
 public class GeorgeBlueAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 
@@ -46,11 +46,11 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 2: //Use PID Control to ensure servo moves down slowly and safely
                 stateName = "Knock off jewel 1 - arm down";
                 //upDownServo moves down to max/min?? position
-                upDownPos += 0.005;
+                upDownPos -= 0.005;
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
-                if (upDownServo.getPosition() == UPDOWN_MAX)
-                    state = 1000;
+                if (upDownServo.getPosition() == UPDOWN_MIN)
+                    state++;
                 break;
 
             case 4:
@@ -59,9 +59,9 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 //if leftJewel == blue, leftRightServo moves right to knock off red jewel
                 colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
                 if (colorSensor.red() >= RED_THRESHOLD)
-                    leftRightPos -= 0.01;
-                else if (colorSensor.blue() >= BLUE_THRESHOLD)
                     leftRightPos += 0.01;
+                else if (colorSensor.blue() >= BLUE_THRESHOLD)
+                    leftRightPos -= 0.01;
                 leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
                 if (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)
                     state = 1000;
@@ -69,11 +69,16 @@ public class GeorgeBlueAuto extends GeorgeOp {
 
             case 6:
                 stateName = "Knock off jewel 3 - arm up";
+                //leftRight servo moves back to center of robot
+                if (leftRightPos != LEFTRIGHT_MID)
+                    leftRightPos = LEFTRIGHT_MID;
+                leftRightServo.setPosition(upDownPos);
+
                 //upDownServo moves up to max/min?? position
-                upDownPos -= 0.005;
+                upDownPos += 0.005;
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
-                if (upDownServo.getPosition() == UPDOWN_MIN)
+                if (upDownServo.getPosition() == UPDOWN_MAX)
                     state = 1000;
                 break;
 

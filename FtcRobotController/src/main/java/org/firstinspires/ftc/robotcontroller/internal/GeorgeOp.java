@@ -1,11 +1,14 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 /**
  * Updated by Alex, Kalvin on 11/10/17
@@ -30,8 +33,7 @@ public class GeorgeOp extends OpMode {
     DcMotor driveBL; //AndyMark, 40:1
     Servo upDownServo; //Metal Gear, 180
     Servo leftRightServo; //Metal Gear, 180
-    ColorSensor colorSensor; //For Jewel Mechanism
-    GyroSensor gyroSensor;
+    ModernRoboticsI2cColorSensor colorSensor; //For Jewel Mechanism
     ModernRoboticsI2cGyro gyroMR; //For Mecanum Drive Train
     DistanceSensor rangeSensor;
     ModernRoboticsI2cRangeSensor range; //for detecting the wall in autonomous
@@ -49,14 +51,15 @@ public class GeorgeOp extends OpMode {
     double backwardLeftPower = 0;
 
     //Jewel Mechanism Variables and Constants
-    final float UPDOWN_MIN = 0 / 255.0f;
-    final float UPDOWN_MAX = 255 / 255.0f;
-    final float LEFTRIGHT_MIN = 0 / 255.0f;
-    final float LEFTRIGHT_MAX = 255 / 255.0f;
-    final int BLUE_THRESHOLD = 2;
-    final int RED_THRESHOLD = 2;
-    double upDownPos = 0;
-    double leftRightPos = 0;
+    final float LEFTRIGHT_MID = 110 / 255.0f;
+    final float UPDOWN_MIN = 60 / 255.0f;   //fully down
+    final float UPDOWN_MAX = 210 / 255.0f;  //fully up
+    final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
+    final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left
+    final int BLUE_THRESHOLD = 20;
+    final int RED_THRESHOLD = 15;
+    double upDownPos = UPDOWN_MAX;
+    double leftRightPos = LEFTRIGHT_MID;
     double jewelDelta = 0.005;
 
     public GeorgeOp() {}
@@ -77,11 +80,10 @@ public class GeorgeOp extends OpMode {
         leftRightServo = hardwareMap.servo.get("lrs");
 
         //Initialize sensors
-        colorSensor = hardwareMap.colorSensor.get("cs");
-        gyroSensor = hardwareMap.gyroSensor.get("gs");
-        gyroMR = (ModernRoboticsI2cGyro) gyroSensor;
-        range = (ModernRoboticsI2cRangeSensor) rangeSensor;
-
+        colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
+        gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
+        range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
+        colorSensor.enableLed(true);
         telemetry();
     }
     @Override public void loop() {
@@ -129,6 +131,7 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("Gyro", gyroMR.getIntegratedZValue());
         telemetry.addData("Red", colorSensor.red());
         telemetry.addData("Blue", colorSensor.blue());
+        telemetry.addData("Distance", range.getDistance(DistanceUnit.INCH) + " in.");
     }
 
     //Create Methods that will update the driver data
@@ -144,9 +147,9 @@ public class GeorgeOp extends OpMode {
         else if (gamepad2.dpad_down)
             upDownPos -= jewelDelta;
         if (gamepad2.dpad_right)
-            leftRightPos += jewelDelta;
-        else if (gamepad2.dpad_left)
             leftRightPos -= jewelDelta;
+        else if (gamepad2.dpad_left)
+            leftRightPos += jewelDelta;
     }
 
 

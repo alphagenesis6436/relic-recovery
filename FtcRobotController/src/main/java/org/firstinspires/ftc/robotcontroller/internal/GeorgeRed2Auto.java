@@ -15,17 +15,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * 0. Start on balancing stone, jewel mechanism faces the jewel
  * 1. Knock off jewel
  * 2. Move right 36 inches towards the red tape in order to be centered at the cryptobox
- * 3. Rotate 180 degrees to have glyph face CryptoBox
- * 4. Drive forward toward CryptoBox until 4 inches away from the wall
- * 5. Drive left until white tape is seen
- * 6. Drive forward 3?? inches -> push glyph into the CryptoBox
+ * 3. Rotate 90 degrees to have glyph face CryptoBox
+ * 4. Drive left 12 inches to have robot be centered in front of cryptobox
+ * 5. Drive forward toward CryptoBox until 4 inches away from the wall
+ * 6. Drive left until white tape is seen
+ * 7. Drive forward 3?? inches -> push glyph into the CryptoBox
  * End. Robot ends up aligned to score glyph in specific column of CryptoBox
  */
-@Autonomous(name = "GeorgeRedAuto", group = "default")
-public class GeorgeRedAuto extends GeorgeOp {
+@Autonomous(name = "GeorgeRed2Auto", group = "default")
+public class GeorgeRed2Auto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 
-    public GeorgeRedAuto() {}
+    public GeorgeRed2Auto() {}
 
     @Override
     public void loop(){
@@ -87,22 +88,30 @@ public class GeorgeRedAuto extends GeorgeOp {
                 break;
 
             case 8:
-                stateName = "Drive Right 36 inches";
+                stateName = "Drive Right 32 inches";
                 //have robot drive to position of 36 inches
-                moveRight(36);
+                moveRight(0.80);
                 if (waitSec(1) && !driveFR.isBusy())
                     state++;
                 break;
 
             case 10:
-                stateName = "Rotate 180 Degrees";
+                stateName = "Rotate 90 Degrees";
                 //have robot turn clockwise 180 degrees
-                turnClockwise(180);
-                if (turnAbsolute(180))
+                turnClockwise(90);
+                if (turnAbsolute(90))
                     state++;
                 break;
 
             case 12:
+                stateName = "Drive Left 12 inches";
+                //have robot drive to position of 36 inches
+                moveRight(-0.2);
+                if (waitSec(1) && !driveFR.isBusy())
+                    state++;
+                break;
+
+            case 14:
                 stateName = "Drive forward until 4 inches away from Wall";
                 //have robot drive forward until 4 inches away from wall
                 moveForward(0.25);
@@ -110,7 +119,7 @@ public class GeorgeRedAuto extends GeorgeOp {
                     state = 1000;
                 break; //End here for League meet 0
 
-            case 14:
+            case 16:
                 stateName = "Drive right until white tape is seen";
                 //have robot drive right until white tape is seen
                 moveRight(0.40);
@@ -118,7 +127,7 @@ public class GeorgeRedAuto extends GeorgeOp {
                     state = 1000;
                 break;
 
-            case 16:
+            case 18:
                 stateName = "Drive forward 3 inches";
                 //have robot drive to position of 3 inches forward to score glyph
                 moveForward(3);

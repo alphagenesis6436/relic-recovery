@@ -14,18 +14,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Pseudocode:
  * 0. Start on balancing stone, jewel mechanism faces the jewel
  * 1. Knock off jewel
- * 2. Move left 36 inches towards the blue tape in order to be centered at the cryptobox
+ * 2. Move right 36 inches towards the red tape in order to be centered at the cryptobox
  * 3. Rotate 180 degrees to have glyph face CryptoBox
  * 4. Drive forward toward CryptoBox until 4 inches away from the wall
- * 5. Drive right until white tape is seen
+ * 5. Drive left until white tape is seen
  * 6. Drive forward 3?? inches -> push glyph into the CryptoBox
  * End. Robot ends up aligned to score glyph in specific column of CryptoBox
  */
-@Autonomous(name = "GeorgeBlueAuto", group = "default")
-public class GeorgeBlueAuto extends GeorgeOp {
+@Autonomous(name = "GeorgeRedAuto", group = "default")
+public class GeorgeRedAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 
-    public GeorgeBlueAuto() {}
+    public GeorgeRedAuto() {}
 
     @Override
     public void loop(){
@@ -56,13 +56,13 @@ public class GeorgeBlueAuto extends GeorgeOp {
 
             case 4:
                 stateName = "Knock off jewel 2 - arm knock";
-                //if leftJewel == red, leftRightServo moves right to knock off red jewel
-                //if leftJewel == blue, leftRightServo moves left to knock off red jewel
+                //if leftJewel == red, leftRightServo moves left to knock off red jewel
+                //if leftJewel == blue, leftRightServo moves right to knock off red jewel
                 colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
                 if (colorSensor.red() >= RED_THRESHOLD)
-                    leftRightPos = LEFTRIGHT_MIN;
-                else if (colorSensor.blue() >= BLUE_THRESHOLD)
                     leftRightPos = LEFTRIGHT_MAX;
+                else if (colorSensor.blue() >= BLUE_THRESHOLD)
+                    leftRightPos = LEFTRIGHT_MIN;
                 else if (waitSec(1)) //Fail Safe: If looking into hole
                     leftRightPos -= 0.005;
                 leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);

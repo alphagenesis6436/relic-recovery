@@ -52,12 +52,12 @@ public class GeorgeOp extends OpMode {
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
-    final float UPDOWN_MIN = 60 / 255.0f;   //fully down
+    final float UPDOWN_MIN = 65 / 255.0f;   //fully down
     final float UPDOWN_MAX = 210 / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
     final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left
-    final int BLUE_THRESHOLD = 20;
-    final int RED_THRESHOLD = 15;
+    final int BLUE_THRESHOLD = 4;   //holes
+    final int RED_THRESHOLD = 4;    //holes
     double upDownPos = UPDOWN_MAX;
     double leftRightPos = LEFTRIGHT_MID;
     double jewelDelta = 0.005;
@@ -122,12 +122,12 @@ public class GeorgeOp extends OpMode {
     }
     void telemetry() {
         //Show Data for Specific Robot Mechanisms
-        telemetry.addData("FR", String.format("%.2f",forwardRightPower));
-        telemetry.addData("FL", String.format("%.2f",forwardLeftPower));
-        telemetry.addData("BR", String.format("%.2f",backwardRightPower));
-        telemetry.addData("BL", String.format("%.2f",forwardLeftPower));
-        telemetry.addData("UD", String.format("%.0f", upDownPos * 255));
-        telemetry.addData("LR", String.format("%.0f", leftRightPos * 255));
+        telemetry.addData("FR", String.format("%.2f",driveFR.getPower()));
+        telemetry.addData("FL", String.format("%.2f",driveFL.getPower()));
+        telemetry.addData("BR", String.format("%.2f",driveBR.getPower()));
+        telemetry.addData("BL", String.format("%.2f",driveBL.getPower()));
+        telemetry.addData("UD", String.format("%.0f", upDownServo.getPosition() * 255));
+        telemetry.addData("LR", String.format("%.0f", leftRightServo.getPosition() * 255));
         telemetry.addData("Gyro", gyroMR.getIntegratedZValue());
         telemetry.addData("Red", colorSensor.red());
         telemetry.addData("Blue", colorSensor.blue());

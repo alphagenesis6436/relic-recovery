@@ -40,7 +40,7 @@ public class VuforiaTestOp extends APIKey {
     double rX; // X value extracted from the rotational components of the tartget relitive to the robot
     double rY; // Same as above but for Y
     double rZ; // Same as above but for Z
-    int pictogrpahKey = -1; //Left = 0, Center = 1, Right = 2
+    int pictographKey = -1; //Left = 0, Center = 1, Right = 2
 
     public VuforiaTestOp() {}
 
@@ -129,21 +129,21 @@ public class VuforiaTestOp extends APIKey {
                 telemetry.addData("X =", tX);
                 telemetry.addData("Y =", tY);
                 telemetry.addData("Z =", tZ);
-                pictogrpahKey = 0;
+                pictographKey = 0;
             } else if (vuMark == RelicRecoveryVuMark.RIGHT)
             { // Test to see if Image is the "RIGHT" image and display values.
                 telemetry.addData("VuMark is", "Right");
                 telemetry.addData("X =", tX);
                 telemetry.addData("Y =", tY);
                 telemetry.addData("Z =", tZ);
-                pictogrpahKey = 2;
+                pictographKey = 2;
             } else if (vuMark == RelicRecoveryVuMark.CENTER)
             { // Test to see if Image is the "CENTER" image and display values.
                 telemetry.addData("VuMark is", "Center");
                 telemetry.addData("X =", tX);
                 telemetry.addData("Y =", tY);
                 telemetry.addData("Z =", tZ);
-                pictogrpahKey = 1;
+                pictographKey = 1;
             }
         } else
         {

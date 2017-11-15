@@ -35,11 +35,11 @@ public class GeorgeOp extends OpMode {
     Servo leftRightServo; //Metal Gear, 180
     ModernRoboticsI2cColorSensor colorSensor; //For Jewel Mechanism
     ModernRoboticsI2cGyro gyroMR; //For Mecanum Drive Train
-    DistanceSensor rangeSensor;
     ModernRoboticsI2cRangeSensor range; //for detecting the wall in autonomous
 
     //Mecanum Drive Train Variables and Constants
-    final double DRIVE_PWR_MAX = 0.90;
+    final double DRIVE_PWR_MAX = 0.70;
+    final double TURN_PWR_MAX = 0.70;
     final int COUNTS_PER_REVOLUTION = 1440; //AndyMark Motors
     final double DRIVE_GEAR_RATIO = 16.0 / 24.0; //Driven / Driver
     final double COUNTS_PER_INCH_RF = COUNTS_PER_REVOLUTION / (4 * Math.PI / DRIVE_GEAR_RATIO); //forward / right / backward / left
@@ -56,8 +56,8 @@ public class GeorgeOp extends OpMode {
     final float UPDOWN_MAX = 210 / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
     final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left
-    final int BLUE_THRESHOLD = 4;   //holes
-    final int RED_THRESHOLD = 4;    //holes
+    final int BLUE_THRESHOLD = 3;   //holes
+    final int RED_THRESHOLD = 3;    //holes
     double upDownPos = UPDOWN_MAX;
     double leftRightPos = LEFTRIGHT_MID;
     double jewelDelta = 0.005;
@@ -136,10 +136,10 @@ public class GeorgeOp extends OpMode {
 
     //Create Methods that will update the driver data
     void updateDriveTrain() {
-        forwardRightPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x) * DRIVE_PWR_MAX;
-        forwardLeftPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x) * DRIVE_PWR_MAX;
-        backwardRightPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x) * DRIVE_PWR_MAX;
-        backwardLeftPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x) * DRIVE_PWR_MAX;
+        forwardRightPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
+        forwardLeftPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
+        backwardRightPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
+        backwardLeftPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
     }
     void updateJewel() {
         if (gamepad2.dpad_up)

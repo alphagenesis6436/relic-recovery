@@ -7,14 +7,14 @@ import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
 /**
- * Updated by Alex on 11/5/2017.
+ * Updated by Alex on 11/15/2017.
  * Jessica's prototype
  * servos: leftClaw, rightClaw
  * motor: lift
  */
 
 @TeleOp(name = "Glyph Prototype 1", group = "Default")
-@Disabled
+//@Disabled
 public class PrototypeGlyphClawOp extends OpMode {
     //Declare any motors, servos, and sensors
     Servo leftClaw; //180
@@ -31,18 +31,18 @@ public class PrototypeGlyphClawOp extends OpMode {
     double clawDelta = 0.001;
 
     //variables & constants pertaining to lift motor
-    final float LIFT_PWR_MAX = 0.70f;
+    final float LIFT_PWR_MAX = 0.25f; //experimentally found by using labview
     double liftPower = 0;
 
     public PrototypeGlyphClawOp() {}
 
     @Override public void init() {
         //Initialize motors & set direction
-        lift = hardwareMap.dcMotor.get("lift");
+        lift = hardwareMap.dcMotor.get("l");
 
         //Initialize servos
-        leftClaw = hardwareMap.servo.get("leftClaw");
-        rightClaw = hardwareMap.servo.get("rightClaw");
+        leftClaw = hardwareMap.servo.get("lc");
+        rightClaw = hardwareMap.servo.get("rc");
 
         telemetry();
     }

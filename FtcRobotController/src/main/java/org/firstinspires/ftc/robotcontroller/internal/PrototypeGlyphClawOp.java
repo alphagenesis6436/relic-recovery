@@ -22,16 +22,18 @@ public class PrototypeGlyphClawOp extends OpMode {
     DcMotor lift; //Andymark 60:1
 
     //variables & constants pertaining to claw servos
-    final float SERVO_MIN_LEFT = 92 / 255.0f; //left claw is closed
-    final float SERVO_MAX_LEFT = 255 / 255.0f; //left claw is open
-    final float SERVO_MIN_RIGHT = 0 / 255.0f; //right claw is open
-    final float SERVO_MAX_RIGHT = 255 / 255.0f; //right claw is closed
+    final float SERVO_MIN_LEFT = 50 / 255.0f; //left claw is closed?
+    final float SERVO_GRAB_LEFT = 80 / 255.0f; //left claw is gripping glyph
+    final float SERVO_MAX_LEFT = 117 / 255.0f; //left claw is open
+    final float SERVO_MIN_RIGHT = 90 / 255.0f; //right claw is open
+    final float SERVO_GRAB_RIGHT = 127 / 255.0f; //right claw is gripping glpyh
+    final float SERVO_MAX_RIGHT = 250 / 255.0f; //right claw is closed?
     double leftClawServoPos = SERVO_MIN_LEFT;
     double rightClawServoPos = SERVO_MAX_RIGHT;
-    double clawDelta = 0.001;
+    double clawDelta = 0.01;
 
     //variables & constants pertaining to lift motor
-    final float LIFT_PWR_MAX = 0.25f; //experimentally found by using labview
+    final float LIFT_PWR_MAX = 0.40f; //experimentally found by using labview
     double liftPower = 0;
 
     public PrototypeGlyphClawOp() {}
@@ -69,7 +71,7 @@ public class PrototypeGlyphClawOp extends OpMode {
         leftClaw.setPosition(leftClawServoPos);
         rightClawServoPos = Range.clip(rightClawServoPos, SERVO_MIN_RIGHT, SERVO_MAX_RIGHT);
         rightClaw.setPosition(rightClawServoPos);
-        liftPower = Range.clip(liftPower, -LIFT_PWR_MAX, LIFT_PWR_MAX);
+        liftPower = Range.clip(liftPower, -0.05, LIFT_PWR_MAX);
         lift.setPower(liftPower);
     }
     void telemetry() {
@@ -84,14 +86,14 @@ public class PrototypeGlyphClawOp extends OpMode {
     //Step 2: Close the Left/Right Claw by pressing the Left/Right Trigger
     void updateGlyphClaw() {
         liftPower = -gamepad2.left_stick_y * LIFT_PWR_MAX;
-        if (gamepad2.left_bumper)
-            leftClawServoPos += clawDelta;
-        else if (gamepad2.left_trigger > 0.50)
-            leftClawServoPos -= clawDelta;
-        if (gamepad2.right_trigger > 0.50)
-            rightClawServoPos += clawDelta;
-        else if (gamepad2.right_bumper)
-            rightClawServoPos -= clawDelta;
+        if (gamepad2.left_bumper) {
+            leftClawServoPos = SERVO_MAX_LEFT; //left servo open
+            rightClawServoPos = SERVO_MIN_RIGHT; //right servo open
+        }
+        if (gamepad2.right_bumper) {
+            leftClawServoPos = SERVO_GRAB_LEFT;
+            rightClawServoPos = SERVO_GRAB_RIGHT;
+        }
     }
 
 

@@ -11,14 +11,16 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 /**
- * Updated by Alex, Kalvin on 11/10/17
+ * Updated by Alex on 11/18/17
  * GeorgeOp is the TeleOp for the Competition Robot
  * Has Following Robot Systems:
  * --Mecanum Drive Train
  * ----Follows Same Code from MecanumDriveOp
  * ----Adds Gyro Sensor for Autonomous
- * ----Adds turnAbsolute() and turnRelative() methods for autonomous
+ * ----Adds turnAbsolute() method for autonomous
  * ----Adds calibrateVariables() method for autonomous
+ * ----Modified encoder-based autonomous driving methods based on video by SwerveRobotics
+ * ----Adds runToPosition() method for encoder-based driving methods
  * --Jewel Mechanism
  * ----Adapted from PrototypeJewelOpMode3
  * ----Modifies updateActuators() method [Renamed to updateJewel()] to accommodate Controls for other Systems
@@ -177,6 +179,13 @@ public class GeorgeOp extends OpMode {
         driveBR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         driveBL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+    void runToPosition() {
+        driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
     void stopDriveMotors() {
         driveFR.setPower(0.0);
         driveFL.setPower(0.0);
@@ -192,15 +201,21 @@ public class GeorgeOp extends OpMode {
     }
     void moveForward(double power, int inches) {
         int target = (int)Math.round(inches * COUNTS_PER_INCH_RF);
-        moveForward(power);
+
         driveFR.setTargetPosition(target);
-        driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveFL.setTargetPosition(target);
-        driveFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveBR.setTargetPosition(target);
-        driveBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveBL.setTargetPosition(target);
-        driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runToPosition();
+        driveFR.setPower(power);
+        driveFL.setPower(power);
+        driveBR.setPower(power);
+        driveBL.setPower(power);
+
+        while (driveFR.isBusy()) {
+            //Wait until target position is reached
+        }
+        stopDriveMotors();
     }
     void moveRight(double power) {
         runConstantSpeed();
@@ -211,15 +226,21 @@ public class GeorgeOp extends OpMode {
     }
     void moveRight(double power, int inches) {
         int target = (int)Math.round(inches * COUNTS_PER_INCH_RF);
-        moveRight(power);
+
         driveFR.setTargetPosition(-target);
-        driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveFL.setTargetPosition(target);
-        driveFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveBR.setTargetPosition(target);
-        driveBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveBL.setTargetPosition(-target);
-        driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runToPosition();
+        driveFR.setPower(-power);
+        driveFL.setPower(power);
+        driveBR.setPower(power);
+        driveBL.setPower(-power);
+
+        while (driveFR.isBusy()) {
+            //Wait until target position is reached
+        }
+        stopDriveMotors();
     }
     void moveForwardRight(double power) {
         runConstantSpeed();
@@ -230,15 +251,21 @@ public class GeorgeOp extends OpMode {
     }
     void moveForwardRight(double power, int inches) {
         int target = (int)Math.round(inches * COUNTS_PER_INCH_DG);
-        moveForwardRight(power);
-        driveFR.setTargetPosition(0);       //motor will not rotate because the motor position resets to 0 at end of each stage
-        driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        driveFR.setTargetPosition(0); //motor will not rotate because the motor position resets to 0 at end of each stage
         driveFL.setTargetPosition(target);
-        driveFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveBR.setTargetPosition(target);
-        driveBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveBL.setTargetPosition(0);
-        driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runToPosition();
+        driveFR.setPower(0.0);
+        driveFL.setPower(power);
+        driveBR.setPower(power);
+        driveBL.setPower(0.0);
+
+        while (driveFL.isBusy()) {
+            //Wait until target position is reached
+        }
+        stopDriveMotors();
     }
     void moveForwardLeft(double power) {
         runConstantSpeed();
@@ -248,16 +275,22 @@ public class GeorgeOp extends OpMode {
         driveBL.setPower(power);
     }
     void moveForwardLeft(double power, int inches) {
-        moveForwardLeft(power);
         int target = (int)Math.round(inches * COUNTS_PER_INCH_DG);
+
         driveFR.setTargetPosition(target);       //motor will not rotate because the motor position resets to 0 at end of each stage
-        driveFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveFL.setTargetPosition(0);
-        driveFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveBR.setTargetPosition(0);
-        driveBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         driveBL.setTargetPosition(target);
-        driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runToPosition();
+        driveFR.setPower(power);
+        driveFL.setPower(0.0);
+        driveBR.setPower(0.0);;
+        driveBL.setPower(power);
+
+        while (driveFR.isBusy()) {
+            //Wait until target position is reached
+        }
+        stopDriveMotors();
     }
     void turnClockwise(double power) {
         runConstantSpeed();
@@ -271,6 +304,8 @@ public class GeorgeOp extends OpMode {
         double power = k * (targetAngle + gyroMR.getIntegratedZValue()) / Math.abs(targetAngle);
         if (Math.abs(targetAngle + gyroMR.getIntegratedZValue()) >= 5)
             turnClockwise(power);
+        else
+            stopDriveMotors();
     }
 
     boolean turnAbsolute(double target) { //Tells robot to rotate to an absolute heading (degrees)
@@ -281,21 +316,10 @@ public class GeorgeOp extends OpMode {
         }
         return absoluteReached;
     }
-    boolean turnRelative(int target) { //Tells robot to rotate target degrees from starting position
-        boolean relativeReached = false;
-        target -= startingIntZVal;
-        startingIntZVal = 0;
-        if (Math.abs(gyroMR.getIntegratedZValue() + target) <= Math.abs(driveFR.getPower() * 95)) {
-            stopDriveMotors();
-            relativeReached = true;
-        }
-        return relativeReached;
-    }
-    int startingIntZVal = 0; //Reset this value to last IntegratedZValue during each Calibrating State
+
 
 
     void calibrateVariables() {//Used if any autonomous methods need initial state variables
-        startingIntZVal = gyroMR.getIntegratedZValue();
         colorSensor.enableLed(false);
     }
     //used to measure the amount of time passed since a new step in autonomous has started

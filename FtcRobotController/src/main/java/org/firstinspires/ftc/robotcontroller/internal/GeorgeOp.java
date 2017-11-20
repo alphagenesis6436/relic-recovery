@@ -186,8 +186,14 @@ public class GeorgeOp extends OpMode {
         driveBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
+    void move(double pwr_fr, double pwr_fl, double pwr_br, double pwr_bl) {
+        driveFR.setPower(pwr_fr);
+        driveFL.setPower(pwr_fl);
+        driveBR.setPower(pwr_br);
+        driveBL.setPower(pwr_bl);
+    }
     void stopDriveMotors() {
-        move(0.0, 0.0, 0.0, 0.0);
+        move(0, 0, 0, 0);
     }
     void moveForward(double power) {
         runConstantSpeed();
@@ -285,13 +291,6 @@ public class GeorgeOp extends OpMode {
             absoluteReached = true;
         }
         return absoluteReached;
-    }
-
-    void move(double pwr_fr, double pwr_fl, double pwr_br, double pwr_bl) {
-        driveFR.setPower(pwr_fr);
-        driveFL.setPower(pwr_fl);
-        driveBR.setPower(pwr_br);
-        driveBL.setPower(pwr_bl);
     }
 
     void calibrateVariables() {//Used if any autonomous methods need initial state variables

@@ -26,7 +26,6 @@ import static com.sun.tools.javac.util.Constants.format;
  */
 
 @TeleOp(name = "VuforiaTestOp", group = "Default")
-@Disabled
 public class VuforiaTestOp extends APIKey {
     //Declare any objects for Vuforia
     OpenGLMatrix lastLocation = null;
@@ -107,7 +106,7 @@ public class VuforiaTestOp extends APIKey {
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
         if (vuMark != RelicRecoveryVuMark.UNKNOWN) { // Test to see if image is visable
             OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) relicTemplate.getListener()).getPose(); // Get Positional value to use later
-            telemetry.addData("Pose", format(pose));
+            //telemetry.addData("Pose", format(pose));
             if (pose != null)
             {
                 VectorF trans = pose.getTranslation();

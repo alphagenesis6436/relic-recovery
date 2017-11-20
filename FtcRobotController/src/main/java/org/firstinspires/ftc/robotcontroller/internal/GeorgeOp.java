@@ -187,17 +187,11 @@ public class GeorgeOp extends OpMode {
     }
 
     void stopDriveMotors() {
-        driveFR.setPower(0.0);
-        driveFL.setPower(0.0);
-        driveBR.setPower(0.0);
-        driveBL.setPower(0.0);
+        move(0.0, 0.0, 0.0, 0.0);
     }
     void moveForward(double power) {
         runConstantSpeed();
-        driveFR.setPower(power);
-        driveFL.setPower(power);
-        driveBR.setPower(power);
-        driveBL.setPower(power);
+        move(power, power, power, power);
     }
     void moveForward(double power, int inches) {
         int target = (int)Math.round(inches * COUNTS_PER_INCH_RF);
@@ -207,10 +201,7 @@ public class GeorgeOp extends OpMode {
         driveBR.setTargetPosition(target);
         driveBL.setTargetPosition(target);
         runToPosition();
-        driveFR.setPower(power);
-        driveFL.setPower(power);
-        driveBR.setPower(power);
-        driveBL.setPower(power);
+        move(power, power, power, power);
 
         while (driveFR.isBusy()) {
             //Wait until target position is reached
@@ -219,10 +210,7 @@ public class GeorgeOp extends OpMode {
     }
     void moveRight(double power) {
         runConstantSpeed();
-        driveFR.setPower(-power);
-        driveFL.setPower(power);
-        driveBR.setPower(power);
-        driveBL.setPower(-power);
+        move(-power, power, power, -power);
     }
     void moveRight(double power, int inches) {
         int target = (int)Math.round(inches * COUNTS_PER_INCH_RF);
@@ -232,10 +220,7 @@ public class GeorgeOp extends OpMode {
         driveBR.setTargetPosition(target);
         driveBL.setTargetPosition(-target);
         runToPosition();
-        driveFR.setPower(-power);
-        driveFL.setPower(power);
-        driveBR.setPower(power);
-        driveBL.setPower(-power);
+        move(-power, power, power, -power);
 
         while (driveFR.isBusy()) {
             //Wait until target position is reached
@@ -244,10 +229,7 @@ public class GeorgeOp extends OpMode {
     }
     void moveForwardRight(double power) {
         runConstantSpeed();
-        driveFR.setPower(0.0);
-        driveFL.setPower(power);
-        driveBR.setPower(power);
-        driveBL.setPower(0.0);
+        move(0.0, power, power, 0.0);
     }
     void moveForwardRight(double power, int inches) {
         int target = (int)Math.round(inches * COUNTS_PER_INCH_DG);
@@ -257,10 +239,7 @@ public class GeorgeOp extends OpMode {
         driveBR.setTargetPosition(target);
         driveBL.setTargetPosition(0);
         runToPosition();
-        driveFR.setPower(0.0);
-        driveFL.setPower(power);
-        driveBR.setPower(power);
-        driveBL.setPower(0.0);
+        move(0.0, power, power, 0.0);
 
         while (driveFL.isBusy()) {
             //Wait until target position is reached
@@ -269,10 +248,7 @@ public class GeorgeOp extends OpMode {
     }
     void moveForwardLeft(double power) {
         runConstantSpeed();
-        driveFR.setPower(power);
-        driveFL.setPower(0.0);
-        driveBR.setPower(0.0);;
-        driveBL.setPower(power);
+        move(power, 0.0, 0.0, power);
     }
     void moveForwardLeft(double power, int inches) {
         int target = (int)Math.round(inches * COUNTS_PER_INCH_DG);
@@ -282,10 +258,7 @@ public class GeorgeOp extends OpMode {
         driveBR.setTargetPosition(0);
         driveBL.setTargetPosition(target);
         runToPosition();
-        driveFR.setPower(power);
-        driveFL.setPower(0.0);
-        driveBR.setPower(0.0);;
-        driveBL.setPower(power);
+        move(power, 0.0, 0.0, power);
 
         while (driveFR.isBusy()) {
             //Wait until target position is reached
@@ -294,10 +267,7 @@ public class GeorgeOp extends OpMode {
     }
     void turnClockwise(double power) {
         runConstantSpeed();
-        driveFR.setPower(-power);
-        driveFL.setPower(power);
-        driveBR.setPower(-power);
-        driveBL.setPower(power);
+        move(-power, power, -power, power);
     }
     void turnClockwise(int targetAngle) {
         double k = 1; //experimentally found
@@ -317,7 +287,12 @@ public class GeorgeOp extends OpMode {
         return absoluteReached;
     }
 
-
+    void move(double pwr_fr, double pwr_fl, double pwr_br, double pwr_bl) {
+        driveFR.setPower(pwr_fr);
+        driveFL.setPower(pwr_fl);
+        driveBR.setPower(pwr_br);
+        driveBL.setPower(pwr_bl);
+    }
 
     void calibrateVariables() {//Used if any autonomous methods need initial state variables
         colorSensor.enableLed(false);

@@ -66,10 +66,10 @@ public class GeorgeOp extends OpMode {
     double jewelDelta = 0.005;
 
     //Stone Mechanism Variables and Constants
-    final float STONE_DOWN = 0 / 255.0f;
-    final float STONE_UP = 255 / 255.0f;
-    double stonePos = STONE_UP;
-    double stoneDelta = 0.005;
+    final float STONE_DOWN = 172 / 255.0f;
+    final float STONE_UP = 42 / 255.0f;
+    double stonePos = STONE_DOWN;
+    double stoneDelta = 0.030;
 
     public GeorgeOp() {}
 
@@ -131,7 +131,7 @@ public class GeorgeOp extends OpMode {
         leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
         leftRightServo.setPosition(leftRightPos);
         //clip and initialize Stone Mechanism
-        stonePos = Range.clip(stonePos, STONE_DOWN, STONE_UP);
+        stonePos = Range.clip(stonePos, STONE_UP, STONE_DOWN);
         stoneServo.setPosition(stonePos);
     }
     void telemetry() {
@@ -168,9 +168,9 @@ public class GeorgeOp extends OpMode {
     }
     void updateStone() {
         if (gamepad1.dpad_down)
-            stonePos += stoneDelta;
-        else if (gamepad1.dpad_up)
             stonePos -= stoneDelta;
+        else if (gamepad1.dpad_up)
+            stonePos += stoneDelta;
     }
 
     //Create variables/methods that will be used in ALL autonomous programs for this specific robot

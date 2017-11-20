@@ -35,6 +35,7 @@ public class GeorgeOp extends OpMode {
     DcMotor driveBL; //AndyMark, 40:1
     Servo upDownServo; //Metal Gear, 180
     Servo leftRightServo; //Metal Gear, 180
+    Servo stoneServo;    //Plastic Gear, 180
     ModernRoboticsI2cColorSensor colorSensor; //For Jewel Mechanism
     ModernRoboticsI2cGyro gyroMR; //For Mecanum Drive Train
     ModernRoboticsI2cRangeSensor range; //for detecting the wall in autonomous
@@ -64,6 +65,12 @@ public class GeorgeOp extends OpMode {
     double leftRightPos = LEFTRIGHT_MID;
     double jewelDelta = 0.005;
 
+    //Stone Mechanism Variables and Constants
+    final float STONE_DOWN = 0 / 255.0f;
+    final float STONE_UP = 255 / 255.0f;
+    double stonePos = STONE_UP;
+    double stoneDelta = 0.005;
+
     public GeorgeOp() {}
 
     @Override public void init() {
@@ -80,6 +87,7 @@ public class GeorgeOp extends OpMode {
         //Initialize servos
         upDownServo = hardwareMap.servo.get("uds");
         leftRightServo = hardwareMap.servo.get("lrs");
+        stoneServo = hardwareMap.servo.get("stone");
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
@@ -104,6 +112,7 @@ public class GeorgeOp extends OpMode {
         //Add in update methods for specific robot mechanisms
         updateDriveTrain();
         updateJewel();
+        updateStone();
     }
 
     void initialization() {
@@ -121,6 +130,9 @@ public class GeorgeOp extends OpMode {
         upDownServo.setPosition(upDownPos);
         leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
         leftRightServo.setPosition(leftRightPos);
+        //clip and initialize Stone Mechanism
+        stonePos = Range.clip(stonePos, STONE_DOWN, STONE_UP);
+        stoneServo.setPosition(stonePos);
     }
     void telemetry() {
         //Show Data for Specific Robot Mechanisms
@@ -134,6 +146,7 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("Red", colorSensor.red());
         telemetry.addData("Blue", colorSensor.blue());
         telemetry.addData("Distance", range.getDistance(DistanceUnit.INCH) + " in.");
+        telemetry.addData("Stone", String.format("%.0f", stoneServo.getPosition() * 255));
     }
 
     //Create Methods that will update the driver data
@@ -153,7 +166,12 @@ public class GeorgeOp extends OpMode {
         else if (gamepad2.dpad_left)
             leftRightPos += jewelDelta;
     }
-
+    void updateStone() {
+        if (gamepad1.dpad_down)
+            stonePos += stoneDelta;
+        else if (gamepad1.dpad_up)
+            stonePos -= stoneDelta;
+    }
 
     //Create variables/methods that will be used in ALL autonomous programs for this specific robot
 

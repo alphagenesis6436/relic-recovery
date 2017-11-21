@@ -27,11 +27,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * ----Adds in the Color Sensor for Autonomous
  * --Stone Mechanism
  * ----Adapted from PrototypeStoneOp
- * ----Adds updateStone() method to listen for updates to the game controller
  * ----Declared and Initialized stoneServo
  * ----Created Variables to control stoneServo during teleop
  * ----Create method updateStone() to control stone mechanism
- * --
+ * --Glyph Claw Mechanism
+ * ----Adapted from PrototypeGlyphClawOp
+ * ----Adds updateGlyphClawOp() method to control glyph claw mechanism
+ * ----Declared / initialized glyphLift, leftClaw, rightClaw
+ * ----Created Variables to control glyphLift, leftClaw, rightClaw during TeleOp
  */
 @TeleOp(name = "GeorgeOp", group = "Default")
 public class GeorgeOp extends OpMode {
@@ -46,6 +49,9 @@ public class GeorgeOp extends OpMode {
     ModernRoboticsI2cColorSensor colorSensor; //For Jewel Mechanism
     ModernRoboticsI2cGyro gyroMR; //For Mecanum Drive Train
     ModernRoboticsI2cRangeSensor range; //for detecting the wall in autonomous
+    Servo leftClaw; //180, glyph claw
+    Servo rightClaw; //180, glyph claw
+    DcMotor glyphLift; //Andymark 60:1, lift the glyph claw
 
     //Mecanum Drive Train Variables and Constants
     final double DRIVE_PWR_MAX = 0.70;
@@ -59,6 +65,18 @@ public class GeorgeOp extends OpMode {
     double forwardLeftPower = 0;
     double backwardRightPower = 0;
     double backwardLeftPower = 0;
+
+    //Glyph Claw Mechanism Variables and Constants
+    final float GLYPH_LIFT_PWR_MAX = 0.40f; //experimentally found by using LabView
+    double glyphLiftPower = 0;
+    final float SERVO_MIN_LEFT = 50 / 255.0f; //left claw is closed?
+    final float SERVO_GRAB_LEFT = 80 / 255.0f; //left claw is gripping glyph
+    final float SERVO_MAX_LEFT = 117 / 255.0f; //left claw is open
+    final float SERVO_MIN_RIGHT = 90 / 255.0f; //right claw is open
+    final float SERVO_GRAB_RIGHT = 127 / 255.0f; //right claw is gripping glpyh
+    final float SERVO_MAX_RIGHT = 250 / 255.0f; //right claw is closed?
+    double leftClawServoPos = SERVO_MIN_LEFT;
+    double rightClawServoPos = SERVO_MAX_RIGHT;
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
@@ -90,11 +108,15 @@ public class GeorgeOp extends OpMode {
         driveBR.setDirection(DcMotorSimple.Direction.FORWARD);
         driveBL = hardwareMap.dcMotor.get("dbl");
         driveBL.setDirection(DcMotorSimple.Direction.REVERSE);
+        glyphLift = hardwareMap.dcMotor.get("gl");
+        glyphLift.setDirection(DcMotorSimple.Direction.REVERSE); //may need to be revised
 
         //Initialize servos
         upDownServo = hardwareMap.servo.get("uds");
         leftRightServo = hardwareMap.servo.get("lrs");
         stoneServo = hardwareMap.servo.get("stone");
+        leftClaw = hardwareMap.servo.get("lc");
+        rightClaw = hardwareMap.servo.get("rc");
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
@@ -118,6 +140,7 @@ public class GeorgeOp extends OpMode {
     void updateData() {
         //Add in update methods for specific robot mechanisms
         updateDriveTrain();
+        updateGlyphClaw();
         updateJewel();
         updateStone();
     }
@@ -132,6 +155,13 @@ public class GeorgeOp extends OpMode {
         driveBR.setPower(backwardRightPower);
         backwardLeftPower = Range.clip(backwardLeftPower, -DRIVE_PWR_MAX, DRIVE_PWR_MAX);
         driveBL.setPower(backwardLeftPower);
+        //Clip and Initialize Glyph Claw Mechanism
+        leftClawServoPos = Range.clip(leftClawServoPos, SERVO_MIN_LEFT, SERVO_MAX_LEFT);
+        leftClaw.setPosition(leftClawServoPos);
+        rightClawServoPos = Range.clip(rightClawServoPos, SERVO_MIN_RIGHT, SERVO_MAX_RIGHT);
+        rightClaw.setPosition(rightClawServoPos);
+        glyphLiftPower = Range.clip(glyphLiftPower, -0.05, GLYPH_LIFT_PWR_MAX);
+        glyphLift.setPower(glyphLiftPower);
         //Clip and Initialize Jewel Mechanism
         upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
         upDownServo.setPosition(upDownPos);
@@ -154,6 +184,9 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("Blue", colorSensor.blue());
         telemetry.addData("Distance", range.getDistance(DistanceUnit.INCH) + " in.");
         telemetry.addData("Stone", String.format("%.0f", stoneServo.getPosition() * 255));
+        telemetry.addData("Current leftClaw servo pos:", String.format("%.0f", leftClawServoPos * 255));
+        telemetry.addData("Current rightClaw servo pos:", String.format("%.0f", rightClawServoPos * 255));
+        telemetry.addData("Current lift motor power", String.format("%.2f", glyphLiftPower));
     }
 
     //Create Methods that will update the driver data
@@ -162,6 +195,20 @@ public class GeorgeOp extends OpMode {
         forwardLeftPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         backwardRightPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         backwardLeftPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
+    }
+    //Controlled by Driver 2
+    //Step 1: Open Left/Right Claw by pressing the Left/Right Bumper
+    //Step 2: Close the Left/Right Claw by pressing the Left/Right Trigger
+    void updateGlyphClaw() {
+        glyphLiftPower = -gamepad2.left_stick_y * GLYPH_LIFT_PWR_MAX;
+        if (gamepad2.left_bumper) {
+            leftClawServoPos = SERVO_MAX_LEFT; //left servo open
+            rightClawServoPos = SERVO_MIN_RIGHT; //right servo open
+        }
+        if (gamepad2.right_bumper) {
+            leftClawServoPos = SERVO_GRAB_LEFT;
+            rightClawServoPos = SERVO_GRAB_RIGHT;
+        }
     }
     void updateJewel() {
         if (gamepad2.dpad_up)

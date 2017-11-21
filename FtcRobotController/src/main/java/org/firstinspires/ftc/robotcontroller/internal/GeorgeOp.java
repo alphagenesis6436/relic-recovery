@@ -8,7 +8,19 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 /**
  * Updated by Alex on 11/18/17
@@ -29,6 +41,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * ----Declared and Initialized stoneServo
  * ----Created Variables to control stoneServo during teleop
  * ----Create method updateStone() to control stone mechanism
+ * --Vuforia System
+ * ----Follows Same Code from VuforiaTestOp
+ * ----Adds _____ method for autonomous
  */
 @TeleOp(name = "GeorgeOp", group = "Default")
 public class GeorgeOp extends OpMode {
@@ -75,6 +90,14 @@ public class GeorgeOp extends OpMode {
     double stonePos = STONE_DOWN;
     double stoneDelta = 0.030;
 
+    //Vuforia System Variables and Objects
+    //Declare any objects for Vuforia
+    OpenGLMatrix lastLocation = null;
+    VuforiaLocalizer vuforia;
+    VuforiaTrackables relicTrackables;
+    VuforiaTrackable relicTemplate;
+    int pictographKey = 0; //Left = 0, Center = 1, Right = 2
+
     public GeorgeOp() {}
 
     @Override public void init() {
@@ -98,6 +121,15 @@ public class GeorgeOp extends OpMode {
         gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
+
+        //Initialize Vuforia
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        parameters.vuforiaLicenseKey = APIKey.apiKey;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT; // Use FRONT Camera (Change to BACK if you want to use that one)
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        relicTemplate = relicTrackables.get(0);
+
         telemetry();
     }
     @Override public void loop() {
@@ -314,6 +346,30 @@ public class GeorgeOp extends OpMode {
             absoluteReached = true;
         }
         return absoluteReached;
+    }
+
+    void updateVuforia() {
+        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+        if (vuMark != RelicRecoveryVuMark.UNKNOWN) { // Test to see if image is visable
+            OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) relicTemplate.getListener()).getPose(); // Get Positional value to use later
+            if (vuMark == RelicRecoveryVuMark.LEFT)
+            { // Test to see if Image is the "LEFT" image and display value.
+                telemetry.addData("VuMark is", "Left");
+                pictographKey = 0;
+            } else if (vuMark == RelicRecoveryVuMark.CENTER)
+            { // Test to see if Image is the "CENTER" image and display values.
+                telemetry.addData("VuMark is", "Center");
+                pictographKey = 1;
+            }
+            else if (vuMark == RelicRecoveryVuMark.RIGHT)
+            { // Test to see if Image is the "RIGHT" image and display values.
+                telemetry.addData("VuMark is", "Right");
+                pictographKey = 2;
+            }
+        } else
+        {
+            telemetry.addData("VuMark", "not visible");
+        }
     }
 
     void calibrateVariables() {//Used if any autonomous methods need initial state variables

@@ -88,6 +88,11 @@ public class GeorgeOp extends OpMode {
     double leftClawServoPos = SERVO_MIN_LEFT;
     double rightClawServoPos = SERVO_MAX_RIGHT;
 
+    //Glyph Claw Mechanism - elevator lift
+    int level = 0; //start off at level 0
+    final int LEVEL_MIN = 0;
+    final int LEVEL_MAX = 3;
+
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
     final float UPDOWN_MIN = 65 / 255.0f;   //fully down
@@ -189,6 +194,23 @@ public class GeorgeOp extends OpMode {
         rightClaw.setPosition(rightClawServoPos);
         glyphLiftPower = Range.clip(glyphLiftPower, -0.05, GLYPH_LIFT_PWR_MAX);
         glyphLift.setPower(glyphLiftPower);
+
+        //relies on encoder counts
+        switch (level) {
+            case 0:
+                //rotate motor back to zero position
+                break;
+            case 1:
+                //rotate motor back to reach 1st block height
+                break;
+            case 2:
+                //rotate motor back to reach 2nd block height
+                break;
+            case 3:
+                //rotate motor back to reach 3rd block height
+                break;
+        }
+
         //Clip and Initialize Jewel Mechanism
         upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
         upDownServo.setPosition(upDownPos);
@@ -236,6 +258,16 @@ public class GeorgeOp extends OpMode {
             leftClawServoPos = SERVO_GRAB_LEFT;
             rightClawServoPos = SERVO_GRAB_RIGHT;
         }
+
+        /*Elevator lift
+        * glyph claw should only exist at certain heights / "levels" (similar to Bohr's energy levels)
+        * each level corresponds to one of 4 heights at which blocks can be dropped
+        */
+
+        if (gamepad2.y && level < LEVEL_MAX)
+            level++;
+        else if (gamepad2.a && level > LEVEL_MIN)
+            level--;
     }
     void updateJewel() {
         if (gamepad2.dpad_up)

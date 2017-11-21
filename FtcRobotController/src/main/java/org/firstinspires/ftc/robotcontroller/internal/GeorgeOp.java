@@ -25,6 +25,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * ----Adapted from PrototypeJewelOpMode3
  * ----Modifies updateActuators() method [Renamed to updateJewel()] to accommodate Controls for other Systems
  * ----Adds in the Color Sensor for Autonomous
+ * --Stone Mechanism
+ * ----Adapted from PrototypeStoneOp
+ * ----Adds updateStone() method to listen for updates to the game controller
+ * ----
  */
 @TeleOp(name = "GeorgeOp", group = "Default")
 public class GeorgeOp extends OpMode {

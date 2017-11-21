@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -13,11 +12,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * --Score 1 Glyph into 1st Column of CryptoBox for 15 points
  * Pseudocode:
  * 0. Start on balancing stone, jewel mechanism faces the jewel
- * 1. Knock off jewel
- * 2. Move left 36 inches towards the blue tape in order to be centered at the cryptobox
- * 3. Rotate 180 degrees to have glyph face CryptoBox
- * 4. Drive forward toward CryptoBox until 4 inches away from the wall
- * 5. Drive right until white tape is seen
+ * 1. Knock off jewel (and read Pictograph, and lift Glyph 2 inches up)
+ * 2. Move left 24 inches left to drive off balancing stone
+ * 3. Rotate 180 degrees countercockwise to have glyph face CryptoBox
+ * 4. Drive forward toward CryptoBox until 6??? inches away from the wall
+ * 5. Drive right until white tape is seen (and continue until alligned with correct column)
  * 6. Drive forward 3?? inches -> push glyph into the CryptoBox
  * End. Robot ends up aligned to score glyph in specific column of CryptoBox
  */
@@ -44,18 +43,22 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 state++;
                 break;
 
-            case 2: //Use PID Control to ensure servo moves down slowly and safely
+            case 2:
                 stateName = "Knock off jewel 1 - arm down";
+                updateVuforia();
                 //upDownServo moves down to max/min?? position
                 upDownPos -= 0.03;
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
-                if (upDownServo.getPosition() == UPDOWN_MIN)
+                colorSensor.enableLed(true);
+                if (upDownServo.getPosition() == UPDOWN_MIN || colorSensor.red() >= RED_THRESHOLD
+                        || colorSensor.blue() >= BLUE_THRESHOLD)
                     state++;
                 break;
 
             case 4:
                 stateName = "Knock off jewel 2 - arm knock";
+                updateVuforia();
                 //if leftJewel == red, leftRightServo moves right to knock off red jewel
                 //if leftJewel == blue, leftRightServo moves left to knock off red jewel
                 colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
@@ -73,6 +76,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
 
             case 6:
                 stateName = "Knock off jewel 3 - arm up";
+                updateVuforia();
                 //leftRight servo moves back to center of robot
                 if (leftRightPos != LEFTRIGHT_MID)
                     leftRightPos = LEFTRIGHT_MID;
@@ -83,47 +87,61 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
                 if (upDownServo.getPosition() == UPDOWN_MAX)
-                    state++;
+                    state = 1000;
                 break;
 
             case 8:
-                stateName = "Drive Left 36 inches";
-                //have robot drive to position of 36 inches
-                moveRight(-36);
-                telemetry.addData("FR Encoder", driveFR.getCurrentPosition() / COUNTS_PER_INCH_RF);
-                if (waitSec(1) && !driveFR.isBusy())
-                    state++;
+                stateName = "Drive Left 24 inches";
+                //have robot drive to position of -24 inches
+                moveRight(-0.40, -24);
+                if (encoderTargetReached)
+                    state = 1000;
                 break;
 
             case 10:
                 stateName = "Rotate 180 Degrees";
-                //have robot turn clockwise 180 degrees
-                turnClockwise(180);
-                if (turnAbsolute(180))
-                    state++;
+                //have robot turn counterclockwise 180 degrees
+                turnClockwise(-180);
+                if (turnAbsolute(-180))
+                    state = 1000;
                 break;
 
             case 12:
-                stateName = "Drive forward until 7 inches away from Wall";
-                //have robot drive forward until 7 inches away from wall
+                stateName = "Drive forward until 6 inches away from Wall";
+                //have robot drive forward until 6 inches away from wall
                 moveForward(0.25);
-                if (range.getDistance(DistanceUnit.INCH) <= 7)
+                if (range.getDistance(DistanceUnit.INCH) <= 6)
                     state = 1000;
                 break; //End here for league meet 0
 
             case 14:
-                stateName = "Drive right until white tape is seen";
-                //have robot drive right until white tape is seen
-                moveRight(0.40);
-                if (range.getLightDetected() >= WHITE_THRESHOLD)
+                stateName = "Drive right until correct column reached";
+                //have robot drive right until white tape of correct column is seen
+                moveRight(0.20);
+                if (whiteTapeIsDetected()) {
+                    whitePreviouslyDetected = true;
+                    pictographKey--;
+                }
+                else if (whiteTapeIsNotDetected()) {
+                    whitePreviouslyDetected = false;
+                }
+                if (pictographKey == -1)
                     state = 1000;
                 break;
 
             case 16:
                 stateName = "Drive forward 3 inches";
                 //have robot drive to position of 3 inches forward to score glyph
-                moveForward(3);
-                if (waitSec(1) && !driveFR.isBusy())
+                moveForward(0.20, 3);
+                if (encoderTargetReached)
+                    state = 1000;
+                break;
+
+            case 18:
+                stateName = "Drop and Score Glyph";
+                //have robot drive to position of 3 inches forward to score glyph
+                moveForward(0.20, 3);
+                if (encoderTargetReached)
                     state = 1000;
                 break;
 

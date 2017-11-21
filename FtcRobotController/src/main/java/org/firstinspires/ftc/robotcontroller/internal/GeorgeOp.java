@@ -40,7 +40,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  * ----Create method updateStone() to control stone mechanism
  * --Vuforia System
  * ----Follows Same Code from VuforiaTestOp
- * ----Adds _____ method for autonomous
+ * ----Adds updateVuforia method for autonomous
  */
 @TeleOp(name = "GeorgeOp", group = "Default")
 public class GeorgeOp extends OpMode {
@@ -53,6 +53,7 @@ public class GeorgeOp extends OpMode {
     Servo leftRightServo; //Metal Gear, 180
     Servo stoneServo;    //Plastic Gear, 180
     ModernRoboticsI2cColorSensor colorSensor; //For Jewel Mechanism
+    ModernRoboticsI2cColorSensor colorSensor2; //For Cryptobox Tape
     ModernRoboticsI2cGyro gyroMR; //For Mecanum Drive Train
     ModernRoboticsI2cRangeSensor range; //for detecting the wall in autonomous
 
@@ -63,7 +64,8 @@ public class GeorgeOp extends OpMode {
     final double DRIVE_GEAR_RATIO = 16.0 / 24.0; //Driven / Driver
     final double COUNTS_PER_INCH_RF = COUNTS_PER_REVOLUTION / (4 * Math.PI / DRIVE_GEAR_RATIO); //forward / right / backward / left
     final double COUNTS_PER_INCH_DG = COUNTS_PER_REVOLUTION / (2 * Math.PI * Math.sqrt(2) / DRIVE_GEAR_RATIO); //diagonal
-    final double WHITE_THRESHOLD = 0.30;
+    final int WHITE_THRESHOLD = 30;
+    boolean whitePreviouslyDetected = false;
     double forwardRightPower = 0;
     double forwardLeftPower = 0;
     double backwardRightPower = 0;
@@ -115,9 +117,11 @@ public class GeorgeOp extends OpMode {
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
+        colorSensor2 = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs2");
         gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
+        colorSensor2.enableLed(true);
 
         //Initialize Vuforia
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
@@ -176,8 +180,11 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("UD", String.format("%.0f", upDownServo.getPosition() * 255));
         telemetry.addData("LR", String.format("%.0f", leftRightServo.getPosition() * 255));
         telemetry.addData("Gyro", gyroMR.getIntegratedZValue());
-        telemetry.addData("Red", colorSensor.red());
-        telemetry.addData("Blue", colorSensor.blue());
+        telemetry.addData("Red1", colorSensor.red());
+        telemetry.addData("Blue1", colorSensor.blue());
+        telemetry.addData("Red2", colorSensor2.red());
+        telemetry.addData("Blue2", colorSensor2.blue());
+        telemetry.addData("Green2", colorSensor2.green());
         telemetry.addData("Distance", range.getDistance(DistanceUnit.INCH) + " in.");
         telemetry.addData("Stone", String.format("%.0f", stoneServo.getPosition() * 255));
     }
@@ -211,6 +218,7 @@ public class GeorgeOp extends OpMode {
     double setTime; //used to measure the time period of each step in autonomous
     int state = 0; //used to control the steps taken during autonomous
     String stateName = ""; //Overwrite this as the specific step used in Autonomous
+    boolean encoderTargetReached = false;
 
     void resetEncoders() {
         driveFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -262,8 +270,10 @@ public class GeorgeOp extends OpMode {
 
         while (driveFR.isBusy()) {
             //Wait until target position is reached
+            telemetry.addData("FR Encoder", String.format("%.0f", (target - driveFR.getCurrentPosition()) / COUNTS_PER_INCH_RF));
         }
         stopDriveMotors();
+        encoderTargetReached = true;
     }
     void moveRight(double power) {
         runConstantSpeed();
@@ -281,8 +291,10 @@ public class GeorgeOp extends OpMode {
 
         while (driveFR.isBusy()) {
             //Wait until target position is reached
+            telemetry.addData("FR Encoder", String.format("%.0f", (target - driveFR.getCurrentPosition()) / COUNTS_PER_INCH_RF));
         }
         stopDriveMotors();
+        encoderTargetReached = true;
     }
     void moveForwardRight(double power) {
         runConstantSpeed();
@@ -300,8 +312,10 @@ public class GeorgeOp extends OpMode {
 
         while (driveFL.isBusy()) {
             //Wait until target position is reached
+            telemetry.addData("FL Encoder", String.format("%.0f", (target - driveFL.getCurrentPosition()) / COUNTS_PER_INCH_RF));
         }
         stopDriveMotors();
+        encoderTargetReached = true;
     }
     void moveForwardLeft(double power) {
         runConstantSpeed();
@@ -310,7 +324,7 @@ public class GeorgeOp extends OpMode {
     void moveForwardLeft(double power, int inches) {
         int target = (int)Math.round(inches * COUNTS_PER_INCH_DG);
 
-        driveFR.setTargetPosition(target);       //motor will not rotate because the motor position resets to 0 at end of each stage
+        driveFR.setTargetPosition(target);
         driveFL.setTargetPosition(0);
         driveBR.setTargetPosition(0);
         driveBL.setTargetPosition(target);
@@ -319,8 +333,10 @@ public class GeorgeOp extends OpMode {
 
         while (driveFR.isBusy()) {
             //Wait until target position is reached
+            telemetry.addData("FR Encoder", String.format("%.0f", (target - driveFR.getCurrentPosition()) / COUNTS_PER_INCH_RF));
         }
         stopDriveMotors();
+        encoderTargetReached = true;
     }
     void turnClockwise(double power) {
         runConstantSpeed();
@@ -369,8 +385,19 @@ public class GeorgeOp extends OpMode {
         }
     }
 
+    boolean whiteTapeIsDetected() {
+        return (colorSensor2.red() >= WHITE_THRESHOLD && colorSensor2.blue() >= WHITE_THRESHOLD
+                && colorSensor2.green() >= WHITE_THRESHOLD && !whitePreviouslyDetected);
+    }
+    boolean whiteTapeIsNotDetected() {
+        return (!(colorSensor2.red() >= WHITE_THRESHOLD && colorSensor2.blue() >= WHITE_THRESHOLD
+                && colorSensor2.green() >= WHITE_THRESHOLD) && whitePreviouslyDetected);
+    }
+
     void calibrateVariables() {//Used if any autonomous methods need initial state variables
+        encoderTargetReached = false;
         colorSensor.enableLed(false);
+        colorSensor2.enableLed(false);
     }
     //used to measure the amount of time passed since a new step in autonomous has started
     boolean waitSec(double elapsedTime) { return (this.time - setTime >= elapsedTime); }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -9,7 +10,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Created by Alex on 11/8/2017.
  * Autonomous Objectives:
  * --Knock Off Jewel for 30 Points
- * --Score 1 Glyph into 1st Column of CryptoBox for 15 points
+ * --Score 1 Glyph (15 points) in Correct Column CryptoBox for (30 points)
+ * --Park in Safe Zone (10 points)
  * Pseudocode:
  * 0. Start on balancing stone, jewel mechanism faces the jewel
  * 1. Knock off jewel (and read Pictograph, and lift Glyph 2 inches up)
@@ -46,6 +48,10 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 2:
                 stateName = "Knock off jewel 1 - arm down";
                 updateVuforia();
+                leftClawServoPos = SERVO_GRAB_LEFT;
+                leftClaw.setPosition(leftClawServoPos);
+                rightClawServoPos = SERVO_GRAB_RIGHT;
+                rightClaw.setPosition(rightClawServoPos);
                 //upDownServo moves down to max/min?? position
                 upDownPos -= 0.03;
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
@@ -59,6 +65,14 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 4:
                 stateName = "Knock off jewel 2 - arm knock";
                 updateVuforia();
+                if (!(glyphLift.getCurrentPosition() >= zeroLevelHeight)) {
+                    glyphLift.setTargetPosition(zeroLevelHeight);
+                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    glyphLift.setPower(0.10);
+                }
+                else
+                    glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
                 //if leftJewel == red, leftRightServo moves right to knock off red jewel
                 //if leftJewel == blue, leftRightServo moves left to knock off red jewel
                 colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
@@ -140,7 +154,18 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 18:
                 stateName = "Drop and Score Glyph";
                 //have robot drive to position of 3 inches forward to score glyph
-                moveForward(0.20, 3);
+                leftClawServoPos = SERVO_MAX_LEFT; //left servo open
+                leftClaw.setPosition(leftClawServoPos);
+                rightClawServoPos = SERVO_MIN_RIGHT; //right servo open
+                rightClaw.setPosition(rightClawServoPos);
+                if (leftClaw.getPosition() == SERVO_MAX_LEFT && rightClaw.getPosition() == SERVO_MIN_RIGHT)
+                    state = 1000;
+                break;
+
+            case 20:
+                stateName = "Drive backward 2 inches";
+                //have robot drive to position of 3 inches forward to score glyph
+                moveForward(-0.20, -2);
                 if (encoderTargetReached)
                     state = 1000;
                 break;

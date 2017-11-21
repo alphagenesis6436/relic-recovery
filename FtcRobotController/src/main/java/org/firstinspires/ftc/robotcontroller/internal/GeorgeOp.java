@@ -89,9 +89,11 @@ public class GeorgeOp extends OpMode {
     final float SERVO_MAX_RIGHT = 250 / 255.0f; //right claw is closed?
     double leftClawServoPos = SERVO_MIN_LEFT;
     double rightClawServoPos = SERVO_MAX_RIGHT;
-
-    //Glyph Claw Mechanism - elevator lift
-    int level = 0; //start off at level 0
+    int currentLevel = 0; //start off at currentLevel 0
+    int zeroLevelHeight = 10; //encoder count at currentLevel 0
+    int firstLevelHeight = 1010; //encoder count at currentLevel 1
+    int secondLevelHeight = 2010; //encoder count at currentLevel 2
+    int thirdLevelHeight = 3010; //encoder count at currentLevel 3
     final int LEVEL_MIN = 0;
     final int LEVEL_MAX = 3;
 
@@ -198,23 +200,6 @@ public class GeorgeOp extends OpMode {
         rightClaw.setPosition(rightClawServoPos);
         glyphLiftPower = Range.clip(glyphLiftPower, -0.05, GLYPH_LIFT_PWR_MAX);
         glyphLift.setPower(glyphLiftPower);
-
-        //relies on encoder counts
-        switch (level) {
-            case 0:
-                //rotate motor back to zero position
-                break;
-            case 1:
-                //rotate motor back to reach 1st block height
-                break;
-            case 2:
-                //rotate motor back to reach 2nd block height
-                break;
-            case 3:
-                //rotate motor back to reach 3rd block height
-                break;
-        }
-
         //Clip and Initialize Jewel Mechanism
         upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
         upDownServo.setPosition(upDownPos);
@@ -266,15 +251,78 @@ public class GeorgeOp extends OpMode {
             rightClawServoPos = SERVO_GRAB_RIGHT;
         }
 
+        //Manually Control Glyph Lift
+        glyphLiftPower = -gamepad2.left_stick_y * 0.50;
+
         /*Elevator lift
         * glyph claw should only exist at certain heights / "levels" (similar to Bohr's energy levels)
-        * each level corresponds to one of 4 heights at which blocks can be dropped
+        * each currentLevel corresponds to one of 4 heights at which blocks can be dropped
         */
 
-        if (gamepad2.y && level < LEVEL_MAX)
-            level++;
-        else if (gamepad2.a && level > LEVEL_MIN)
-            level--;
+        //relies on encoder counts
+        /*switch (currentLevel) {
+            case 0:
+                //bring elevator down to zero position
+                if (glyphLift.getCurrentPosition() - zeroLevelHeight >= 10) {
+                    glyphLift.setTargetPosition(zeroLevelHeight);
+                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    glyphLift.setPower(-0.40);
+                }
+                //bring elevator up to zero position
+                else if (zeroLevelHeight - glyphLift.getCurrentPosition() >= 10) {
+                    glyphLift.setTargetPosition(zeroLevelHeight);
+                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    glyphLift.setPower(0.40);
+                }
+                break;
+            case 1:
+                //bring elevator down to 1st block height
+                if (glyphLift.getCurrentPosition() - firstLevelHeight >= 10) {
+                    glyphLift.setTargetPosition(firstLevelHeight);
+                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    glyphLift.setPower(-0.40);
+                }
+                //bring elevator up to 1st block height
+                else if (firstLevelHeight - glyphLift.getCurrentPosition() >= 10) {
+                    glyphLift.setTargetPosition(firstLevelHeight);
+                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    glyphLift.setPower(0.40);
+                }
+                break;
+            case 2:
+                //bring elevator down to 2nd block height
+                if (glyphLift.getCurrentPosition() - secondLevelHeight >= 10) {
+                    glyphLift.setTargetPosition(secondLevelHeight);
+                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    glyphLift.setPower(-0.40);
+                }
+                //bring elevator up to 2nd block height
+                else if (secondLevelHeight - glyphLift.getCurrentPosition() >= 10) {
+                    glyphLift.setTargetPosition(secondLevelHeight);
+                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    glyphLift.setPower(0.40);
+                }
+                break;
+            case 3:
+                //bring elevator down to 3rd block height
+                if (glyphLift.getCurrentPosition() - thirdLevelHeight >= 10) {
+                    glyphLift.setTargetPosition(thirdLevelHeight);
+                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    glyphLift.setPower(-0.40);
+                }
+                //bring elevator up to 3rd block height
+                else if (thirdLevelHeight - glyphLift.getCurrentPosition() >= 10) {
+                    glyphLift.setTargetPosition(thirdLevelHeight);
+                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    glyphLift.setPower(0.40);
+                }
+                break;
+        }
+
+        if (gamepad2.y && currentLevel < LEVEL_MAX)
+            currentLevel++;
+        else if (gamepad2.a && currentLevel > LEVEL_MIN)
+            currentLevel--;*/
     }
     void updateJewel() {
         if (gamepad2.dpad_up)

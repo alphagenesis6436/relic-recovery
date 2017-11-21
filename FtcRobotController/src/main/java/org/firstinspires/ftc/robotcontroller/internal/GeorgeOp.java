@@ -38,6 +38,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  * ----Modifies updateActuators() method [Renamed to updateJewel()] to accommodate Controls for other Systems
  * ----Adds in the Color Sensor for Autonomous
  * --Stone Mechanism
+ * ----Adapted from PrototypeStoneOp
+ * ----Adds updateStone() method to listen for updates to the game controller
  * ----Declared and Initialized stoneServo
  * ----Created Variables to control stoneServo during teleop
  * ----Create method updateStone() to control stone mechanism

@@ -42,6 +42,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  * ----Adds updateGlyphClawOp() method to control glyph claw mechanism
  * ----Declared / initialized glyphLift, leftClaw, rightClaw
  * ----Created Variables to control glyphLift, leftClaw, rightClaw during TeleOp
+ * --Relic System
+ * ----Adapted code from PrototypeRelicOp2
+ * ----Adds updateRelic() method to control Relic System
  * --Vuforia System
  * ----Follows Same Code from VuforiaTestOp
  * ----Adds updateVuforia method for autonomous
@@ -55,7 +58,6 @@ public class GeorgeOp extends OpMode {
     DcMotor driveBL; //AndyMark, 40:1
     Servo upDownServo; //Metal Gear, 180
     Servo leftRightServo; //Metal Gear, 180
-    Servo stoneServo;    //Plastic Gear, 180
     ModernRoboticsI2cColorSensor colorSensor; //For Jewel Mechanism
     ModernRoboticsI2cColorSensor colorSensor2; //For Cryptobox Tape
     ModernRoboticsI2cGyro gyroMR; //For Mecanum Drive Train
@@ -63,6 +65,9 @@ public class GeorgeOp extends OpMode {
     Servo leftClaw; //180, glyph claw
     Servo rightClaw; //180, glyph claw
     DcMotor glyphLift; //Andymark 60:1, lift the glyph claw
+    Servo downUpServo;    //360, relic claw
+    Servo openCloseServo; //180, relic claw
+    DcMotor relicMotor;     //40:1, relic lift
 
     //Mecanum Drive Train Variables and Constants
     final double DRIVE_PWR_MAX = 0.70;
@@ -109,11 +114,14 @@ public class GeorgeOp extends OpMode {
     double leftRightPos = LEFTRIGHT_MID;
     double jewelDelta = 0.005;
 
-    //Stone Mechanism Variables and Constants
-    final float STONE_DOWN = 172 / 255.0f;
-    final float STONE_UP = 42 / 255.0f;
-    double stonePos = STONE_DOWN;
-    double stoneDelta = 0.030;
+    //Relic Mechanism Variables and Constants
+    final float OC_SERVO_MIN = 0 / 255.0f;
+    final float OC_SERVO_MAX = 255 / 255.0f;
+    final double DU_MAX_SPEED = (1.00) / 2.0;
+    double downUpServoSpeed = 0.50;
+    double openCloseServoPos = 0;
+    double RELIC_PWR_MAX = 0.60;
+    double relicPower = 0;
 
     //Vuforia System Variables and Objects
     //Declare any objects for Vuforia
@@ -137,13 +145,16 @@ public class GeorgeOp extends OpMode {
         driveBL.setDirection(DcMotorSimple.Direction.REVERSE);
         glyphLift = hardwareMap.dcMotor.get("gl");
         glyphLift.setDirection(DcMotorSimple.Direction.REVERSE); //may need to be revised
+        relicMotor = hardwareMap.dcMotor.get("rm");
+        relicMotor.setDirection(DcMotorSimple.Direction.FORWARD);//may be revised
 
         //Initialize servos
         upDownServo = hardwareMap.servo.get("uds");
         leftRightServo = hardwareMap.servo.get("lrs");
-        stoneServo = hardwareMap.servo.get("stone");
         leftClaw = hardwareMap.servo.get("lc");
         rightClaw = hardwareMap.servo.get("rc");
+        downUpServo = hardwareMap.servo.get("du");
+        openCloseServo = hardwareMap.servo.get("oc");
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
@@ -180,7 +191,7 @@ public class GeorgeOp extends OpMode {
         updateDriveTrain();
         updateGlyphClaw();
         updateJewel();
-        updateStone();
+        updateRelic();
     }
 
     void initialization() {
@@ -205,18 +216,22 @@ public class GeorgeOp extends OpMode {
         upDownServo.setPosition(upDownPos);
         leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
         leftRightServo.setPosition(leftRightPos);
-        //clip and initialize Stone Mechanism
-        stonePos = Range.clip(stonePos, STONE_UP, STONE_DOWN);
-        stoneServo.setPosition(stonePos);
+        //Clip and Initialize Relic Mechanism
+        downUpServoSpeed = Range.clip(downUpServoSpeed, OC_SERVO_MIN, OC_SERVO_MAX);
+        downUpServo.setPosition(downUpServoSpeed);
+        openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_MIN, OC_SERVO_MAX);
+        openCloseServo.setPosition(openCloseServoPos);
+        relicPower = Range.clip(relicPower, -RELIC_PWR_MAX, RELIC_PWR_MAX);
+        relicMotor.setPower(relicPower);
     }
     void telemetry() {
         //Show Data for Specific Robot Mechanisms
-        telemetry.addData("FR", String.format("%.2f",driveFR.getPower()));
-        telemetry.addData("FL", String.format("%.2f",driveFL.getPower()));
-        telemetry.addData("BR", String.format("%.2f",driveBR.getPower()));
-        telemetry.addData("BL", String.format("%.2f",driveBL.getPower()));
-        telemetry.addData("UD", String.format("%.0f", upDownServo.getPosition() * 255));
-        telemetry.addData("LR", String.format("%.0f", leftRightServo.getPosition() * 255));
+        telemetry.addData("FR Pwr", String.format("%.2f",driveFR.getPower()));
+        telemetry.addData("FL Pwr", String.format("%.2f",driveFL.getPower()));
+        telemetry.addData("BR Pwr", String.format("%.2f",driveBR.getPower()));
+        telemetry.addData("BL Pwr", String.format("%.2f",driveBL.getPower()));
+        telemetry.addData("UD Pos", String.format("%.0f", upDownServo.getPosition() * 255));
+        telemetry.addData("LR Pos", String.format("%.0f", leftRightServo.getPosition() * 255));
         telemetry.addData("Gyro", gyroMR.getIntegratedZValue());
         telemetry.addData("Red1", colorSensor.red());
         telemetry.addData("Blue1", colorSensor.blue());
@@ -224,10 +239,12 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("Blue2", colorSensor2.blue());
         telemetry.addData("Green2", colorSensor2.green());
         telemetry.addData("Distance", range.getDistance(DistanceUnit.INCH) + " in.");
-        telemetry.addData("Stone", String.format("%.0f", stoneServo.getPosition() * 255));
-        telemetry.addData("Current leftClaw servo pos:", String.format("%.0f", leftClawServoPos * 255));
-        telemetry.addData("Current rightClaw servo pos:", String.format("%.0f", rightClawServoPos * 255));
-        telemetry.addData("Current lift motor power", String.format("%.2f", glyphLiftPower));
+        telemetry.addData("LC Pos", String.format("%.0f", leftClawServoPos * 255));
+        telemetry.addData("RC Pos", String.format("%.0f", rightClawServoPos * 255));
+        telemetry.addData("GL Pwr", String.format("%.2f", glyphLiftPower));
+        telemetry.addData("DU Speed", String.format("%.0f", downUpServoSpeed * 255));
+        telemetry.addData("OC Pos", String.format("%.0f", openCloseServoPos * 255));
+        telemetry.addData("RM Pwr", String.format("%.2f", relicPower));
     }
 
     //Create Methods that will update the driver data
@@ -325,21 +342,23 @@ public class GeorgeOp extends OpMode {
             currentLevel--;*/
     }
     void updateJewel() {
-        if (gamepad2.dpad_up)
+        /*if (gamepad2.dpad_up)
             upDownPos += jewelDelta;
         else if (gamepad2.dpad_down)
             upDownPos -= jewelDelta;
         if (gamepad2.dpad_right)
             leftRightPos -= jewelDelta;
         else if (gamepad2.dpad_left)
-            leftRightPos += jewelDelta;
+            leftRightPos += jewelDelta;*/
     }
-    void updateStone() {
-        if (gamepad1.dpad_down)
-            stonePos -= stoneDelta;
-        else if (gamepad1.dpad_up)
-            stonePos += stoneDelta;
+
+    void updateRelic() {
+        downUpServoSpeed = 0.50;
+        downUpServoSpeed += gamepad2.right_trigger * DU_MAX_SPEED;
+        downUpServoSpeed -= gamepad2.left_trigger * DU_MAX_SPEED;
+        relicPower = gamepad2.right_stick_y * RELIC_PWR_MAX;
     }
+
 
     //Create variables/methods that will be used in ALL autonomous programs for this specific robot
 

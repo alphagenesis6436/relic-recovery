@@ -1,32 +1,32 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
 /**
- * Created by Kalvin on 11/10/2017.
- * winchMotor - Drawer slides
+ * Updated by Alex on 11/21/2017.
+ * relicMotor - Drawer slides
  * relic claw - relic grabber (code pulled from PrototypeRelicOp)
  */
 
 @TeleOp(name = "Relic Prototype 2", group = "Default")
+//@Disabled
 public class PrototypeRelicOp2 extends PrototypeRelicOp {
     //Declare any motors, servos, and sensors
-    DcMotor winchMotor;     //60:1
+    DcMotor relicMotor;     //40:1
 
     //Declare any variables & constants pertaining to specific robot mechanisms (i.e. drive train)
-    double WINCH_PWR_MAX = 0.80;
-    double winchPower = 0;
+    double RELIC_PWR_MAX = 0.60;
+    double relicPower = 0;
 
     public PrototypeRelicOp2() {}
 
     @Override public void init() {
         super.init();
         //Initialize motors & set direction
-        winchMotor = hardwareMap.dcMotor.get("winch");
+        relicMotor = hardwareMap.dcMotor.get("rm");
 
         //Initialize servos
 
@@ -47,20 +47,19 @@ public class PrototypeRelicOp2 extends PrototypeRelicOp {
 
     @Override void updateData() {
         super.updateData();
-        winchPower = gamepad2.left_stick_y * WINCH_PWR_MAX;
-        winchMotor.setPower(winchPower);
+        relicPower = gamepad2.right_stick_y * RELIC_PWR_MAX;
     }
 
     @Override void initialization() {
         super.initialization();
-        winchPower = Range.clip(winchPower, -WINCH_PWR_MAX, WINCH_PWR_MAX);
-        winchMotor.setPower(winchPower);
+        relicPower = Range.clip(relicPower, -RELIC_PWR_MAX, RELIC_PWR_MAX);
+        relicMotor.setPower(relicPower);
     }
 
     @Override void telemetry() {
         //Show Data for Specific Robot Mechanisms
         super.telemetry();
-        telemetry.addData("Current winchMotor power:", String.format("%.2f", winchPower));
+        telemetry.addData("Current relicMotor power:", String.format("%.2f", relicPower));
     }
 
     //Create Methods that will update the driver data

@@ -28,7 +28,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * --Stone Mechanism
  * ----Adapted from PrototypeStoneOp
  * ----Adds updateStone() method to listen for updates to the game controller
- * ----
+ * ----Declared and Initialized stoneServo
+ * ----Created Variables to control stoneServo during teleop
+ * ----Create method updateStone() to control stone mechanism
+ * --
  */
 @TeleOp(name = "GeorgeOp", group = "Default")
 public class GeorgeOp extends OpMode {
@@ -299,7 +302,8 @@ public class GeorgeOp extends OpMode {
     }
     void turnClockwise(int targetAngle) {
         double k = 1; //experimentally found
-        double power = k * (targetAngle + gyroMR.getIntegratedZValue()) / Math.abs(targetAngle);
+        double power = k * (targetAngle + gyroMR.getIntegratedZValue())
+                / Math.abs(targetAngle);
         if (Math.abs(targetAngle + gyroMR.getIntegratedZValue()) >= 5)
             turnClockwise(power);
         else

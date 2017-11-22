@@ -15,11 +15,17 @@ import com.qualcomm.robotcore.util.Range;
 //@Disabled
 public class PrototypeRelicOp2 extends PrototypeRelicOp {
     //Declare any motors, servos, and sensors
-    DcMotor relicMotor;     //40:1
-
-    //Declare any variables & constants pertaining to specific robot mechanisms (i.e. drive train)
+    final float OC_SERVO_MIN = 160 / 255.0f; //open
+    final float OC_SERVO_MAX = 255 / 255.0f;//closed
+    final double DU_MAX_SPEED = (1.00) / 2.0;
+    double downUpServoSpeed = 0.50;
+    double openCloseServoPos = OC_SERVO_MAX;
     double RELIC_PWR_MAX = 0.60;
     double relicPower = 0;
+    double relicDelta = 0.01;
+    DcMotor relicMotor;     //40:1
+
+
 
     public PrototypeRelicOp2() {}
 
@@ -47,11 +53,22 @@ public class PrototypeRelicOp2 extends PrototypeRelicOp {
 
     @Override void updateData() {
         super.updateData();
+        downUpServoSpeed = 0.50;
+        downUpServoSpeed += gamepad2.right_trigger * DU_MAX_SPEED;
+        downUpServoSpeed -= gamepad2.left_trigger * DU_MAX_SPEED;
         relicPower = gamepad2.right_stick_y * RELIC_PWR_MAX;
+        if (gamepad2.dpad_up)
+            openCloseServoPos -= relicDelta;
+        else if (gamepad2.dpad_down)
+            openCloseServoPos += relicDelta;
     }
 
     @Override void initialization() {
         super.initialization();
+        downUpServoSpeed = Range.clip(downUpServoSpeed, OC_SERVO_MIN, OC_SERVO_MAX);
+        upDownServo.setPosition(downUpServoSpeed);
+        openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_MIN, OC_SERVO_MAX);
+        openCloseServo.setPosition(openCloseServoPos);
         relicPower = Range.clip(relicPower, -RELIC_PWR_MAX, RELIC_PWR_MAX);
         relicMotor.setPower(relicPower);
     }
@@ -59,7 +76,9 @@ public class PrototypeRelicOp2 extends PrototypeRelicOp {
     @Override void telemetry() {
         //Show Data for Specific Robot Mechanisms
         super.telemetry();
-        telemetry.addData("Current relicMotor power:", String.format("%.2f", relicPower));
+        telemetry.addData("DU Speed", String.format("%.0f", downUpServoSpeed * 255));
+        telemetry.addData("OC Pos", String.format("%.0f", openCloseServoPos * 255));
+        telemetry.addData("RM Pwr", String.format("%.2f", relicPower));
     }
 
     //Create Methods that will update the driver data

@@ -25,7 +25,7 @@ public class PrototypeRelicOp extends OpMode {
     Servo openCloseServo; //180
 
     //Declare any variables & constants pertaining to specific robot mechanisms (i.e. drive train)
-    final float SERVO_MIN = 0 / 255.0f;
+    final float SERVO_MIN = 1 / 255.0f;
     final float SERVO_MAX = 255 / 255.0f;
     double upDownServoPos = 0;
     double openCloseServoPos = 0;
@@ -57,7 +57,7 @@ public class PrototypeRelicOp extends OpMode {
 
     void updateData() {
         //Add in update methods for specific robot mechanisms
-        if (gamepad1.left_stick_x < 0) {
+        /*if (gamepad1.left_stick_x < 0) {
             upDownServoPos = (((upDownServoPos * 255.0) + 1) / 255.0);
         }
         if (gamepad1.left_stick_x > 0) {
@@ -68,22 +68,22 @@ public class PrototypeRelicOp extends OpMode {
         }
         if (gamepad1.right_stick_y > 0) {
             openCloseServoPos = (((openCloseServoPos * 255.0) - 1) / 255.0);
-        }
+        }*/
     }
 
     void initialization() {
         //Clip and Initialize Specific Robot Mechanisms
-        upDownServoPos = Range.clip(upDownServoPos, SERVO_MIN, SERVO_MAX);
+        /*upDownServoPos = Range.clip(upDownServoPos, SERVO_MIN, SERVO_MAX);
         upDownServo.setPosition(upDownServoPos);        //replace w/ actual initial position
 
         openCloseServoPos = Range.clip(openCloseServoPos, SERVO_MIN, SERVO_MAX);
-        openCloseServo.setPosition(openCloseServoPos);  //replace w/ actual initial position
+        openCloseServo.setPosition(openCloseServoPos);  //replace w/ actual initial position*/
     }
 
     void telemetry() {
         //Show Data for Specific Robot Mechanisms
-        telemetry.addData("Current upDown servo pos:", String.format("%.0f", upDownServoPos * 255));
-        telemetry.addData("Current openClose servo pos:", String.format("%.0f", openCloseServoPos * 255));
+        /*telemetry.addData("Current upDown servo pos:", String.format("%.0f", upDownServoPos * 255));
+        telemetry.addData("Current openClose servo pos:", String.format("%.0f", openCloseServoPos * 255));*/
     }
 
     //Create Methods that will update the driver data

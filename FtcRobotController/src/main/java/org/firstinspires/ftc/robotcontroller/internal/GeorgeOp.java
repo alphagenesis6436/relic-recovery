@@ -122,6 +122,7 @@ public class GeorgeOp extends OpMode {
     double openCloseServoPos = 0;
     double RELIC_PWR_MAX = 0.60;
     double relicPower = 0;
+    double relicDelta = 0.01;
 
     //Vuforia System Variables and Objects
     //Declare any objects for Vuforia
@@ -357,6 +358,11 @@ public class GeorgeOp extends OpMode {
         downUpServoSpeed += gamepad2.right_trigger * DU_MAX_SPEED;
         downUpServoSpeed -= gamepad2.left_trigger * DU_MAX_SPEED;
         relicPower = gamepad2.right_stick_y * RELIC_PWR_MAX;
+
+        if (gamepad2.dpad_up)
+            openCloseServoPos += relicDelta;
+        else if (gamepad2.dpad_down)
+            openCloseServoPos -= relicDelta;
     }
 
 

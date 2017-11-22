@@ -20,7 +20,7 @@ public class PrototypeRelicOp2 extends PrototypeRelicOp {
     final double DU_MAX_SPEED = (1.00) / 2.0;
     double downUpServoSpeed = 0.50;
     double openCloseServoPos = OC_SERVO_MAX;
-    double RELIC_PWR_MAX = 0.60;
+    double RELIC_PWR_MAX = 0.40;
     double relicPower = 0;
     double relicDelta = 0.01;
     DcMotor relicMotor;     //40:1
@@ -56,7 +56,7 @@ public class PrototypeRelicOp2 extends PrototypeRelicOp {
         downUpServoSpeed = 0.50;
         downUpServoSpeed += gamepad2.right_trigger * DU_MAX_SPEED;
         downUpServoSpeed -= gamepad2.left_trigger * DU_MAX_SPEED;
-        relicPower = gamepad2.right_stick_y * RELIC_PWR_MAX;
+        relicPower = -gamepad2.right_stick_y * RELIC_PWR_MAX;
         if (gamepad2.dpad_up)
             openCloseServoPos -= relicDelta;
         else if (gamepad2.dpad_down)
@@ -65,18 +65,18 @@ public class PrototypeRelicOp2 extends PrototypeRelicOp {
 
     @Override void initialization() {
         super.initialization();
-        downUpServoSpeed = Range.clip(downUpServoSpeed, OC_SERVO_MIN, OC_SERVO_MAX);
+        downUpServoSpeed = Range.clip(downUpServoSpeed, -1, 1);
         upDownServo.setPosition(downUpServoSpeed);
         openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_MIN, OC_SERVO_MAX);
         openCloseServo.setPosition(openCloseServoPos);
-        relicPower = Range.clip(relicPower, -RELIC_PWR_MAX, RELIC_PWR_MAX);
+        relicPower = Range.clip(relicPower, -0.05, RELIC_PWR_MAX);
         relicMotor.setPower(relicPower);
     }
 
     @Override void telemetry() {
         //Show Data for Specific Robot Mechanisms
         super.telemetry();
-        telemetry.addData("DU Speed", String.format("%.0f", downUpServoSpeed * 255));
+        telemetry.addData("DU Speed", String.format("%.0f", downUpServoSpeed));
         telemetry.addData("OC Pos", String.format("%.0f", openCloseServoPos * 255));
         telemetry.addData("RM Pwr", String.format("%.2f", relicPower));
     }

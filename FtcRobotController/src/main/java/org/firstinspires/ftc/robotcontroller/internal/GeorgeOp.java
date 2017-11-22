@@ -115,12 +115,12 @@ public class GeorgeOp extends OpMode {
     double jewelDelta = 0.005;
 
     //Relic Mechanism Variables and Constants
-    final float OC_SERVO_MIN = 0 / 255.0f;
-    final float OC_SERVO_MAX = 255 / 255.0f;
+    final float OC_SERVO_MIN = 160 / 255.0f; //open
+    final float OC_SERVO_MAX = 255 / 255.0f; //closed
     final double DU_MAX_SPEED = (1.00) / 2.0;
     double downUpServoSpeed = 0.50;
-    double openCloseServoPos = 0;
-    double RELIC_PWR_MAX = 0.60;
+    double openCloseServoPos = OC_SERVO_MIN;
+    double RELIC_PWR_MAX = 0.40;
     double relicPower = 0;
     double relicDelta = 0.01;
 
@@ -218,11 +218,11 @@ public class GeorgeOp extends OpMode {
         leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
         leftRightServo.setPosition(leftRightPos);
         //Clip and Initialize Relic Mechanism
-        downUpServoSpeed = Range.clip(downUpServoSpeed, OC_SERVO_MIN, OC_SERVO_MAX);
-        downUpServo.setPosition(downUpServoSpeed);
+        downUpServoSpeed = Range.clip(downUpServoSpeed, -1, 1);
+        upDownServo.setPosition(downUpServoSpeed);
         openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_MIN, OC_SERVO_MAX);
         openCloseServo.setPosition(openCloseServoPos);
-        relicPower = Range.clip(relicPower, -RELIC_PWR_MAX, RELIC_PWR_MAX);
+        relicPower = Range.clip(relicPower, -0.05, RELIC_PWR_MAX);
         relicMotor.setPower(relicPower);
     }
     void telemetry() {
@@ -239,11 +239,11 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("Red2", colorSensor2.red());
         telemetry.addData("Blue2", colorSensor2.blue());
         telemetry.addData("Green2", colorSensor2.green());
-        telemetry.addData("Distance", range.getDistance(DistanceUnit.INCH) + " in.");
+        telemetry.addData("Distance", String.format("%.2f", range.getDistance(DistanceUnit.INCH)) + " in");
         telemetry.addData("LC Pos", String.format("%.0f", leftClawServoPos * 255));
         telemetry.addData("RC Pos", String.format("%.0f", rightClawServoPos * 255));
         telemetry.addData("GL Pwr", String.format("%.2f", glyphLiftPower));
-        telemetry.addData("DU Speed", String.format("%.0f", downUpServoSpeed * 255));
+        telemetry.addData("DU Speed", String.format("%.0f", downUpServoSpeed));
         telemetry.addData("OC Pos", String.format("%.0f", openCloseServoPos * 255));
         telemetry.addData("RM Pwr", String.format("%.2f", relicPower));
     }
@@ -357,12 +357,11 @@ public class GeorgeOp extends OpMode {
         downUpServoSpeed = 0.50;
         downUpServoSpeed += gamepad2.right_trigger * DU_MAX_SPEED;
         downUpServoSpeed -= gamepad2.left_trigger * DU_MAX_SPEED;
-        relicPower = gamepad2.right_stick_y * RELIC_PWR_MAX;
-
+        relicPower = -gamepad2.right_stick_y * RELIC_PWR_MAX;
         if (gamepad2.dpad_up)
-            openCloseServoPos += relicDelta;
-        else if (gamepad2.dpad_down)
             openCloseServoPos -= relicDelta;
+        else if (gamepad2.dpad_down)
+            openCloseServoPos += relicDelta;
     }
 
 

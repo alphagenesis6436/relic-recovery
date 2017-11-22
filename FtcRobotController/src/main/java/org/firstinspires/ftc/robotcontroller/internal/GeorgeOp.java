@@ -105,14 +105,15 @@ public class GeorgeOp extends OpMode {
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
     final float UPDOWN_MIN = 65 / 255.0f;   //fully down
-    final float UPDOWN_MAX = 210 / 255.0f;  //fully up
+    final float UPDOWN_MAX = 229
+            / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
     final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left
     final int BLUE_THRESHOLD = 3;   //holes
     final int RED_THRESHOLD = 3;    //holes
     double upDownPos = UPDOWN_MAX;
     double leftRightPos = LEFTRIGHT_MID;
-    double jewelDelta = 0.005;
+    double jewelDelta = 0.01;
 
     //Relic Mechanism Variables and Constants
     final float OC_SERVO_MIN = 160 / 255.0f; //open
@@ -219,10 +220,10 @@ public class GeorgeOp extends OpMode {
         leftRightServo.setPosition(leftRightPos);
         //Clip and Initialize Relic Mechanism
         downUpServoSpeed = Range.clip(downUpServoSpeed, -1, 1);
-        upDownServo.setPosition(downUpServoSpeed);
+        downUpServo.setPosition(downUpServoSpeed);
         openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_MIN, OC_SERVO_MAX);
         openCloseServo.setPosition(openCloseServoPos);
-        relicPower = Range.clip(relicPower, -0.05, RELIC_PWR_MAX);
+        relicPower = Range.clip(relicPower, -0.10, RELIC_PWR_MAX);
         relicMotor.setPower(relicPower);
     }
     void telemetry() {
@@ -240,12 +241,12 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("Blue2", colorSensor2.blue());
         telemetry.addData("Green2", colorSensor2.green());
         telemetry.addData("Distance", String.format("%.2f", range.getDistance(DistanceUnit.INCH)) + " in");
-        telemetry.addData("LC Pos", String.format("%.0f", leftClawServoPos * 255));
-        telemetry.addData("RC Pos", String.format("%.0f", rightClawServoPos * 255));
-        telemetry.addData("GL Pwr", String.format("%.2f", glyphLiftPower));
-        telemetry.addData("DU Speed", String.format("%.0f", downUpServoSpeed));
-        telemetry.addData("OC Pos", String.format("%.0f", openCloseServoPos * 255));
-        telemetry.addData("RM Pwr", String.format("%.2f", relicPower));
+        telemetry.addData("LC Pos", String.format("%.0f", leftClaw.getPosition() * 255));
+        telemetry.addData("RC Pos", String.format("%.0f", rightClaw.getPosition() * 255));
+        telemetry.addData("GL Pwr", String.format("%.2f", glyphLift.getPower()));
+        telemetry.addData("DU Speed", String.format("%.0f", downUpServo.getPosition()));
+        telemetry.addData("OC Pos", String.format("%.0f", openCloseServo.getPosition() * 255));
+        telemetry.addData("RM Pwr", String.format("%.2f", relicMotor.getPower()));
     }
 
     //Create Methods that will update the driver data
@@ -284,13 +285,13 @@ public class GeorgeOp extends OpMode {
                 if (glyphLift.getCurrentPosition() - zeroLevelHeight >= 10) {
                     glyphLift.setTargetPosition(zeroLevelHeight);
                     glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(-0.40);
+                    glyphLift.setPower(-GLYPH_LIFT_PWR_MAX);
                 }
                 //bring elevator up to zero position
                 else if (zeroLevelHeight - glyphLift.getCurrentPosition() >= 10) {
                     glyphLift.setTargetPosition(zeroLevelHeight);
                     glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(0.40);
+                    glyphLift.setPower(GLYPH_LIFT_PWR_MAX);
                 }
                 break;
             case 1:
@@ -298,13 +299,13 @@ public class GeorgeOp extends OpMode {
                 if (glyphLift.getCurrentPosition() - firstLevelHeight >= 10) {
                     glyphLift.setTargetPosition(firstLevelHeight);
                     glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(-0.40);
+                    glyphLift.setPower(-GLYPH_LIFT_PWR_MAX);
                 }
                 //bring elevator up to 1st block height
                 else if (firstLevelHeight - glyphLift.getCurrentPosition() >= 10) {
                     glyphLift.setTargetPosition(firstLevelHeight);
                     glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(0.40);
+                    glyphLift.setPower(GLYPH_LIFT_PWR_MAX);
                 }
                 break;
             case 2:
@@ -312,13 +313,13 @@ public class GeorgeOp extends OpMode {
                 if (glyphLift.getCurrentPosition() - secondLevelHeight >= 10) {
                     glyphLift.setTargetPosition(secondLevelHeight);
                     glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(-0.40);
+                    glyphLift.setPower(-GLYPH_LIFT_PWR_MAX);
                 }
                 //bring elevator up to 2nd block height
                 else if (secondLevelHeight - glyphLift.getCurrentPosition() >= 10) {
                     glyphLift.setTargetPosition(secondLevelHeight);
                     glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(0.40);
+                    glyphLift.setPower(GLYPH_LIFT_PWR_MAX);
                 }
                 break;
             case 3:
@@ -326,13 +327,13 @@ public class GeorgeOp extends OpMode {
                 if (glyphLift.getCurrentPosition() - thirdLevelHeight >= 10) {
                     glyphLift.setTargetPosition(thirdLevelHeight);
                     glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(-0.40);
+                    glyphLift.setPower(-GLYPH_LIFT_PWR_MAX);
                 }
                 //bring elevator up to 3rd block height
                 else if (thirdLevelHeight - glyphLift.getCurrentPosition() >= 10) {
                     glyphLift.setTargetPosition(thirdLevelHeight);
                     glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(0.40);
+                    glyphLift.setPower(GLYPH_LIFT_PWR_MAX);
                 }
                 break;
         }
@@ -343,14 +344,14 @@ public class GeorgeOp extends OpMode {
             currentLevel--;*/
     }
     void updateJewel() {
-        /*if (gamepad2.dpad_up)
-            upDownPos += jewelDelta;
-        else if (gamepad2.dpad_down)
-            upDownPos -= jewelDelta;
-        if (gamepad2.dpad_right)
-            leftRightPos -= jewelDelta;
-        else if (gamepad2.dpad_left)
-            leftRightPos += jewelDelta;*/
+//        if (gamepad2.dpad_up)
+//            upDownPos += jewelDelta;
+//        else if (gamepad2.dpad_down)
+//            upDownPos -= jewelDelta;
+//        if (gamepad2.dpad_right)
+//            leftRightPos -= jewelDelta;
+//        else if (gamepad2.dpad_left)
+//            leftRightPos += jewelDelta;
     }
 
     void updateRelic() {

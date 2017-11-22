@@ -87,10 +87,10 @@ public class GeorgeOp extends OpMode {
     final float GLYPH_LIFT_PWR_MAX = 0.40f; //experimentally found by using LabView
     double glyphLiftPower = 0;
     final float SERVO_MIN_LEFT = 50 / 255.0f; //left claw is closed?
-    final float SERVO_GRAB_LEFT = 80 / 255.0f; //left claw is gripping glyph
+        float SERVO_GRAB_LEFT = 101 / 255.0f; //left claw is gripping glyph
     final float SERVO_MAX_LEFT = 117 / 255.0f; //left claw is open
-    final float SERVO_MIN_RIGHT = 90 / 255.0f; //right claw is open
-    final float SERVO_GRAB_RIGHT = 127 / 255.0f; //right claw is gripping glpyh
+    final float SERVO_MIN_RIGHT = 155 / 255.0f; //right claw is open - orig: 90
+        float SERVO_GRAB_RIGHT = 209 / 255.0f; //right claw is gripping glpyh
     final float SERVO_MAX_RIGHT = 245 / 255.0f; //right claw is closed?
     double leftClawServoPos = SERVO_MIN_LEFT;
     double rightClawServoPos = SERVO_MAX_RIGHT;
@@ -269,6 +269,16 @@ public class GeorgeOp extends OpMode {
             leftClawServoPos = SERVO_GRAB_LEFT;
             rightClawServoPos = SERVO_GRAB_RIGHT;
         }
+
+        if (gamepad2.a)
+            SERVO_GRAB_RIGHT = (float)(((SERVO_GRAB_RIGHT * 255.0) + 1) / 255.0);
+        if (gamepad2.y)
+            SERVO_GRAB_RIGHT = (float)(((SERVO_GRAB_RIGHT * 255.0) - 1) / 255.0);
+
+        if (gamepad2.x)
+            SERVO_GRAB_LEFT = (float)(((SERVO_GRAB_LEFT * 255.0) + 1) / 255.0);
+        if (gamepad2.b)
+            SERVO_GRAB_LEFT = (float)(((SERVO_GRAB_LEFT * 255.0) - 1) / 255.0);
 
         //Manually Control Glyph Lift
         glyphLiftPower = -gamepad2.left_stick_y * 0.50;

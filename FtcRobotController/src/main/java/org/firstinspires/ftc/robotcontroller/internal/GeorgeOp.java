@@ -270,16 +270,6 @@ public class GeorgeOp extends OpMode {
             rightClawServoPos = SERVO_GRAB_RIGHT;
         }
 
-        if (gamepad2.a)
-            SERVO_GRAB_RIGHT = (float)(((SERVO_GRAB_RIGHT * 255.0) + 1) / 255.0);
-        if (gamepad2.y)
-            SERVO_GRAB_RIGHT = (float)(((SERVO_GRAB_RIGHT * 255.0) - 1) / 255.0);
-
-        if (gamepad2.x)
-            SERVO_GRAB_LEFT = (float)(((SERVO_GRAB_LEFT * 255.0) + 1) / 255.0);
-        if (gamepad2.b)
-            SERVO_GRAB_LEFT = (float)(((SERVO_GRAB_LEFT * 255.0) - 1) / 255.0);
-
         //Manually Control Glyph Lift
         glyphLiftPower = -gamepad2.left_stick_y * 0.50;
 

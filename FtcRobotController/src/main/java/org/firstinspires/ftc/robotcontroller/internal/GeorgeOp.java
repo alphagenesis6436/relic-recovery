@@ -91,7 +91,7 @@ public class GeorgeOp extends OpMode {
     final float SERVO_MAX_LEFT = 117 / 255.0f; //left claw is open
     final float SERVO_MIN_RIGHT = 90 / 255.0f; //right claw is open
     final float SERVO_GRAB_RIGHT = 127 / 255.0f; //right claw is gripping glpyh
-    final float SERVO_MAX_RIGHT = 250 / 255.0f; //right claw is closed?
+    final float SERVO_MAX_RIGHT = 245 / 255.0f; //right claw is closed?
     double leftClawServoPos = SERVO_MIN_LEFT;
     double rightClawServoPos = SERVO_MAX_RIGHT;
     int currentLevel = 0; //start off at currentLevel 0
@@ -123,7 +123,7 @@ public class GeorgeOp extends OpMode {
     double openCloseServoPos = OC_SERVO_MIN;
     double RELIC_PWR_MAX = 0.40;
     double relicPower = 0;
-    double relicDelta = 0.01;
+    double relicDelta = 0.05;
 
     //Vuforia System Variables and Objects
     //Declare any objects for Vuforia

@@ -105,8 +105,7 @@ public class GeorgeOp extends OpMode {
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
     final float UPDOWN_MIN = 65 / 255.0f;   //fully down
-    final float UPDOWN_MAX = 229
-            / 255.0f;  //fully up
+    final float UPDOWN_MAX = 229 / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
     final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left
     final int BLUE_THRESHOLD = 3;   //holes
@@ -116,7 +115,8 @@ public class GeorgeOp extends OpMode {
     double jewelDelta = 0.01;
 
     //Relic Mechanism Variables and Constants
-    final float OC_SERVO_MIN = 160 / 255.0f; //open
+    final float OC_SERVO_MIN = 42 / 255.0f;
+    final float OC_SERVO_OPEN = 160 / 255.0f; //open
     final float OC_SERVO_MAX = 255 / 255.0f; //closed
     final double DU_MAX_SPEED = (1.00) / 2.0;
     double downUpServoSpeed = 0.50;
@@ -211,7 +211,7 @@ public class GeorgeOp extends OpMode {
         leftClaw.setPosition(leftClawServoPos);
         rightClawServoPos = Range.clip(rightClawServoPos, SERVO_MIN_RIGHT, SERVO_MAX_RIGHT);
         rightClaw.setPosition(rightClawServoPos);
-        glyphLiftPower = Range.clip(glyphLiftPower, -0.05, GLYPH_LIFT_PWR_MAX);
+        glyphLiftPower = Range.clip(glyphLiftPower, -0.08, GLYPH_LIFT_PWR_MAX);
         glyphLift.setPower(glyphLiftPower);
         //Clip and Initialize Jewel Mechanism
         upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
@@ -219,7 +219,7 @@ public class GeorgeOp extends OpMode {
         leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
         leftRightServo.setPosition(leftRightPos);
         //Clip and Initialize Relic Mechanism
-        downUpServoSpeed = Range.clip(downUpServoSpeed, -1, 1);
+        downUpServoSpeed = Range.clip(downUpServoSpeed, 0, 1);
         downUpServo.setPosition(downUpServoSpeed);
         openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_MIN, OC_SERVO_MAX);
         openCloseServo.setPosition(openCloseServoPos);
@@ -360,9 +360,9 @@ public class GeorgeOp extends OpMode {
         downUpServoSpeed -= gamepad2.left_trigger * DU_MAX_SPEED;
         relicPower = -gamepad2.right_stick_y * RELIC_PWR_MAX;
         if (gamepad2.dpad_up)
-            openCloseServoPos -= relicDelta;
+            openCloseServoPos = OC_SERVO_OPEN;
         else if (gamepad2.dpad_down)
-            openCloseServoPos += relicDelta;
+            openCloseServoPos = OC_SERVO_MAX;
     }
 
 

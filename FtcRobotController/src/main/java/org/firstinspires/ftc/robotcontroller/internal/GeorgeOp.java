@@ -84,7 +84,7 @@ public class GeorgeOp extends OpMode {
     double backwardLeftPower = 0;
 
     //Glyph Claw Mechanism Variables and Constants
-    final float GLYPH_LIFT_PWR_MAX = 0.40f; //experimentally found by using LabView
+    final float GLYPH_LIFT_PWR_MAX = 0.50f;
     double glyphLiftPower = 0;
     final float SERVO_MIN_LEFT = 50 / 255.0f; //left claw is closed?
         float SERVO_GRAB_LEFT = 101 / 255.0f; //left claw is gripping glyph
@@ -223,7 +223,7 @@ public class GeorgeOp extends OpMode {
         downUpServo.setPosition(downUpServoSpeed);
         openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_MIN, OC_SERVO_MAX);
         openCloseServo.setPosition(openCloseServoPos);
-        relicPower = Range.clip(relicPower, -RELIC_PWR_MAX / 2, RELIC_PWR_MAX);
+        relicPower = Range.clip(relicPower, -RELIC_PWR_MAX, RELIC_PWR_MAX);
         relicMotor.setPower(relicPower);
     }
     void telemetry() {
@@ -271,7 +271,7 @@ public class GeorgeOp extends OpMode {
         }
 
         //Manually Control Glyph Lift
-        glyphLiftPower = -gamepad2.left_stick_y * 0.50;
+        glyphLiftPower = -gamepad2.left_stick_y *GLYPH_LIFT_PWR_MAX;
 
         /*Elevator lift
         * glyph claw should only exist at certain heights / "levels" (similar to Bohr's energy levels)

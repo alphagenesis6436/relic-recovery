@@ -244,7 +244,7 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("LC Pos", String.format("%.0f", leftClaw.getPosition() * 255));
         telemetry.addData("RC Pos", String.format("%.0f", rightClaw.getPosition() * 255));
         telemetry.addData("GL Pwr", String.format("%.2f", glyphLift.getPower()));
-        telemetry.addData("DU Speed", String.format("%.0f", downUpServo.getPosition()));
+        telemetry.addData("DU Speed", String.format("%.0f", downUpServoSpeed));
         telemetry.addData("OC Pos", String.format("%.0f", openCloseServo.getPosition() * 255));
         telemetry.addData("RM Pwr", String.format("%.2f", relicMotor.getPower()));
     }

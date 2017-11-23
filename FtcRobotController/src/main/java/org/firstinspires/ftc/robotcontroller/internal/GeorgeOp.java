@@ -211,7 +211,7 @@ public class GeorgeOp extends OpMode {
         leftClaw.setPosition(leftClawServoPos);
         rightClawServoPos = Range.clip(rightClawServoPos, SERVO_MIN_RIGHT, SERVO_MAX_RIGHT);
         rightClaw.setPosition(rightClawServoPos);
-        glyphLiftPower = Range.clip(glyphLiftPower, -0.08, GLYPH_LIFT_PWR_MAX);
+        glyphLiftPower = Range.clip(glyphLiftPower, -GLYPH_LIFT_PWR_MAX, GLYPH_LIFT_PWR_MAX);
         glyphLift.setPower(glyphLiftPower);
         //Clip and Initialize Jewel Mechanism
         upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
@@ -223,7 +223,7 @@ public class GeorgeOp extends OpMode {
         downUpServo.setPosition(downUpServoSpeed);
         openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_MIN, OC_SERVO_MAX);
         openCloseServo.setPosition(openCloseServoPos);
-        relicPower = Range.clip(relicPower, -0.10, RELIC_PWR_MAX);
+        relicPower = Range.clip(relicPower, -RELIC_PWR_MAX / 2, RELIC_PWR_MAX);
         relicMotor.setPower(relicPower);
     }
     void telemetry() {

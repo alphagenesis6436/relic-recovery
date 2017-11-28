@@ -45,6 +45,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  * --Relic System
  * ----Adapted code from PrototypeRelicOp2
  * ----Adds updateRelic() method to control Relic System
+ * ----Modified Code to account for replacing downUpServo from a continuous to a 180 servo
  * --Vuforia System
  * ----Follows Same Code from VuforiaTestOp
  * ----Adds updateVuforia method for autonomous
@@ -65,7 +66,7 @@ public class GeorgeOp extends OpMode {
     Servo leftClaw; //180, glyph claw
     Servo rightClaw; //180, glyph claw
     DcMotor glyphLift; //Andymark 60:1, lift the glyph claw
-    Servo downUpServo;    //360, relic claw
+    Servo downUpServo;    //180, relic claw
     Servo openCloseServo; //180, relic claw
     DcMotor relicMotor;     //40:1, relic lift
 
@@ -91,7 +92,6 @@ public class GeorgeOp extends OpMode {
     final float SERVO_MAX_LEFT = 117 / 255.0f; //left claw is open
     final float SERVO_MIN_RIGHT = 155 / 255.0f; //right claw is open - orig: 90
         float SERVO_GRAB_RIGHT = 209 / 255.0f; //right claw is gripping glpyh
-
     final float SERVO_MAX_RIGHT = 245 / 255.0f; //right claw is closed?
     double leftClawServoPos = SERVO_MIN_LEFT;
     double rightClawServoPos = SERVO_MAX_RIGHT;
@@ -119,12 +119,13 @@ public class GeorgeOp extends OpMode {
     final float OC_SERVO_MIN = 42 / 255.0f;
     final float OC_SERVO_OPEN = 160 / 255.0f; //open
     final float OC_SERVO_MAX = 255 / 255.0f; //closed
-    final double DU_MAX_SPEED = (0.40) / 2.0;
-    double downUpServoSpeed = 0.50;
+    final double DU_SERVO_MIN = 0 / 255.0f;
+    final double DU_SERVO_MAX = 255 / 255.0f;
+    double downUpServoPos = DU_SERVO_MIN;
     double openCloseServoPos = OC_SERVO_MIN;
-    double RELIC_PWR_MAX = 0.40;
+    final double RELIC_PWR_MAX = 0.40;
     double relicPower = 0;
-    double relicDelta = 0.05;
+    double relicDelta = 0.0075;
 
     //Vuforia System Variables and Objects
     //Declare any objects for Vuforia
@@ -147,9 +148,9 @@ public class GeorgeOp extends OpMode {
         driveBL = hardwareMap.dcMotor.get("dbl");
         driveBL.setDirection(DcMotorSimple.Direction.REVERSE);
         glyphLift = hardwareMap.dcMotor.get("gl");
-        glyphLift.setDirection(DcMotorSimple.Direction.REVERSE); //may need to be revised
+        glyphLift.setDirection(DcMotorSimple.Direction.REVERSE);
         relicMotor = hardwareMap.dcMotor.get("rm");
-        relicMotor.setDirection(DcMotorSimple.Direction.FORWARD);//may be revised
+        relicMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         //Initialize servos
         upDownServo = hardwareMap.servo.get("uds");
@@ -193,7 +194,7 @@ public class GeorgeOp extends OpMode {
         //Add in update methods for specific robot mechanisms
         updateDriveTrain();
         updateGlyphClaw();
-        updateJewel();
+        //updateJewel();
         updateRelic();
     }
 
@@ -220,8 +221,8 @@ public class GeorgeOp extends OpMode {
         leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
         leftRightServo.setPosition(leftRightPos);
         //Clip and Initialize Relic Mechanism
-        downUpServoSpeed = Range.clip(downUpServoSpeed, 0, 1);
-        downUpServo.setPosition(downUpServoSpeed);
+        downUpServoPos = Range.clip(downUpServoPos, DU_SERVO_MIN, DU_SERVO_MAX);
+        downUpServo.setPosition(downUpServoPos);
         openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_MIN, OC_SERVO_MAX);
         openCloseServo.setPosition(openCloseServoPos);
         relicPower = Range.clip(relicPower, -RELIC_PWR_MAX, RELIC_PWR_MAX);
@@ -245,7 +246,7 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("LC Pos", String.format("%.0f", leftClaw.getPosition() * 255));
         telemetry.addData("RC Pos", String.format("%.0f", rightClaw.getPosition() * 255));
         telemetry.addData("GL Pwr", String.format("%.2f", glyphLift.getPower()));
-        telemetry.addData("DU Speed", String.format("%.0f", downUpServoSpeed));
+        telemetry.addData("DU Speed", String.format("%.0f", downUpServo.getPosition() * 255));
         telemetry.addData("OC Pos", String.format("%.0f", openCloseServo.getPosition() * 255));
         telemetry.addData("RM Pwr", String.format("%.2f", relicMotor.getPower()));
     }
@@ -345,25 +346,26 @@ public class GeorgeOp extends OpMode {
             currentLevel--;*/
     }
     void updateJewel() {
-//        if (gamepad2.dpad_up)
-//            upDownPos += jewelDelta;
-//        else if (gamepad2.dpad_down)
-//            upDownPos -= jewelDelta;
-//        if (gamepad2.dpad_right)
-//            leftRightPos -= jewelDelta;
-//        else if (gamepad2.dpad_left)
-//            leftRightPos += jewelDelta;
+        if (gamepad2.dpad_up)
+            upDownPos += jewelDelta;
+        else if (gamepad2.dpad_down)
+            upDownPos -= jewelDelta;
+        if (gamepad2.dpad_right)
+            leftRightPos -= jewelDelta;
+        else if (gamepad2.dpad_left)
+            leftRightPos += jewelDelta;
     }
 
     void updateRelic() {
-        downUpServoSpeed = 0.50;
-        downUpServoSpeed += gamepad2.right_trigger * DU_MAX_SPEED;
-        downUpServoSpeed -= gamepad2.left_trigger * DU_MAX_SPEED;
         relicPower = -gamepad2.right_stick_y * RELIC_PWR_MAX;
         if (gamepad2.dpad_up)
             openCloseServoPos = OC_SERVO_OPEN;
         else if (gamepad2.dpad_down)
             openCloseServoPos = OC_SERVO_MAX;
+        if (gamepad2.dpad_right)
+            downUpServoPos += relicDelta;
+        else if (gamepad2.dpad_left)
+            downUpServoPos -= relicDelta;
     }
 
 

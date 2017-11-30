@@ -117,15 +117,15 @@ public class GeorgeOp extends OpMode {
 
     //Relic Mechanism Variables and Constants
     final float OC_SERVO_MIN = 42 / 255.0f;
-    final float OC_SERVO_OPEN = 160 / 255.0f; //open
+    final float OC_SERVO_OPEN = 200 / 255.0f; //open
     final float OC_SERVO_MAX = 255 / 255.0f; //closed
-    final double DU_SERVO_MIN = 0 / 255.0f;
-    final double DU_SERVO_MAX = 255 / 255.0f;
-    double downUpServoPos = DU_SERVO_MIN;
+    final double DU_SERVO_MIN = 40 / 255.0f; //down
+    final double DU_SERVO_MAX = 115 / 255.0f; //up
+    double downUpServoPos = DU_SERVO_MAX;
     double openCloseServoPos = OC_SERVO_MIN;
     final double RELIC_PWR_MAX = 0.40;
     double relicPower = 0;
-    double relicDelta = 0.0075;
+    double relicDelta = 0.03;
 
     //Vuforia System Variables and Objects
     //Declare any objects for Vuforia

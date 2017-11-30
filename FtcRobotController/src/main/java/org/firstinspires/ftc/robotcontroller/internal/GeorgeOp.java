@@ -119,8 +119,8 @@ public class GeorgeOp extends OpMode {
     final float OC_SERVO_MIN = 42 / 255.0f;
     final float OC_SERVO_OPEN = 200 / 255.0f; //open
     final float OC_SERVO_MAX = 255 / 255.0f; //closed
-    final double DU_SERVO_MIN = 40 / 255.0f; //down
-    final double DU_SERVO_MAX = 115 / 255.0f; //up
+    final double DU_SERVO_MIN = 0 / 255.0f; //down - 40
+    final double DU_SERVO_MAX = 255 / 255.0f; //up - 115
     double downUpServoPos = DU_SERVO_MAX;
     double openCloseServoPos = OC_SERVO_MIN;
     final double RELIC_PWR_MAX = 0.40;
@@ -246,7 +246,7 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("LC Pos", String.format("%.0f", leftClaw.getPosition() * 255));
         telemetry.addData("RC Pos", String.format("%.0f", rightClaw.getPosition() * 255));
         telemetry.addData("GL Pwr", String.format("%.2f", glyphLift.getPower()));
-        telemetry.addData("DU Speed", String.format("%.0f", downUpServo.getPosition() * 255));
+        telemetry.addData("DU Pos", String.format("%.0f", downUpServo.getPosition() * 255));
         telemetry.addData("OC Pos", String.format("%.0f", openCloseServo.getPosition() * 255));
         telemetry.addData("RM Pwr", String.format("%.2f", relicMotor.getPower()));
     }

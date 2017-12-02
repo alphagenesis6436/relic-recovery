@@ -26,6 +26,7 @@ import static com.sun.tools.javac.util.Constants.format;
  */
 
 @TeleOp(name = "VuforiaTestOp", group = "Default")
+@Disabled
 public class VuforiaTestOp extends APIKey {
     //Declare any objects for Vuforia
     OpenGLMatrix lastLocation = null;

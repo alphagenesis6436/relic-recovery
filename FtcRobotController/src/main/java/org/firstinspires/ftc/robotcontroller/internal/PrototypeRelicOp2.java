@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name = "Relic Prototype 2", group = "Default")
-//@Disabled
+@Disabled
 public class PrototypeRelicOp2 extends PrototypeRelicOp {
     //Declare any motors, servos, and sensors
     final float OC_SERVO_MIN = 160 / 255.0f; //open

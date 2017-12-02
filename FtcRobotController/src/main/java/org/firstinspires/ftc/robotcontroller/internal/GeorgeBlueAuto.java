@@ -65,9 +65,8 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 4:
                 stateName = "Knock off jewel 2 - arm knock";
                 updateVuforia();
-                if (!(glyphLift.getCurrentPosition() >= zeroLevelHeight)) {
-                    glyphLift.setTargetPosition(zeroLevelHeight);
-                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                if (!waitSec(0.5)) {//bring up glyph
+                    glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     glyphLift.setPower(0.10);
                 }
                 else
@@ -131,13 +130,28 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 14:
                 stateName = "Drive right until correct column reached";
                 //have robot drive right until white tape of correct column is seen
-                moveRight(0.20);
+                /*moveRight(0.20);
                 if (whiteTapeIsDetected()) {
                     whitePreviouslyDetected = true;
                     pictographKey--;
                 }
                 else if (whiteTapeIsNotDetected()) {
                     whitePreviouslyDetected = false;
+                }*/
+                if (pictographKey == 2) { //drive to right column
+                    moveRight(0.20, 30);
+                    if (encoderTargetReached)
+                        pictographKey = -1;
+                }
+                else if (pictographKey == 1) { //drive to middle column
+                    moveRight(0.20, 20);
+                    if (encoderTargetReached)
+                        pictographKey = -1;
+                }
+                else if (pictographKey == 0) { //drive to left column
+                    moveRight(0.20, 10);
+                    if (encoderTargetReached)
+                        pictographKey = -1;
                 }
                 if (pictographKey == -1)
                     state = 1000;

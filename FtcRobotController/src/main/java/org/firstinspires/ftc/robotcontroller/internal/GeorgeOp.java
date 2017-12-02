@@ -79,6 +79,7 @@ public class GeorgeOp extends OpMode {
     final double COUNTS_PER_INCH_DG = COUNTS_PER_REVOLUTION / (2 * Math.PI * Math.sqrt(2) / DRIVE_GEAR_RATIO); //diagonal
     final int WHITE_THRESHOLD = 30;
     boolean whitePreviouslyDetected = false;
+    boolean drivePreciseIsOn = false; //true halfs drive speed, false returns drive speed to max
     double forwardRightPower = 0;
     double forwardLeftPower = 0;
     double backwardRightPower = 0;
@@ -87,14 +88,14 @@ public class GeorgeOp extends OpMode {
     //Glyph Claw Mechanism Variables and Constants
     final float GLYPH_LIFT_PWR_MAX = 0.50f;
     double glyphLiftPower = 0;
-    final float SERVO_MIN_LEFT = 50 / 255.0f; //left claw is closed?
-        float SERVO_GRAB_LEFT = 101 / 255.0f; //left claw is gripping glyph
-    final float SERVO_MAX_LEFT = 117 / 255.0f; //left claw is open
-    final float SERVO_MIN_RIGHT = 155 / 255.0f; //right claw is open - orig: 90
-        float SERVO_GRAB_RIGHT = 209 / 255.0f; //right claw is gripping glpyh
-    final float SERVO_MAX_RIGHT = 245 / 255.0f; //right claw is closed?
-    double leftClawServoPos = SERVO_MAX_LEFT;
-    double rightClawServoPos = SERVO_MIN_RIGHT;
+    final float SERVO_GRAB_LEFT = 101 / 255.0f; //left claw is gripping glyph
+    final float SERVO_MID_LEFT = 110 / 255.0f; //left claw is slightly open
+    final float SERVO_MAX_LEFT = 130 / 255.0f; //left claw is fully open
+    final float SERVO_MIN_RIGHT = 155 / 255.0f; //right claw is fully open
+    final float SERVO_MID_RIGHT = 200 / 255.0f; //right claw is slightly open
+    final float SERVO_GRAB_RIGHT = 209 / 255.0f; //right claw is gripping glpyh
+    double leftClawServoPos = SERVO_MAX_LEFT; //start left claw fully open
+    double rightClawServoPos = SERVO_MIN_RIGHT; //start right claw fully open
     int currentLevel = 0; //start off at currentLevel 0
     int zeroLevelHeight = 10; //encoder count at currentLevel 0
     int firstLevelHeight = 1010; //encoder count at currentLevel 1
@@ -116,12 +117,12 @@ public class GeorgeOp extends OpMode {
     double jewelDelta = 0.01;
 
     //Relic Mechanism Variables and Constants
-    final float OC_SERVO_MIN = 42 / 255.0f;
+    final float OC_SERVO_MIN = 39 / 255.0f;
     final float OC_SERVO_OPEN = 200 / 255.0f; //open
     final float OC_SERVO_MAX = 255 / 255.0f; //closed
-    final double DU_SERVO_MIN = 107 / 255.0f; //down - 40
-    final double DU_SERVO_MAX = 255 / 255.0f; //up - 115
-    double downUpServoPos = DU_SERVO_MAX;
+    final double DU_SERVO_MIN = 0 / 255.0f; //up - 40
+    final double DU_SERVO_MAX = 107 / 255.0f; //down - 115
+    double downUpServoPos = DU_SERVO_MIN;
     double openCloseServoPos = OC_SERVO_MIN;
     final double RELIC_PWR_MAX = 0.40;
     double relicPower = 0;
@@ -209,9 +210,9 @@ public class GeorgeOp extends OpMode {
         backwardLeftPower = Range.clip(backwardLeftPower, -DRIVE_PWR_MAX, DRIVE_PWR_MAX);
         driveBL.setPower(backwardLeftPower);
         //Clip and Initialize Glyph Claw Mechanism
-        leftClawServoPos = Range.clip(leftClawServoPos, SERVO_MIN_LEFT, SERVO_MAX_LEFT);
+        leftClawServoPos = Range.clip(leftClawServoPos, SERVO_GRAB_LEFT, SERVO_MAX_LEFT);
         leftClaw.setPosition(leftClawServoPos);
-        rightClawServoPos = Range.clip(rightClawServoPos, SERVO_MIN_RIGHT, SERVO_MAX_RIGHT);
+        rightClawServoPos = Range.clip(rightClawServoPos, SERVO_MIN_RIGHT, SERVO_GRAB_RIGHT);
         rightClaw.setPosition(rightClawServoPos);
         glyphLiftPower = Range.clip(glyphLiftPower, -GLYPH_LIFT_PWR_MAX, GLYPH_LIFT_PWR_MAX);
         glyphLift.setPower(glyphLiftPower);
@@ -257,6 +258,21 @@ public class GeorgeOp extends OpMode {
         forwardLeftPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         backwardRightPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         backwardLeftPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
+        if (gamepad1.y) {
+            drivePreciseIsOn = false;
+            colorSensor.enableLed(false);
+        }
+        else if (gamepad1.a) {
+            drivePreciseIsOn = true;
+            colorSensor.enableLed(true);
+        }
+        if (drivePreciseIsOn) {
+            forwardRightPower *= 0.50;
+            forwardLeftPower *= 0.50;
+            backwardRightPower *= 0.50;
+            backwardLeftPower *= 0.50;
+        }
+
     }
     //Controlled by Driver 2
     //Step 1: Open Left/Right Claw by pressing the Left/Right Bumper
@@ -264,16 +280,21 @@ public class GeorgeOp extends OpMode {
     void updateGlyphClaw() {
         glyphLiftPower = -gamepad2.left_stick_y * GLYPH_LIFT_PWR_MAX;
         if (gamepad2.left_bumper) {
-            leftClawServoPos = SERVO_MAX_LEFT; //left servo open
-            rightClawServoPos = SERVO_MIN_RIGHT; //right servo open
+            leftClawServoPos = SERVO_MAX_LEFT; //left servo fully open
+            rightClawServoPos = SERVO_MIN_RIGHT; //right servo fully open
         }
-        if (gamepad2.right_bumper) {
-            leftClawServoPos = SERVO_GRAB_LEFT;
-            rightClawServoPos = SERVO_GRAB_RIGHT;
+        else if (gamepad2.right_bumper) {
+            leftClawServoPos = SERVO_GRAB_LEFT; //left servo grabbing position
+            rightClawServoPos = SERVO_GRAB_RIGHT; //right servo grabbing position
+        }
+        else if (gamepad2.left_trigger != 0) {
+            leftClawServoPos = SERVO_MID_LEFT; //left servo slightly open
+            rightClawServoPos = SERVO_MID_RIGHT; //right servo slightly open
         }
 
+
         //Manually Control Glyph Lift
-        glyphLiftPower = -gamepad2.left_stick_y *GLYPH_LIFT_PWR_MAX;
+        glyphLiftPower = -gamepad2.left_stick_y * GLYPH_LIFT_PWR_MAX;
 
         /*Elevator lift
         * glyph claw should only exist at certain heights / "levels" (similar to Bohr's energy levels)

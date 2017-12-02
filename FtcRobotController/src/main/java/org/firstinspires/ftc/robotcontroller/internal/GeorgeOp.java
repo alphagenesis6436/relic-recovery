@@ -93,8 +93,8 @@ public class GeorgeOp extends OpMode {
     final float SERVO_MIN_RIGHT = 155 / 255.0f; //right claw is open - orig: 90
         float SERVO_GRAB_RIGHT = 209 / 255.0f; //right claw is gripping glpyh
     final float SERVO_MAX_RIGHT = 245 / 255.0f; //right claw is closed?
-    double leftClawServoPos = SERVO_MIN_LEFT;
-    double rightClawServoPos = SERVO_MAX_RIGHT;
+    double leftClawServoPos = SERVO_MAX_LEFT;
+    double rightClawServoPos = SERVO_MIN_RIGHT;
     int currentLevel = 0; //start off at currentLevel 0
     int zeroLevelHeight = 10; //encoder count at currentLevel 0
     int firstLevelHeight = 1010; //encoder count at currentLevel 1
@@ -119,7 +119,7 @@ public class GeorgeOp extends OpMode {
     final float OC_SERVO_MIN = 42 / 255.0f;
     final float OC_SERVO_OPEN = 200 / 255.0f; //open
     final float OC_SERVO_MAX = 255 / 255.0f; //closed
-    final double DU_SERVO_MIN = 0 / 255.0f; //down - 40
+    final double DU_SERVO_MIN = 107 / 255.0f; //down - 40
     final double DU_SERVO_MAX = 255 / 255.0f; //up - 115
     double downUpServoPos = DU_SERVO_MAX;
     double openCloseServoPos = OC_SERVO_MIN;

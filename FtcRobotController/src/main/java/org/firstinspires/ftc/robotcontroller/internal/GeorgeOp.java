@@ -10,12 +10,19 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+
+import static com.qualcomm.ftcrobotcontroller.R.id.cameraMonitorViewId;
 
 /**
  * Updated by Alex on 11/18/17
@@ -106,7 +113,7 @@ public class GeorgeOp extends OpMode {
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
-    final float UPDOWN_MIN = 65 / 255.0f;   //fully down
+    final float UPDOWN_MIN = 68 / 255.0f;   //fully down
     final float UPDOWN_MAX = 229 / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
     final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left
@@ -170,14 +177,19 @@ public class GeorgeOp extends OpMode {
         colorSensor2.enableLed(true);
 
         //Initialize Vuforia
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
         parameters.vuforiaLicenseKey = APIKey.apiKey;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT; // Use FRONT Camera (Change to BACK if you want to use that one)
+        parameters.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES; // Display Axes
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
         relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
         relicTemplate = relicTrackables.get(0);
 
         telemetry();
+    }
+    @Override public void start() {
+        relicTrackables.activate();
     }
     @Override public void loop() {
         //Update all the data based on driver input
@@ -197,6 +209,7 @@ public class GeorgeOp extends OpMode {
         updateGlyphClaw();
         updateJewel();
         updateRelic();
+        updateVuforia();
     }
 
     void initialization() {
@@ -542,19 +555,22 @@ public class GeorgeOp extends OpMode {
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
         if (vuMark != RelicRecoveryVuMark.UNKNOWN) { // Test to see if image is visable
             OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) relicTemplate.getListener()).getPose(); // Get Positional value to use later
+            //telemetry.addData("Pose", format(pose));
+            if (pose != null)
+            {
+            }
             if (vuMark == RelicRecoveryVuMark.LEFT)
             { // Test to see if Image is the "LEFT" image and display value.
                 telemetry.addData("VuMark is", "Left");
                 pictographKey = 0;
+            } else if (vuMark == RelicRecoveryVuMark.RIGHT)
+            { // Test to see if Image is the "RIGHT" image and display values.
+                telemetry.addData("VuMark is", "Right");
+                pictographKey = 2;
             } else if (vuMark == RelicRecoveryVuMark.CENTER)
             { // Test to see if Image is the "CENTER" image and display values.
                 telemetry.addData("VuMark is", "Center");
                 pictographKey = 1;
-            }
-            else if (vuMark == RelicRecoveryVuMark.RIGHT)
-            { // Test to see if Image is the "RIGHT" image and display values.
-                telemetry.addData("VuMark is", "Right");
-                pictographKey = 2;
             }
         } else
         {

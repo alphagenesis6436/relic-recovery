@@ -533,10 +533,10 @@ public class GeorgeOp extends OpMode {
         move(-power, power, -power, power);
     }
     void turnClockwise(int targetAngle) {
-        double k = 1; //experimentally found
+        double k = 2; //experimentally found
         double power = k * (targetAngle + gyroMR.getIntegratedZValue())
                 / Math.abs(targetAngle);
-        if (Math.abs(targetAngle + gyroMR.getIntegratedZValue()) >= 5)
+        if (Math.abs(targetAngle + gyroMR.getIntegratedZValue()) >= 10)
             turnClockwise(power);
         else
             stopDriveMotors();
@@ -544,7 +544,7 @@ public class GeorgeOp extends OpMode {
 
     boolean turnAbsolute(double target) { //Tells robot to rotate to an absolute heading (degrees)
         boolean absoluteReached = false;
-        if (Math.abs(gyroMR.getIntegratedZValue() + target) <= 5) {
+        if (Math.abs(gyroMR.getIntegratedZValue() + target) <= 10) {
             stopDriveMotors();
             absoluteReached = true;
         }

@@ -118,41 +118,33 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 break;
 
             case 8:
-                stateName = "Rotate 90 Degress";
-                //have robot turn counterclockwise 180 degrees
-                turnClockwise(-90);
-                if (turnAbsolute(-90))
-                    state = 1000;
-                break;
-
-            case 10:
-                stateName = "Drive Forward 40 inches";
+                stateName = "Drive Left 40 inches";
                 //have robot drive to position of -40 inches
-                moveForward(0.35);
+                moveRight(-1.00);
                 /*moveRight(-0.40, -40);
                 if (encoderTargetReached)
                     state = 1000;*/
-                if (waitSec(2))
-                    state = 1000;
+                if (waitSec(1.4))
+                    state++;
+                break;
+
+            case 10:
+                stateName = "Rotate 180 Degrees";
+                //have robot turn counterclockwise 180 degrees
+                turnClockwise(180);
+                if (turnAbsolute(180))
+                    state++;
                 break;
 
             case 12:
-                stateName = "Rotate 180 Degrees";
-                //have robot turn counterclockwise 180 degrees
-                turnClockwise(-180);
-                if (turnAbsolute(-180))
-                    state = 1000;
-                break;
-
-            case 14:
                 stateName = "Drive forward until 6 inches away from Wall";
                 //have robot drive forward until 6 inches away from wall
                 moveForward(0.25);
                 if (range.getDistance(DistanceUnit.INCH) <= 6)
-                    state = 1000;
+                    state = 18;
                 break; //End here for league meet 0
 
-            case 16:
+            case 14:
                 stateName = "Drive right until correct column reached";
                 //have robot drive right until white tape of correct column is seen
                 /*moveRight(0.20);
@@ -164,33 +156,33 @@ public class GeorgeBlueAuto extends GeorgeOp {
                     whitePreviouslyDetected = false;
                 }*/
                 if (pictographKey == 2) { //drive to right column
-                    moveRight(0.20, 30);
-                    if (encoderTargetReached)
+                    moveRight(0.20);
+                    if (waitSec(3))
                         pictographKey = -1;
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveRight(0.20, 20);
-                    if (encoderTargetReached)
+                    moveRight(0.20);
+                    if (waitSec(2))
                         pictographKey = -1;
                 }
                 else if (pictographKey == 0) { //drive to left column
-                    moveRight(0.20, 10);
-                    if (encoderTargetReached)
+                    moveRight(0.20);
+                    if (waitSec(1))
                         pictographKey = -1;
                 }
                 if (pictographKey == -1)
                     state = 1000;
                 break;
 
-            case 18:
+            case 16:
                 stateName = "Drive forward 3 inches";
                 //have robot drive to position of 3 inches forward to score glyph
-                moveForward(0.20, 3);
-                if (encoderTargetReached)
+                moveForward(0.20);
+                if (waitSec(1))
                     state = 1000;
                 break;
 
-            case 20:
+            case 18:
                 stateName = "Drop and Score Glyph";
                 //have robot drive to position of 3 inches forward to score glyph
                 leftClawServoPos = SERVO_MAX_LEFT; //left servo open
@@ -198,14 +190,14 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 rightClawServoPos = SERVO_MIN_RIGHT; //right servo open
                 rightClaw.setPosition(rightClawServoPos);
                 if (leftClaw.getPosition() == SERVO_MAX_LEFT && rightClaw.getPosition() == SERVO_MIN_RIGHT)
-                    state = 1000;
+                    state++;
                 break;
 
-            case 22:
+            case 20:
                 stateName = "Drive backward 2 inches";
                 //have robot drive to position of 3 inches forward to score glyph
-                moveForward(-0.20, -2);
-                if (encoderTargetReached)
+                moveForward(-0.20);
+                if (waitSec(0.75))
                     state = 1000;
                 break;
 

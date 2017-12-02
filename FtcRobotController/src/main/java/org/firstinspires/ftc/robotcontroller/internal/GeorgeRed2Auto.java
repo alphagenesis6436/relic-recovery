@@ -23,6 +23,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * End. Robot ends up aligned to score glyph in specific column of CryptoBox
  */
 @Autonomous(name = "GeorgeRed2Auto", group = "default")
+@Disabled
 public class GeorgeRed2Auto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 

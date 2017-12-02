@@ -195,7 +195,7 @@ public class GeorgeOp extends OpMode {
         //Add in update methods for specific robot mechanisms
         updateDriveTrain();
         updateGlyphClaw();
-        //updateJewel();
+        updateJewel();
         updateRelic();
     }
 
@@ -367,13 +367,13 @@ public class GeorgeOp extends OpMode {
             currentLevel--;*/
     }
     void updateJewel() {
-        if (gamepad2.dpad_up)
+        if (gamepad2.y)
             upDownPos += jewelDelta;
-        else if (gamepad2.dpad_down)
+        else if (gamepad2.a)
             upDownPos -= jewelDelta;
-        if (gamepad2.dpad_right)
+        if (gamepad2.b)
             leftRightPos -= jewelDelta;
-        else if (gamepad2.dpad_left)
+        else if (gamepad2.x)
             leftRightPos += jewelDelta;
     }
 

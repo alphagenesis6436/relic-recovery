@@ -95,12 +95,12 @@ public class GeorgeOp extends OpMode {
     //Glyph Claw Mechanism Variables and Constants
     final float GLYPH_LIFT_PWR_MAX = 0.50f;
     double glyphLiftPower = 0;
-    final float SERVO_GRAB_LEFT = 101 / 255.0f; //left claw is gripping glyph
+    final float SERVO_GRAB_LEFT = 95 / 255.0f; //left claw is gripping glyph
     final float SERVO_MID_LEFT = 110 / 255.0f; //left claw is slightly open
     final float SERVO_MAX_LEFT = 130 / 255.0f; //left claw is fully open
     final float SERVO_MIN_RIGHT = 155 / 255.0f; //right claw is fully open
     final float SERVO_MID_RIGHT = 200 / 255.0f; //right claw is slightly open
-    final float SERVO_GRAB_RIGHT = 209 / 255.0f; //right claw is gripping glpyh
+    final float SERVO_GRAB_RIGHT = 215 / 255.0f; //right claw is gripping glpyh
     double leftClawServoPos = SERVO_MAX_LEFT; //start left claw fully open
     double rightClawServoPos = SERVO_MIN_RIGHT; //start right claw fully open
     int currentLevel = 0; //start off at currentLevel 0
@@ -285,7 +285,6 @@ public class GeorgeOp extends OpMode {
             backwardRightPower *= 0.50;
             backwardLeftPower *= 0.50;
         }
-
     }
     //Controlled by Driver 2
     //Step 1: Open Left/Right Claw by pressing the Left/Right Bumper
@@ -300,7 +299,7 @@ public class GeorgeOp extends OpMode {
             leftClawServoPos = SERVO_GRAB_LEFT; //left servo grabbing position
             rightClawServoPos = SERVO_GRAB_RIGHT; //right servo grabbing position
         }
-        else if (gamepad2.left_trigger != 0) {
+        else if (gamepad2.left_trigger >= 0.40) {
             leftClawServoPos = SERVO_MID_LEFT; //left servo slightly open
             rightClawServoPos = SERVO_MID_RIGHT; //right servo slightly open
         }

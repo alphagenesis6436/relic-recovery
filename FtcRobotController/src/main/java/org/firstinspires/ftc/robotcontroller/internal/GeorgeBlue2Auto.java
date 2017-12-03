@@ -2,6 +2,7 @@ package org.firstinspires.ftc.robotcontroller.internal;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -23,7 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * End. Robot ends up aligned to score glyph in specific column of CryptoBox
  */
 @Autonomous(name = "GeorgeBlue2Auto", group = "default")
-@Disabled
+//@Disabled
 public class GeorgeBlue2Auto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 
@@ -46,18 +47,33 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                 state++;
                 break;
 
-            case 2: //Use PID Control to ensure servo moves down slowly and safely
+            case 2:
                 stateName = "Knock off jewel 1 - arm down";
+                updateVuforia();
+                leftClawServoPos = SERVO_GRAB_LEFT;
+                leftClaw.setPosition(leftClawServoPos);
+                rightClawServoPos = SERVO_GRAB_RIGHT;
+                rightClaw.setPosition(rightClawServoPos);
                 //upDownServo moves down to max/min?? position
                 upDownPos -= 0.03;
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
-                if (upDownServo.getPosition() == UPDOWN_MIN)
+                colorSensor.enableLed(true);
+                if (upDownServo.getPosition() == UPDOWN_MIN || colorSensor.red() >= RED_THRESHOLD
+                        || colorSensor.blue() >= BLUE_THRESHOLD)
                     state++;
                 break;
 
             case 4:
                 stateName = "Knock off jewel 2 - arm knock";
+                updateVuforia();
+                if (!waitSec(2)) {//bring up glyph
+                    glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    glyphLift.setPower(0.30);
+                }
+                else
+                    glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
                 //if leftJewel == red, leftRightServo moves right to knock off red jewel
                 //if leftJewel == blue, leftRightServo moves left to knock off red jewel
                 colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
@@ -69,12 +85,15 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                     leftRightPos -= 0.005;
                 leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
                 leftRightServo.setPosition(leftRightPos);
-                if (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)
+                if (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN) {
                     state++;
+                    glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                }
                 break;
 
             case 6:
                 stateName = "Knock off jewel 3 - arm up";
+                updateVuforia();
                 //leftRight servo moves back to center of robot
                 if (leftRightPos != LEFTRIGHT_MID)
                     leftRightPos = LEFTRIGHT_MID;

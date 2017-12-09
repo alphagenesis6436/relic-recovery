@@ -81,7 +81,7 @@ public class GeorgeOp extends OpMode {
     final double DRIVE_PWR_MAX = 0.70;
     final double TURN_PWR_MAX = 0.70;
     final int COUNTS_PER_REVOLUTION = 1120; //AndyMark Motors
-    final double DRIVE_GEAR_RATIO = 16.0 / 24.0; //Driven / Driver
+    final double DRIVE_GEAR_RATIO = 16.0 / 16.0; //Driven / Driver
     final double COUNTS_PER_INCH_RF = COUNTS_PER_REVOLUTION / (4 * Math.PI / DRIVE_GEAR_RATIO); //forward / right / backward / left
     final double COUNTS_PER_INCH_DG = COUNTS_PER_REVOLUTION / (2 * Math.PI * Math.sqrt(2) / DRIVE_GEAR_RATIO); //diagonal
     final int WHITE_THRESHOLD = 30;
@@ -95,14 +95,16 @@ public class GeorgeOp extends OpMode {
     //Glyph Claw Mechanism Variables and Constants
     final float GLYPH_LIFT_PWR_MAX = 0.50f;
     double glyphLiftPower = 0;
-    final float SERVO_GRAB_LEFT = 95 / 255.0f; //left claw is gripping glyph
+    final float SERVO_GRAB_LEFT = 0 / 255.0f; //left claw is gripping glyph
     final float SERVO_MID_LEFT = 110 / 255.0f; //left claw is slightly open
-    final float SERVO_MAX_LEFT = 130 / 255.0f; //left claw is fully open
-    final float SERVO_MIN_RIGHT = 155 / 255.0f; //right claw is fully open
+    final float SERVO_MAX_LEFT = 255 / 255.0f; //left claw is fully open
+    final float SERVO_MIN_RIGHT = 0 / 255.0f; //right claw is fully open
     final float SERVO_MID_RIGHT = 200 / 255.0f; //right claw is slightly open
-    final float SERVO_GRAB_RIGHT = 215 / 255.0f; //right claw is gripping glpyh
+    final float SERVO_GRAB_RIGHT = 255 / 255.0f; //right claw is gripping glpyh
     double leftClawServoPos = SERVO_MAX_LEFT; //start left claw fully open
     double rightClawServoPos = SERVO_MIN_RIGHT; //start right claw fully open
+    double clawDelta = 0.0075;
+
     int currentLevel = 0; //start off at currentLevel 0
     int zeroLevelHeight = 10; //encoder count at currentLevel 0
     int firstLevelHeight = 1010; //encoder count at currentLevel 1
@@ -114,7 +116,7 @@ public class GeorgeOp extends OpMode {
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
     final float UPDOWN_MIN = 68 / 255.0f;   //fully down
-    final float UPDOWN_MAX = 229 / 255.0f;  //fully up
+    final float UPDOWN_MAX = 207 / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
     final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left
     final int BLUE_THRESHOLD = 3;   //holes
@@ -291,7 +293,7 @@ public class GeorgeOp extends OpMode {
     //Step 2: Close the Left/Right Claw by pressing the Left/Right Trigger
     void updateGlyphClaw() {
         glyphLiftPower = -gamepad2.left_stick_y * GLYPH_LIFT_PWR_MAX;
-        if (gamepad2.left_bumper) {
+        /*if (gamepad2.left_bumper) {
             leftClawServoPos = SERVO_MAX_LEFT; //left servo fully open
             rightClawServoPos = SERVO_MIN_RIGHT; //right servo fully open
         }
@@ -302,8 +304,13 @@ public class GeorgeOp extends OpMode {
         else if (gamepad2.left_trigger >= 0.40) {
             leftClawServoPos = SERVO_MID_LEFT; //left servo slightly open
             rightClawServoPos = SERVO_MID_RIGHT; //right servo slightly open
+        }*/
+        if (gamepad2.left_bumper) {
+            leftClawServoPos += clawDelta;
         }
-
+        if (gamepad2.right_bumper) {
+            
+        }
 
         //Manually Control Glyph Lift
         glyphLiftPower = -gamepad2.left_stick_y * GLYPH_LIFT_PWR_MAX;
@@ -447,85 +454,87 @@ public class GeorgeOp extends OpMode {
         runConstantSpeed();
         move(power, power, power, power);
     }
-    void moveForward(double power, int inches) {
-        int target = (int)Math.round(inches * COUNTS_PER_INCH_RF);
+    void moveForward(double power, double revolutions) {
+        double target = revolutions * COUNTS_PER_REVOLUTION;
 
-        driveFR.setTargetPosition(target);
-        driveFL.setTargetPosition(target);
-        driveBR.setTargetPosition(target);
-        driveBL.setTargetPosition(target);
-        runToPosition();
-        move(power, power, power, power);
-
-        while (driveFR.isBusy()) {
-            //Wait until target position is reached
-            telemetry.addData("FR Encoder", String.format("%.0f", (target - driveFR.getCurrentPosition()) / COUNTS_PER_INCH_RF));
+        if (!encoderTargetReached) {
+            //driveFR.setTargetPosition(target);
+            //Commented out other motors to use only one encoder value
+            //driveFL.setTargetPosition(target);
+            //driveBR.setTargetPosition(target);
+            //driveBL.setTargetPosition(target);
+            //runToPosition();
+            moveForward(power);
         }
-        stopDriveMotors();
-        encoderTargetReached = true;
+
+        if (Math.abs((target - driveFR.getCurrentPosition())) >= 10) {
+            //Wait until target position is reached
+            telemetry.addData("FR Encoder", String.format("%.0f", (target - driveFR.getCurrentPosition())));
+        }
+        else {
+            stopDriveMotors();
+            encoderTargetReached = true;
+        }
+
     }
     void moveRight(double power) {
         runConstantSpeed();
         move(-power, power, power, -power);
     }
-    void moveRight(double power, int inches) {
-        int target = (int)Math.round(inches * COUNTS_PER_INCH_RF);
+    void moveRight(double power, double revolutions) {
+        double target = revolutions * COUNTS_PER_REVOLUTION;
 
-        driveFR.setTargetPosition(-target);
-        driveFL.setTargetPosition(target);
-        driveBR.setTargetPosition(target);
-        driveBL.setTargetPosition(-target);
-        runToPosition();
-        move(-power, power, power, -power);
-
-        while (driveFR.isBusy()) {
-            //Wait until target position is reached
-            telemetry.addData("FR Encoder", String.format("%.0f", (target - driveFR.getCurrentPosition()) / COUNTS_PER_INCH_RF));
+        if (!encoderTargetReached) {
+            moveRight(power);
         }
-        stopDriveMotors();
-        encoderTargetReached = true;
+
+        if (Math.abs((target - driveFR.getCurrentPosition())) >= 10) {
+            //Wait until target position is reached
+            telemetry.addData("FR Encoder", String.format("%.0f", (target - driveFR.getCurrentPosition())));
+        }
+        else {
+            stopDriveMotors();
+            encoderTargetReached = true;
+        }
     }
     void moveForwardRight(double power) {
         runConstantSpeed();
         move(0.0, power, power, 0.0);
     }
-    void moveForwardRight(double power, int inches) {
-        int target = (int)Math.round(inches * COUNTS_PER_INCH_DG);
+    void moveForwardRight(double power, double revolutions) {
+        double target = revolutions * COUNTS_PER_REVOLUTION;
 
-        driveFR.setTargetPosition(0); //motor will not rotate because the motor position resets to 0 at end of each stage
-        driveFL.setTargetPosition(target);
-        driveBR.setTargetPosition(target);
-        driveBL.setTargetPosition(0);
-        runToPosition();
-        move(0.0, power, power, 0.0);
-
-        while (driveFL.isBusy()) {
-            //Wait until target position is reached
-            telemetry.addData("FL Encoder", String.format("%.0f", (target - driveFL.getCurrentPosition()) / COUNTS_PER_INCH_RF));
+        if (!encoderTargetReached) {
+            moveForwardRight(power);
         }
-        stopDriveMotors();
-        encoderTargetReached = true;
+
+        if (Math.abs((target - driveFL.getCurrentPosition())) >= 10) {
+            //Wait until target position is reached
+            telemetry.addData("FL Encoder", String.format("%.0f", (target - driveFL.getCurrentPosition())));
+        }
+        else {
+            stopDriveMotors();
+            encoderTargetReached = true;
+        }
     }
     void moveForwardLeft(double power) {
         runConstantSpeed();
         move(power, 0.0, 0.0, power);
     }
-    void moveForwardLeft(double power, int inches) {
-        int target = (int)Math.round(inches * COUNTS_PER_INCH_DG);
+    void moveForwardLeft(double power, double revolutions) {
+        double target = revolutions * COUNTS_PER_REVOLUTION;
 
-        driveFR.setTargetPosition(target);
-        driveFL.setTargetPosition(0);
-        driveBR.setTargetPosition(0);
-        driveBL.setTargetPosition(target);
-        runToPosition();
-        move(power, 0.0, 0.0, power);
+        if (!encoderTargetReached)
+            moveForwardLeft(power);
 
-        while (driveFR.isBusy()) {
+        if (Math.abs((target - driveFR.getCurrentPosition())) >= 10) {
             //Wait until target position is reached
-            telemetry.addData("FR Encoder", String.format("%.0f", (target - driveFR.getCurrentPosition()) / COUNTS_PER_INCH_RF));
+            telemetry.addData("FR Encoder", String.format("%.0f", (target - driveFR.getCurrentPosition())));
         }
-        stopDriveMotors();
-        encoderTargetReached = true;
+        else {
+            stopDriveMotors();
+            encoderTargetReached = true;
+        }
     }
     void turnClockwise(double power) {
         runConstantSpeed();

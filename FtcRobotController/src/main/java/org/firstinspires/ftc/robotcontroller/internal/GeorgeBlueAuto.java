@@ -120,12 +120,12 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 8:
                 stateName = "Drive Left 40 inches";
                 //have robot drive to position of -40 inches
-                moveRight(-1.00);
-                /*moveRight(-0.40, -40);
+                //moveRight(-1.00);
+//                if (waitSec(1.4))
+//                    state = 1000;
+                moveRight(-0.40, -40);
                 if (encoderTargetReached)
-                    state = 1000;*/
-                if (waitSec(1.4))
-                    state++;
+                    state = 1000;
                 break;
 
             case 10:

@@ -1,10 +1,16 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 /**
  * Created by Alex on 11/8/2017.
@@ -43,7 +49,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
             telemetry.addData("Pictograph", "LEFT");
         }
         else if (pictographKey == 1) {
-            telemetry.addData("Pictograph", "MIDDLE");
+            telemetry.addData("Pictograph", "CENTER");
         }
         else if (pictographKey == 2) {
             telemetry.addData("Pictograph", "RIGHT");
@@ -51,7 +57,6 @@ public class GeorgeBlueAuto extends GeorgeOp {
         else if (pictographKey == -1) {
             telemetry.addData("Pictograph", "COMPLETE");
         }
-        telemetry();
 
         //Use Switch statement to proceed through Autonomous strategy (only use even cases for steps)
         switch(state){

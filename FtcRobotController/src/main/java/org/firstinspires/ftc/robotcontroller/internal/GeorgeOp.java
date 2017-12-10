@@ -60,7 +60,6 @@ public class GeorgeOp extends OpMode {
     Servo upDownServo; //Metal Gear, 180
     Servo leftRightServo; //Metal Gear, 180
     ModernRoboticsI2cColorSensor colorSensor; //For Jewel Mechanism
-    ModernRoboticsI2cColorSensor colorSensor2; //For Cryptobox Tape
     ModernRoboticsI2cGyro gyroMR; //For Mecanum Drive Train
     ModernRoboticsI2cRangeSensor range; //for detecting the wall in autonomous
     Servo leftClaw; //180, glyph claw
@@ -178,11 +177,9 @@ public class GeorgeOp extends OpMode {
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
-        colorSensor2 = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs2");
         gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
-        colorSensor2.enableLed(true);
 
         //Initialize Vuforia
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -264,9 +261,6 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("Gyro", gyroMR.getIntegratedZValue());
         telemetry.addData("Red1", colorSensor.red());
         telemetry.addData("Blue1", colorSensor.blue());
-        telemetry.addData("Red2", colorSensor2.red());
-        telemetry.addData("Blue2", colorSensor2.blue());
-        telemetry.addData("Green2", colorSensor2.green());
         telemetry.addData("Distance", String.format("%.2f", range.getDistance(DistanceUnit.INCH)) + " in");
         telemetry.addData("LC Pos", String.format("%.0f", leftClaw.getPosition() * 255));
         telemetry.addData("RC Pos", String.format("%.0f", rightClaw.getPosition() * 255));
@@ -284,11 +278,11 @@ public class GeorgeOp extends OpMode {
         forwardLeftPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         backwardRightPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         backwardLeftPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
-        if (gamepad1.y) {
+        if (gamepad1.right_bumper) {
             drivePreciseIsOn = false;
             colorSensor.enableLed(false);
         }
-        else if (gamepad1.a) {
+        else if (gamepad1.left_bumper) {
             drivePreciseIsOn = true;
             colorSensor.enableLed(true);
         }
@@ -345,11 +339,6 @@ public class GeorgeOp extends OpMode {
                 leftClawServoPos = SERVO_MIN_LEFT; //left servo fully open
                 rightClawServoPos = SERVO_MAX_RIGHT; //right servo fully open
             }
-
-            if (gamepad2.x)
-                rightClawServoPos -= clawDelta;
-            if (gamepad2.b)
-                rightClawServoPos += clawDelta;
         }
 
         //Manually Control Glyph Lift
@@ -550,19 +539,9 @@ public class GeorgeOp extends OpMode {
         }
     }
 
-    boolean whiteTapeIsDetected() {
-        return (colorSensor2.red() >= WHITE_THRESHOLD && colorSensor2.blue() >= WHITE_THRESHOLD
-                && colorSensor2.green() >= WHITE_THRESHOLD && !whitePreviouslyDetected);
-    }
-    boolean whiteTapeIsNotDetected() {
-        return (!(colorSensor2.red() >= WHITE_THRESHOLD && colorSensor2.blue() >= WHITE_THRESHOLD
-                && colorSensor2.green() >= WHITE_THRESHOLD) && whitePreviouslyDetected);
-    }
-
     void calibrateVariables() {//Used if any autonomous methods need initial state variables
         encoderTargetReached = false;
         colorSensor.enableLed(false);
-        colorSensor2.enableLed(false);
     }
     //used to measure the amount of time passed since a new step in autonomous has started
     boolean waitSec(double elapsedTime) { return (this.time - setTime >= elapsedTime); }

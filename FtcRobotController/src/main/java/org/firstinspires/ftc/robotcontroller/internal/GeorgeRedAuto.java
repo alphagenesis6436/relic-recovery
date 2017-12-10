@@ -31,6 +31,7 @@ public class GeorgeRedAuto extends GeorgeOp {
 
     public GeorgeRedAuto() {}
 
+
     @Override
     public void loop(){
         //Display Data to be displayed throughout entire Autonomous

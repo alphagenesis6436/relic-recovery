@@ -32,6 +32,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
 
     public GeorgeRed2Auto() {}
 
+
     @Override
     public void loop(){
         //Display Data to be displayed throughout entire Autonomous
@@ -115,7 +116,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
 
             case 8:
                 stateName = "Drive backward to drive off balancing stone";
-                moveForward(-0.20, -1.5);
+                moveForward(-0.20, -1.75);
                 if (encoderTargetReached)
                     state++;
                 break;
@@ -131,13 +132,13 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 12:
                 stateName = "Drive forward until correct column reached";
                 if (pictographKey == 0) { //drive to left column
-                    moveForward(0.20, 2.75);
-                }
-                else if (pictographKey == 1) { //drive to middle column
                     moveForward(0.20, 1.75);
                 }
-                else if (pictographKey == 2) { //drive to right column
+                else if (pictographKey == 1) { //drive to middle column
                     moveForward(0.20, 0.75);
+                }
+                else if (pictographKey == 2) { //drive to right column
+                    moveForward(0.20, 0.25);
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -155,7 +156,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (range.getDistance(DistanceUnit.INCH) <= 6)
+                if (range.getDistance(DistanceUnit.INCH) <= 8)
                     state++;
                 break;
 

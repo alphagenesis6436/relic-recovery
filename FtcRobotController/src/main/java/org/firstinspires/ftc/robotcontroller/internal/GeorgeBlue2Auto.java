@@ -20,10 +20,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * 5. Rotate to 15 degrees to have glyph face CryptoBox
  * 6. Drive forward toward CryptoBox until glyph is scored
  * 7. Release the glyph
- * 8. Rotate to 45 degrees to push glyph
- * 9. Rotate to -15 degrees to push glyph
- * 10. Rotate to 0 degrees to be perpendicular with wall
- * 11. Drive backward a little bit to park
+ * 8. Drive backward a little bit to park
  * End. Robot ends up aligned to score glyph in specific column of CryptoBox
  */
 @Autonomous(name = "GeorgeBlue2Auto", group = "default")
@@ -40,7 +37,18 @@ public class GeorgeBlue2Auto extends GeorgeOp {
         telemetry.addData(stateName, state);
         telemetry.addData("current time", String.format("%.1f", this.time));
         telemetry.addData("state time", String.format("%.1f", this.time - setTime));
-        telemetry();
+        if (pictographKey == 0) {
+            telemetry.addData("Pictograph", "LEFT");
+        }
+        else if (pictographKey == 1) {
+            telemetry.addData("Pictograph", "MIDDLE");
+        }
+        else if (pictographKey == 2) {
+            telemetry.addData("Pictograph", "RIGHT");
+        }
+        else if (pictographKey == -1) {
+            telemetry.addData("Pictograph", "COMPLETE");
+        }
 
         //Use Switch statement to proceed through Autonomous strategy (only use even cases for steps)
         switch(state){
@@ -53,7 +61,9 @@ public class GeorgeBlue2Auto extends GeorgeOp {
 
             case 2:
                 stateName = "Knock off jewel 1 - arm down";
+                //Check Pictograph to score glyph in correct column
                 updateVuforia();
+                //Close the claw servos to grab the glyph
                 leftClawServoPos = SERVO_GRAB_LEFT;
                 leftClaw.setPosition(leftClawServoPos);
                 rightClawServoPos = SERVO_GRAB_RIGHT;
@@ -62,7 +72,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                 topLeftClaw.setPosition(leftClawTopServoPos);
                 rightClawTopServoPos = SERVO_GRAB_RIGHT_TOP;
                 topRightClaw.setPosition(rightClawTopServoPos);
-                //upDownServo moves down to max/min?? position
+                //upDownServo moves down to down position
                 upDownPos -= 0.03;
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
@@ -74,6 +84,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
 
             case 4:
                 stateName = "Knock off jewel 2 - arm knock";
+                //Check Pictograph to score glyph in correct column
                 updateVuforia();
 
                 //if leftJewel == red, leftRightServo moves right to knock off red jewel
@@ -95,6 +106,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
 
             case 6:
                 stateName = "Knock off jewel 3 - arm up";
+                //Check Pictograph to score glyph in correct column
                 updateVuforia();
                 if (!waitSec(2.5)) {//bring up glyph
                     glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -108,7 +120,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                     leftRightPos = LEFTRIGHT_MID;
                 leftRightServo.setPosition(leftRightPos);
 
-                //upDownServo moves up to max/min?? position
+                //upDownServo moves back to up position
                 upDownPos += 0.03;
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
@@ -118,6 +130,8 @@ public class GeorgeBlue2Auto extends GeorgeOp {
 
             case 8:
                 stateName = "Drive forward to drive off balancing stone";
+                //Check Pictograph to score glyph in correct column
+                updateVuforia();
                 moveForward(0.20, 1.5);
                 if (encoderTargetReached)
                     state++;
@@ -125,7 +139,6 @@ public class GeorgeBlue2Auto extends GeorgeOp {
 
             case 10:
                 stateName = "Rotate to 90 degrees to be perpendicular with the walls";
-                //have robot drive forward until 6 inches away from wall
                 turnClockwise(90);
                 if (turnAbsolute(90))
                     state++;
@@ -164,7 +177,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
 
             case 18:
                 stateName = "Drop and Release Glyph";
-                //have robot drive to position of 3 inches forward to score glyph
+                //open the claws to release the glyph
                 leftClawServoPos = SERVO_MIN_LEFT;
                 leftClaw.setPosition(leftClawServoPos);
                 rightClawServoPos = SERVO_MAX_RIGHT;
@@ -172,34 +185,12 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                 leftClawTopServoPos = SERVO_MIN_LEFT_TOP;
                 topLeftClaw.setPosition(leftClawTopServoPos);
                 rightClawTopServoPos = SERVO_MAX_RIGHT_TOP;
-
                 topRightClaw.setPosition(rightClawTopServoPos);
                 if (leftClaw.getPosition() == SERVO_MIN_LEFT && rightClaw.getPosition() == SERVO_MAX_RIGHT)
-                    state = 26;
+                    state++;
                 break;
 
             case 20:
-                stateName = "Rotate to 45 degrees to push glyph";
-                turnClockwise(45);
-                if (turnAbsolute(45))
-                    state++;
-                break;
-
-            case 22:
-                stateName = "Rotate to -15 degrees to push glyph";
-                turnClockwise(-15);
-                if (turnAbsolute(-15))
-                    state++;
-                break;
-
-            case 24:
-                stateName = "Rotate to 0 degrees to be perpendicular with wall";
-                turnClockwise(0);
-                if (turnAbsolute(0))
-                    state++;
-                break;
-
-            case 26:
                 stateName = "Drive backward a little bit to park";
                 moveForward(-0.20);
                 if (waitSec(1))

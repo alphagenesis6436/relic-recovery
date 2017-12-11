@@ -309,7 +309,7 @@ public class GeorgeOp extends OpMode {
             leftClawServoPos += clawDelta;
         }
         if (gamepad2.right_bumper) {
-            
+
         }
 
         //Manually Control Glyph Lift

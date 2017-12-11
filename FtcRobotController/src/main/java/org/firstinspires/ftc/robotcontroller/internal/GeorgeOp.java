@@ -10,19 +10,12 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-
-import static com.qualcomm.ftcrobotcontroller.R.id.cameraMonitorViewId;
 
 /**
  * Updated by Alex on 11/18/17
@@ -67,18 +60,19 @@ public class GeorgeOp extends OpMode {
     Servo upDownServo; //Metal Gear, 180
     Servo leftRightServo; //Metal Gear, 180
     ModernRoboticsI2cColorSensor colorSensor; //For Jewel Mechanism
-    ModernRoboticsI2cColorSensor colorSensor2; //For Cryptobox Tape
     ModernRoboticsI2cGyro gyroMR; //For Mecanum Drive Train
     ModernRoboticsI2cRangeSensor range; //for detecting the wall in autonomous
     Servo leftClaw; //180, glyph claw
     Servo rightClaw; //180, glyph claw
+    Servo topLeftClaw; //180, glyph top claw
+    Servo topRightClaw; //180, glyph top claw
     DcMotor glyphLift; //Andymark 60:1, lift the glyph claw
     Servo downUpServo;    //180, relic claw
     Servo openCloseServo; //180, relic claw
     DcMotor relicMotor;     //40:1, relic lift
 
     //Mecanum Drive Train Variables and Constants
-    final double DRIVE_PWR_MAX = 0.70;
+    final double DRIVE_PWR_MAX = 0.80;
     final double TURN_PWR_MAX = 0.70;
     final int COUNTS_PER_REVOLUTION = 1120; //AndyMark Motors
     final double DRIVE_GEAR_RATIO = 16.0 / 16.0; //Driven / Driver
@@ -95,14 +89,23 @@ public class GeorgeOp extends OpMode {
     //Glyph Claw Mechanism Variables and Constants
     final float GLYPH_LIFT_PWR_MAX = 0.50f;
     double glyphLiftPower = 0;
-    final float SERVO_GRAB_LEFT = 0 / 255.0f; //left claw is gripping glyph
-    final float SERVO_MID_LEFT = 110 / 255.0f; //left claw is slightly open
-    final float SERVO_MAX_LEFT = 255 / 255.0f; //left claw is fully open
-    final float SERVO_MIN_RIGHT = 0 / 255.0f; //right claw is fully open
-    final float SERVO_MID_RIGHT = 200 / 255.0f; //right claw is slightly open
-    final float SERVO_GRAB_RIGHT = 255 / 255.0f; //right claw is gripping glpyh
-    double leftClawServoPos = SERVO_MAX_LEFT; //start left claw fully open
-    double rightClawServoPos = SERVO_MIN_RIGHT; //start right claw fully open
+    final float SERVO_MIN_LEFT = 142 / 255.0f; //left claw is fully open
+    final float SERVO_MID_LEFT = 186 / 255.0f; //left claw is slightly open
+    final float SERVO_GRAB_LEFT = 211 / 255.0f; //left claw is gripping glyph
+    final float SERVO_GRAB_RIGHT = 95 / 255.0f; //right claw is gripping the glyph 168
+    final float SERVO_MID_RIGHT = 121 / 255.0f; //right claw is slightly open 188
+    final float SERVO_MAX_RIGHT = 133 / 255.0f; //right claw is fully open 203
+    double leftClawServoPos = SERVO_MIN_LEFT; //start left claw fully open
+    double rightClawServoPos = SERVO_MAX_RIGHT; //start right claw fully open
+    final float SERVO_MIN_LEFT_TOP = 173 / 255.0f; //left claw is fully open
+    final float SERVO_MID_LEFT_TOP = 207 / 255.0f; //left claw is slightly open
+    final float SERVO_GRAB_LEFT_TOP = 240 / 255.0f; //left claw is gripping glyph
+    final float SERVO_GRAB_RIGHT_TOP = 102 / 255.0f; //right claw is gripping the glyph
+    final float SERVO_MID_RIGHT_TOP = 143 / 255.0f; //right claw is slightly open
+    final float SERVO_MAX_RIGHT_TOP = 163 / 255.0f; //right claw is fully open
+    double leftClawTopServoPos = SERVO_MIN_LEFT_TOP; //start left claw fully open
+    double rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //start right claw fully open
+    boolean singleClawModeIsOn = false;
     double clawDelta = 0.0075;
 
     int currentLevel = 0; //start off at currentLevel 0
@@ -115,7 +118,7 @@ public class GeorgeOp extends OpMode {
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
-    final float UPDOWN_MIN = 68 / 255.0f;   //fully down
+    final float UPDOWN_MIN = 130 / 255.0f;   //fully down
     final float UPDOWN_MAX = 207 / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
     final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left
@@ -167,23 +170,22 @@ public class GeorgeOp extends OpMode {
         leftRightServo = hardwareMap.servo.get("lrs");
         leftClaw = hardwareMap.servo.get("lc");
         rightClaw = hardwareMap.servo.get("rc");
+        topLeftClaw = hardwareMap.servo.get("lct");
+        topRightClaw = hardwareMap.servo.get("rct");
         downUpServo = hardwareMap.servo.get("du");
         openCloseServo = hardwareMap.servo.get("oc");
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
-        colorSensor2 = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs2");
         gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
-        colorSensor2.enableLed(true);
 
         //Initialize Vuforia
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = APIKey.apiKey;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT; // Use FRONT Camera (Change to BACK if you want to use that one)
-        parameters.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES; // Display Axes
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
         relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
         relicTemplate = relicTrackables.get(0);
@@ -209,9 +211,9 @@ public class GeorgeOp extends OpMode {
         //Add in update methods for specific robot mechanisms
         updateDriveTrain();
         updateGlyphClaw();
-        updateJewel();
+        //updateJewel();
         updateRelic();
-        updateVuforia();
+        //updateVuforia();
     }
 
     void initialization() {
@@ -225,12 +227,16 @@ public class GeorgeOp extends OpMode {
         backwardLeftPower = Range.clip(backwardLeftPower, -DRIVE_PWR_MAX, DRIVE_PWR_MAX);
         driveBL.setPower(backwardLeftPower);
         //Clip and Initialize Glyph Claw Mechanism
-        leftClawServoPos = Range.clip(leftClawServoPos, SERVO_GRAB_LEFT, SERVO_MAX_LEFT);
+        leftClawServoPos = Range.clip(leftClawServoPos, SERVO_MIN_LEFT, SERVO_GRAB_LEFT);
         leftClaw.setPosition(leftClawServoPos);
-        rightClawServoPos = Range.clip(rightClawServoPos, SERVO_MIN_RIGHT, SERVO_GRAB_RIGHT);
+        rightClawServoPos = Range.clip(rightClawServoPos, SERVO_GRAB_RIGHT, SERVO_MAX_RIGHT);
         rightClaw.setPosition(rightClawServoPos);
         glyphLiftPower = Range.clip(glyphLiftPower, -GLYPH_LIFT_PWR_MAX, GLYPH_LIFT_PWR_MAX);
         glyphLift.setPower(glyphLiftPower);
+        leftClawTopServoPos = Range.clip(leftClawTopServoPos, SERVO_MIN_LEFT_TOP, SERVO_GRAB_LEFT_TOP);
+        topLeftClaw.setPosition(leftClawTopServoPos);
+        rightClawTopServoPos = Range.clip(rightClawTopServoPos, SERVO_GRAB_RIGHT_TOP, SERVO_MAX_RIGHT_TOP);
+        topRightClaw.setPosition(rightClawTopServoPos);
         //Clip and Initialize Jewel Mechanism
         upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
         upDownServo.setPosition(upDownPos);
@@ -255,12 +261,11 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("Gyro", gyroMR.getIntegratedZValue());
         telemetry.addData("Red1", colorSensor.red());
         telemetry.addData("Blue1", colorSensor.blue());
-        telemetry.addData("Red2", colorSensor2.red());
-        telemetry.addData("Blue2", colorSensor2.blue());
-        telemetry.addData("Green2", colorSensor2.green());
         telemetry.addData("Distance", String.format("%.2f", range.getDistance(DistanceUnit.INCH)) + " in");
         telemetry.addData("LC Pos", String.format("%.0f", leftClaw.getPosition() * 255));
         telemetry.addData("RC Pos", String.format("%.0f", rightClaw.getPosition() * 255));
+        telemetry.addData("TLC Pos", String.format("%.0f", topLeftClaw.getPosition() * 255));
+        telemetry.addData("TRC Pos", String.format("%.0f", topRightClaw.getPosition() * 255));
         telemetry.addData("GL Pwr", String.format("%.2f", glyphLift.getPower()));
         telemetry.addData("DU Pos", String.format("%.0f", downUpServo.getPosition() * 255));
         telemetry.addData("OC Pos", String.format("%.0f", openCloseServo.getPosition() * 255));
@@ -273,19 +278,19 @@ public class GeorgeOp extends OpMode {
         forwardLeftPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         backwardRightPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         backwardLeftPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
-        if (gamepad1.y) {
+        if (gamepad1.right_bumper) {
             drivePreciseIsOn = false;
             colorSensor.enableLed(false);
         }
-        else if (gamepad1.a) {
+        else if (gamepad1.left_bumper) {
             drivePreciseIsOn = true;
             colorSensor.enableLed(true);
         }
         if (drivePreciseIsOn) {
-            forwardRightPower *= 0.50;
-            forwardLeftPower *= 0.50;
-            backwardRightPower *= 0.50;
-            backwardLeftPower *= 0.50;
+            forwardRightPower *= 0.40;
+            forwardLeftPower *= 0.40;
+            backwardRightPower *= 0.40;
+            backwardLeftPower *= 0.40;
         }
     }
     //Controlled by Driver 2
@@ -293,97 +298,51 @@ public class GeorgeOp extends OpMode {
     //Step 2: Close the Left/Right Claw by pressing the Left/Right Trigger
     void updateGlyphClaw() {
         glyphLiftPower = -gamepad2.left_stick_y * GLYPH_LIFT_PWR_MAX;
-        /*if (gamepad2.left_bumper) {
-            leftClawServoPos = SERVO_MAX_LEFT; //left servo fully open
-            rightClawServoPos = SERVO_MIN_RIGHT; //right servo fully open
+        if (gamepad2.a)
+            singleClawModeIsOn = true;
+        if (gamepad2.y)
+            singleClawModeIsOn = false;
+        if (!singleClawModeIsOn) {
+            if (gamepad2.left_bumper) {
+                leftClawServoPos = SERVO_MIN_LEFT; //left servo fully open
+                rightClawServoPos = SERVO_MAX_RIGHT; //right servo fully open
+                leftClawTopServoPos = SERVO_MIN_LEFT_TOP;//left top servo fully open
+                rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //right top servo fully open
+            }
+            else if (gamepad2.right_bumper) {
+                leftClawServoPos = SERVO_GRAB_LEFT; //left servo grabbing position
+                rightClawServoPos = SERVO_GRAB_RIGHT; //right servo grabbing position
+                leftClawTopServoPos = SERVO_GRAB_LEFT_TOP; //left top servo grabbing position
+                rightClawTopServoPos = SERVO_GRAB_RIGHT_TOP; //right top servo grabbing position
+            }
+            else if (gamepad2.left_trigger >= 0.20) {
+                leftClawServoPos = SERVO_MID_LEFT; //left servo slightly open
+                rightClawServoPos = SERVO_MID_RIGHT; //right servo slightly open
+                leftClawTopServoPos = SERVO_MID_LEFT_TOP; //left top servo slightly open
+                rightClawTopServoPos = SERVO_MID_RIGHT_TOP; //right top servo slightly open
+            }
         }
-        else if (gamepad2.right_bumper) {
-            leftClawServoPos = SERVO_GRAB_LEFT; //left servo grabbing position
-            rightClawServoPos = SERVO_GRAB_RIGHT; //right servo grabbing position
-        }
-        else if (gamepad2.left_trigger >= 0.40) {
-            leftClawServoPos = SERVO_MID_LEFT; //left servo slightly open
-            rightClawServoPos = SERVO_MID_RIGHT; //right servo slightly open
-        }*/
-        if (gamepad2.left_bumper) {
-            leftClawServoPos += clawDelta;
-        }
-        if (gamepad2.right_bumper) {
-
+        else {
+            if (gamepad2.right_bumper) {
+                leftClawTopServoPos = SERVO_GRAB_LEFT_TOP; //left top servo grabbing position
+                rightClawTopServoPos = SERVO_GRAB_RIGHT_TOP; //right top servo grabbing position
+            }
+            else if (gamepad2.left_bumper) {
+                leftClawTopServoPos = SERVO_MIN_LEFT_TOP;//left top servo fully open
+                rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //right top servo fully open
+            }
+            if (gamepad2.right_trigger >= 0.20) {
+                leftClawServoPos = SERVO_GRAB_LEFT; //left servo grabbing position
+                rightClawServoPos = SERVO_GRAB_RIGHT; //right servo grabbing position
+            }
+            else if (gamepad2.left_trigger >= 0.20) {
+                leftClawServoPos = SERVO_MIN_LEFT; //left servo fully open
+                rightClawServoPos = SERVO_MAX_RIGHT; //right servo fully open
+            }
         }
 
         //Manually Control Glyph Lift
         glyphLiftPower = -gamepad2.left_stick_y * GLYPH_LIFT_PWR_MAX;
-
-        /*Elevator lift
-        * glyph claw should only exist at certain heights / "levels" (similar to Bohr's energy levels)
-        * each currentLevel corresponds to one of 4 heights at which blocks can be dropped
-        */
-
-        //relies on encoder counts
-        /*switch (currentLevel) {
-            case 0:
-                //bring elevator down to zero position
-                if (glyphLift.getCurrentPosition() - zeroLevelHeight >= 10) {
-                    glyphLift.setTargetPosition(zeroLevelHeight);
-                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(-GLYPH_LIFT_PWR_MAX);
-                }
-                //bring elevator up to zero position
-                else if (zeroLevelHeight - glyphLift.getCurrentPosition() >= 10) {
-                    glyphLift.setTargetPosition(zeroLevelHeight);
-                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(GLYPH_LIFT_PWR_MAX);
-                }
-                break;
-            case 1:
-                //bring elevator down to 1st block height
-                if (glyphLift.getCurrentPosition() - firstLevelHeight >= 10) {
-                    glyphLift.setTargetPosition(firstLevelHeight);
-                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(-GLYPH_LIFT_PWR_MAX);
-                }
-                //bring elevator up to 1st block height
-                else if (firstLevelHeight - glyphLift.getCurrentPosition() >= 10) {
-                    glyphLift.setTargetPosition(firstLevelHeight);
-                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(GLYPH_LIFT_PWR_MAX);
-                }
-                break;
-            case 2:
-                //bring elevator down to 2nd block height
-                if (glyphLift.getCurrentPosition() - secondLevelHeight >= 10) {
-                    glyphLift.setTargetPosition(secondLevelHeight);
-                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(-GLYPH_LIFT_PWR_MAX);
-                }
-                //bring elevator up to 2nd block height
-                else if (secondLevelHeight - glyphLift.getCurrentPosition() >= 10) {
-                    glyphLift.setTargetPosition(secondLevelHeight);
-                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(GLYPH_LIFT_PWR_MAX);
-                }
-                break;
-            case 3:
-                //bring elevator down to 3rd block height
-                if (glyphLift.getCurrentPosition() - thirdLevelHeight >= 10) {
-                    glyphLift.setTargetPosition(thirdLevelHeight);
-                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(-GLYPH_LIFT_PWR_MAX);
-                }
-                //bring elevator up to 3rd block height
-                else if (thirdLevelHeight - glyphLift.getCurrentPosition() >= 10) {
-                    glyphLift.setTargetPosition(thirdLevelHeight);
-                    glyphLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    glyphLift.setPower(GLYPH_LIFT_PWR_MAX);
-                }
-                break;
-        }
-
-        if (gamepad2.y && currentLevel < LEVEL_MAX)
-            currentLevel++;
-        else if (gamepad2.a && currentLevel > LEVEL_MIN)
-            currentLevel--;*/
     }
     void updateJewel() {
         if (gamepad2.y)
@@ -458,22 +417,16 @@ public class GeorgeOp extends OpMode {
         double target = revolutions * COUNTS_PER_REVOLUTION;
 
         if (!encoderTargetReached) {
-            //driveFR.setTargetPosition(target);
-            //Commented out other motors to use only one encoder value
-            //driveFL.setTargetPosition(target);
-            //driveBR.setTargetPosition(target);
-            //driveBL.setTargetPosition(target);
-            //runToPosition();
             moveForward(power);
         }
 
-        if (Math.abs((target - driveFR.getCurrentPosition())) >= 10) {
-            //Wait until target position is reached
-            telemetry.addData("FR Encoder", String.format("%.0f", (target - driveFR.getCurrentPosition())));
-        }
-        else {
+        if ((target > 0 && target - driveFR.getCurrentPosition() <= 10) || (target < 0 && -target + driveFR.getCurrentPosition() <= 10)) {
             stopDriveMotors();
             encoderTargetReached = true;
+        }
+        else {
+            //Wait until target position is reached
+            telemetry.addData("FR Encoder", driveFR.getCurrentPosition());
         }
 
     }
@@ -488,13 +441,13 @@ public class GeorgeOp extends OpMode {
             moveRight(power);
         }
 
-        if (Math.abs((target - driveFR.getCurrentPosition())) >= 10) {
-            //Wait until target position is reached
-            telemetry.addData("FR Encoder", String.format("%.0f", (target - driveFR.getCurrentPosition())));
-        }
-        else {
+        if ((target > 0 && target - driveFR.getCurrentPosition() <= 10) || (target < 0 && -target + driveFR.getCurrentPosition() <= 10)) {
             stopDriveMotors();
             encoderTargetReached = true;
+        }
+        else {
+            //Wait until target position is reached
+            telemetry.addData("FR Encoder", driveFR.getCurrentPosition());
         }
     }
     void moveForwardRight(double power) {
@@ -508,13 +461,13 @@ public class GeorgeOp extends OpMode {
             moveForwardRight(power);
         }
 
-        if (Math.abs((target - driveFL.getCurrentPosition())) >= 10) {
-            //Wait until target position is reached
-            telemetry.addData("FL Encoder", String.format("%.0f", (target - driveFL.getCurrentPosition())));
-        }
-        else {
+        if ((target > 0 && target - driveFL.getCurrentPosition() <= 10) || (target < 0 && -target + driveFL.getCurrentPosition() <= 10)) {
             stopDriveMotors();
             encoderTargetReached = true;
+        }
+        else {
+            //Wait until target position is reached
+            telemetry.addData("FL Encoder", driveFL.getCurrentPosition());
         }
     }
     void moveForwardLeft(double power) {
@@ -527,13 +480,13 @@ public class GeorgeOp extends OpMode {
         if (!encoderTargetReached)
             moveForwardLeft(power);
 
-        if (Math.abs((target - driveFR.getCurrentPosition())) >= 10) {
-            //Wait until target position is reached
-            telemetry.addData("FR Encoder", String.format("%.0f", (target - driveFR.getCurrentPosition())));
-        }
-        else {
+        if ((target > 0 && target - driveFR.getCurrentPosition() <= 10) || (target < 0 && -target + driveFR.getCurrentPosition() <= 10)) {
             stopDriveMotors();
             encoderTargetReached = true;
+        }
+        else {
+            //Wait until target position is reached
+            telemetry.addData("FR Encoder", driveFR.getCurrentPosition());
         }
     }
     void turnClockwise(double power) {
@@ -541,7 +494,7 @@ public class GeorgeOp extends OpMode {
         move(-power, power, -power, power);
     }
     void turnClockwise(int targetAngle) {
-        double k = 2; //experimentally found
+        double k = 1; //experimentally found
         double power = k * (targetAngle + gyroMR.getIntegratedZValue())
                 / Math.abs(targetAngle);
         if (Math.abs(targetAngle + gyroMR.getIntegratedZValue()) >= 10)
@@ -586,19 +539,9 @@ public class GeorgeOp extends OpMode {
         }
     }
 
-    boolean whiteTapeIsDetected() {
-        return (colorSensor2.red() >= WHITE_THRESHOLD && colorSensor2.blue() >= WHITE_THRESHOLD
-                && colorSensor2.green() >= WHITE_THRESHOLD && !whitePreviouslyDetected);
-    }
-    boolean whiteTapeIsNotDetected() {
-        return (!(colorSensor2.red() >= WHITE_THRESHOLD && colorSensor2.blue() >= WHITE_THRESHOLD
-                && colorSensor2.green() >= WHITE_THRESHOLD) && whitePreviouslyDetected);
-    }
-
     void calibrateVariables() {//Used if any autonomous methods need initial state variables
         encoderTargetReached = false;
         colorSensor.enableLed(false);
-        colorSensor2.enableLed(false);
     }
     //used to measure the amount of time passed since a new step in autonomous has started
     boolean waitSec(double elapsedTime) { return (this.time - setTime >= elapsedTime); }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
@@ -28,6 +29,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * End. Robot ends up aligned to score glyph in specific column of CryptoBox
  */
 @Autonomous(name = "MecanumTestAuto", group = "default")
+@Disabled
 public class MecanumTestAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 

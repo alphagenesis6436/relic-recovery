@@ -176,7 +176,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (range.getDistance(DistanceUnit.INCH) <= 6)
+                if (range.getDistance(DistanceUnit.INCH) <= 4.5)
                     state++;
                 break;
 
@@ -198,7 +198,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 20:
                 stateName = "Drive backward a little bit to park";
                 moveForward(-0.20);
-                if (waitSec(1))
+                if (waitSec(0.5))
                     state = 1000;
                 break;
 

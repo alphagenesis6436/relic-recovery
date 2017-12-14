@@ -544,6 +544,7 @@ public class GeorgeOp extends OpMode {
     void calibrateVariables() {//Used if any autonomous methods need initial state variables
         encoderTargetReached = false;
         colorSensor.enableLed(false);
+        jewelKnocked = false;
     }
     //used to measure the amount of time passed since a new step in autonomous has started
     boolean waitSec(double elapsedTime) { return (this.time - setTime >= elapsedTime); }

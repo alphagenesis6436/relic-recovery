@@ -88,15 +88,21 @@ public class GeorgeRedAuto extends GeorgeOp {
                 //if leftJewel == red, leftRightServo moves left to knock off blue jewel
                 //if leftJewel == blue, leftRightServo moves right to knock off blue jewel
                 colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
-                if (colorSensor.red() >= RED_THRESHOLD)
+                if (colorSensor.red() >= RED_THRESHOLD) {
                     leftRightPos = LEFTRIGHT_MAX;
-                else if (colorSensor.blue() >= BLUE_THRESHOLD)
+                    jewelTime = this.time;
+                    jewelKnocked = true;
+                }
+                else if (colorSensor.blue() >= BLUE_THRESHOLD) {
                     leftRightPos = LEFTRIGHT_MIN;
-                else if (waitSec(1)) //Fail Safe: If looking into hole
+                    jewelTime = this.time;
+                    jewelKnocked = true;
+                }
+                else if (waitSec(1) && !jewelKnocked) //Fail Safe: If looking into hole
                     leftRightPos -= 0.005;
                 leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
                 leftRightServo.setPosition(leftRightPos);
-                if (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN) {
+                if (waitJewelSec(0.5) && (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)) {
                     state++;
                     glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }

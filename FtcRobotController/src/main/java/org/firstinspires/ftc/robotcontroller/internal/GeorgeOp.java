@@ -118,7 +118,7 @@ public class GeorgeOp extends OpMode {
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
-    final float UPDOWN_MIN = 130 / 255.0f;   //fully down
+    final float UPDOWN_MIN = 135 / 255.0f;   //fully down
     final float UPDOWN_MAX = 207 / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
     final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left
@@ -127,6 +127,7 @@ public class GeorgeOp extends OpMode {
     double upDownPos = UPDOWN_MAX;
     double leftRightPos = LEFTRIGHT_MID;
     double jewelDelta = 0.01;
+    boolean jewelKnocked = false;
 
     //Relic Mechanism Variables and Constants
     final float OC_SERVO_MIN = 39 / 255.0f;
@@ -371,6 +372,7 @@ public class GeorgeOp extends OpMode {
     //Create variables/methods that will be used in ALL autonomous programs for this specific robot
 
     double setTime; //used to measure the time period of each step in autonomous
+    double jewelTime; //used to measure the time period of after hitting the jewel in autonomous
     int state = 0; //used to control the steps taken during autonomous
     String stateName = ""; //Overwrite this as the specific step used in Autonomous
     boolean encoderTargetReached = false;
@@ -545,6 +547,8 @@ public class GeorgeOp extends OpMode {
     }
     //used to measure the amount of time passed since a new step in autonomous has started
     boolean waitSec(double elapsedTime) { return (this.time - setTime >= elapsedTime); }
+    //used to measure the amount of time passed since jewel was hit in autonomous has started
+    boolean waitJewelSec(double elapsedTime) { return (this.time - jewelTime >= elapsedTime); }
 
 }
 

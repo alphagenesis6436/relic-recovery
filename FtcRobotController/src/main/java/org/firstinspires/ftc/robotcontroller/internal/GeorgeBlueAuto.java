@@ -94,15 +94,21 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 //if leftJewel == red, leftRightServo moves right to knock off red jewel
                 //if leftJewel == blue, leftRightServo moves left to knock off red jewel
                 colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
-                if (colorSensor.red() >= RED_THRESHOLD)
+                if (colorSensor.red() >= RED_THRESHOLD) {
                     leftRightPos = LEFTRIGHT_MIN;
-                else if (colorSensor.blue() >= BLUE_THRESHOLD)
+                    jewelTime = this.time;
+                    jewelKnocked = true;
+                }
+                else if (colorSensor.blue() >= BLUE_THRESHOLD) {
                     leftRightPos = LEFTRIGHT_MAX;
-                else if (waitSec(1)) //Fail Safe: If looking into hole
+                    jewelTime = this.time;
+                    jewelKnocked = true;
+                }
+                else if (waitSec(1) && !jewelKnocked) //Fail Safe: If looking into hole
                     leftRightPos -= 0.005;
                 leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
                 leftRightServo.setPosition(leftRightPos);
-                if ((leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)) {
+                if (waitJewelSec(0.5) && (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)) {
                     state++;
                     glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }
@@ -152,7 +158,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 12:
                 stateName = "Drive Forward until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveForward(0.20, 2.25);
+                    moveForward(0.20, 1.70);
                 }
                 else if (pictographKey == 1) { //drive to middle column
                     moveForward(0.20, 1.25);

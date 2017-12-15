@@ -59,7 +59,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                 state++;
                 break;
 
-            case 2: //Use PID Control to ensure servo moves down slowly and safely
+            case 2:
                 stateName = "Knock off jewel 1 - arm down";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
@@ -86,17 +86,16 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                 stateName = "Knock off jewel 2 - arm knock";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
-
-                //if leftJewel == red, leftRightServo moves left to knock off blue jewel
-                //if leftJewel == blue, leftRightServo moves right to knock off blue jewel
+                //if leftJewel == red, leftRightServo moves right to knock off red jewel
+                //if leftJewel == blue, leftRightServo moves left to knock off red jewel
                 colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
                 if (colorSensor.red() >= RED_THRESHOLD) {
-                    leftRightPos = LEFTRIGHT_MAX;
+                    leftRightPos = LEFTRIGHT_MIN;
                     jewelTime = this.time;
                     jewelKnocked = true;
                 }
                 else if (colorSensor.blue() >= BLUE_THRESHOLD) {
-                    leftRightPos = LEFTRIGHT_MIN;
+                    leftRightPos = LEFTRIGHT_MAX;
                     jewelTime = this.time;
                     jewelKnocked = true;
                 }
@@ -138,7 +137,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                 stateName = "Drive forward to drive off balancing stone";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
-                moveForward(0.20, 1.5);
+                moveForward(0.20, 1.65);
                 if (encoderTargetReached)
                     state++;
                 break;
@@ -159,7 +158,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                     moveForward(0.20, 0.75);
                 }
                 else if (pictographKey == 0) { //drive to left column
-                    moveForward(0.20, 0.25);
+                    moveForward(0.20, 0.15);
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -177,7 +176,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (range.getDistance(DistanceUnit.INCH) <= 6)
+                if (range.getDistance(DistanceUnit.INCH) <= 4.5)
                     state++;
                 break;
 
@@ -199,7 +198,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 20:
                 stateName = "Drive backward a little bit to park";
                 moveForward(-0.20);
-                if (waitSec(1))
+                if (waitSec(0.5))
                     state = 1000;
                 break;
 

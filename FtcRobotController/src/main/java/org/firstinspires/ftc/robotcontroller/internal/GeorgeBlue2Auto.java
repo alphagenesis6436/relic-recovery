@@ -59,7 +59,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                 state++;
                 break;
 
-            case 2:
+            case 2: //Use PID Control to ensure servo moves down slowly and safely
                 stateName = "Knock off jewel 1 - arm down";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
@@ -87,18 +87,24 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
 
-                //if leftJewel == red, leftRightServo moves right to knock off red jewel
-                //if leftJewel == blue, leftRightServo moves left to knock off red jewel
+                //if leftJewel == red, leftRightServo moves left to knock off blue jewel
+                //if leftJewel == blue, leftRightServo moves right to knock off blue jewel
                 colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
-                if (colorSensor.red() >= RED_THRESHOLD)
-                    leftRightPos = LEFTRIGHT_MIN;
-                else if (colorSensor.blue() >= BLUE_THRESHOLD)
+                if (colorSensor.red() >= RED_THRESHOLD) {
                     leftRightPos = LEFTRIGHT_MAX;
-                else if (waitSec(1)) //Fail Safe: If looking into hole
+                    jewelTime = this.time;
+                    jewelKnocked = true;
+                }
+                else if (colorSensor.blue() >= BLUE_THRESHOLD) {
+                    leftRightPos = LEFTRIGHT_MIN;
+                    jewelTime = this.time;
+                    jewelKnocked = true;
+                }
+                else if (waitSec(1) && !jewelKnocked) //Fail Safe: If looking into hole
                     leftRightPos -= 0.005;
                 leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
                 leftRightServo.setPosition(leftRightPos);
-                if ((leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)) {
+                if (waitJewelSec(0.5) && (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)) {
                     state++;
                     glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }

@@ -89,15 +89,21 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 //if leftJewel == red, leftRightServo moves left to knock off blue jewel
                 //if leftJewel == blue, leftRightServo moves right to knock off blue jewel
                 colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
-                if (colorSensor.red() >= RED_THRESHOLD)
+                if (colorSensor.red() >= RED_THRESHOLD) {
                     leftRightPos = LEFTRIGHT_MAX;
-                else if (colorSensor.blue() >= BLUE_THRESHOLD)
+                    jewelTime = this.time;
+                    jewelKnocked = true;
+                }
+                else if (colorSensor.blue() >= BLUE_THRESHOLD) {
                     leftRightPos = LEFTRIGHT_MIN;
-                else if (waitSec(1)) //Fail Safe: If looking into hole
+                    jewelTime = this.time;
+                    jewelKnocked = true;
+                }
+                else if (waitSec(1) && !jewelKnocked) //Fail Safe: If looking into hole
                     leftRightPos -= 0.005;
                 leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
                 leftRightServo.setPosition(leftRightPos);
-                if (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN) {
+                if (waitJewelSec(0.5) && (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)) {
                     state++;
                     glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }
@@ -136,22 +142,22 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 break;
 
             case 10:
-                stateName = "Rotate to 90 degrees to be perpendicular with the walls";
-                turnClockwise(90);
-                if (turnAbsolute(90))
+                stateName = "Rotate to -90 degrees to be perpendicular with the walls";
+                turnClockwise(-90);
+                if (turnAbsolute(-90))
                     state++;
                 break;
 
             case 12:
                 stateName = "Drive forward until correct column reached";
                 if (pictographKey == 0) { //drive to left column
-                    moveForward(0.20, 2.00);
+                    moveForward(-0.20, -2.00);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(0.20, 1.00);
+                    moveForward(-0.20, -1.30);
                 }
                 else if (pictographKey == 2) { //drive to right column
-                    moveForward(0.20, 0.50);
+                    moveForward(-0.20, -0.75);
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -161,15 +167,15 @@ public class GeorgeRed2Auto extends GeorgeOp {
 
             case 14:
                 stateName = "Rotate to 195 degrees to have glyph face CryptoBox";
-                turnClockwise(195);
-                if (turnAbsolute(195))
+                turnClockwise(-165);
+                if (turnAbsolute(-165))
                     state++;
                 break;
 
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (range.getDistance(DistanceUnit.INCH) <= 6)
+                if (range.getDistance(DistanceUnit.INCH) <= 5.25)
                     state++;
                 break;
 
@@ -191,7 +197,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 20:
                 stateName = "Drive backward a little bit to park";
                 moveForward(-0.20);
-                if (waitSec(1))
+                if (waitSec(0.5))
                     state = 1000;
                 break;
 

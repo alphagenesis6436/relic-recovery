@@ -152,10 +152,10 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 12:
                 stateName = "Drive Forward until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveForward(0.20, 1.75);
+                    moveForward(0.20, 1.35);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(0.20, 0.75);
+                    moveForward(0.20, 0.80);
                 }
                 else if (pictographKey == 0) { //drive to left column
                     moveForward(0.20, 0.15);
@@ -176,7 +176,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (range.getDistance(DistanceUnit.INCH) <= 4.5)
+                if (range.getDistance(DistanceUnit.INCH) <= 5.0 || this.time >= 27)
                     state++;
                 break;
 

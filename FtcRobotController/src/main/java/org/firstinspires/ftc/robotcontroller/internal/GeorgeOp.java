@@ -87,11 +87,11 @@ public class GeorgeOp extends OpMode {
     double backwardLeftPower = 0;
 
     //Glyph Claw Mechanism Variables and Constants
-    final float GLYPH_LIFT_PWR_MAX = 0.50f;
+    final float GLYPH_LIFT_PWR_MAX = 0.70f;
     double glyphLiftPower = 0;
-    final float SERVO_MIN_LEFT = 142 / 255.0f; //left claw is fully open
-    final float SERVO_MID_LEFT = 186 / 255.0f; //left claw is slightly open
-    final float SERVO_GRAB_LEFT = 211 / 255.0f; //left claw is gripping glyph
+    final float SERVO_MIN_LEFT = 139 / 255.0f; //left claw is fully open
+    final float SERVO_MID_LEFT = 176 / 255.0f; //left claw is slightly open
+    final float SERVO_GRAB_LEFT = 208 / 255.0f; //left claw is gripping glyph
     final float SERVO_GRAB_RIGHT = 95 / 255.0f; //right claw is gripping the glyph 168
     final float SERVO_MID_RIGHT = 121 / 255.0f; //right claw is slightly open 188
     final float SERVO_MAX_RIGHT = 133 / 255.0f; //right claw is fully open 203

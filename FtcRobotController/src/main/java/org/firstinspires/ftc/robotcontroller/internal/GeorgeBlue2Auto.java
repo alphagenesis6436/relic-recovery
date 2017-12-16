@@ -176,7 +176,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (range.getDistance(DistanceUnit.INCH) <= 4.5 || this.time >= 27)
+                if (range.getDistance(DistanceUnit.INCH) <= 4.5 || waitSec(3))
                     state++;
                 break;
 

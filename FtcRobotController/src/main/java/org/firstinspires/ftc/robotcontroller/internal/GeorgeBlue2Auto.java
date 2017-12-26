@@ -152,7 +152,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 12:
                 stateName = "Drive Forward until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveForward(0.20, 1.15);
+                    moveForward(0.20, 1.40);
                 }
                 else if (pictographKey == 1) { //drive to middle column
                     moveForward(0.20, 0.80);

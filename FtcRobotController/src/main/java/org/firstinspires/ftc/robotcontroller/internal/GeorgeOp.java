@@ -118,7 +118,7 @@ public class GeorgeOp extends OpMode {
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
-    final float UPDOWN_MIN = 135 / 255.0f;   //fully down
+    final float UPDOWN_MIN = 131 / 255.0f;   //fully down
     final float UPDOWN_MAX = 207 / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
     final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left

@@ -118,7 +118,7 @@ public class GeorgeOp extends OpMode {
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
-    final float UPDOWN_MIN = 135 / 255.0f;   //fully down
+    final float UPDOWN_MIN = 140 / 255.0f;   //fully down
     final float UPDOWN_MAX = 207 / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
     final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left
@@ -130,16 +130,15 @@ public class GeorgeOp extends OpMode {
     boolean jewelKnocked = false;
 
     //Relic Mechanism Variables and Constants
-    final float OC_SERVO_MIN = 39 / 255.0f;
-    final float OC_SERVO_OPEN = 200 / 255.0f; //open
+    final float OC_SERVO_OPEN = 180 / 255.0f; //open
     final float OC_SERVO_MAX = 255 / 255.0f; //closed
-    final double DU_SERVO_MIN = 0 / 255.0f; //up - 40
-    final double DU_SERVO_MAX = 107 / 255.0f; //down - 115
-    double downUpServoPos = DU_SERVO_MIN;
-    double openCloseServoPos = OC_SERVO_MIN;
+    final double DU_SERVO_MIN = 0 / 255.0f; //up
+    final double DU_SERVO_MAX = 211 / 255.0f; //down
+    double downUpServoPos = DU_SERVO_MAX;
+    double openCloseServoPos = OC_SERVO_MAX;
     final double RELIC_PWR_MAX = 0.40;
     double relicPower = 0;
-    double relicDelta = 0.03;
+    double relicDelta = 0.05;
 
     //Vuforia System Variables and Objects
     //Declare any objects for Vuforia
@@ -246,7 +245,7 @@ public class GeorgeOp extends OpMode {
         //Clip and Initialize Relic Mechanism
         downUpServoPos = Range.clip(downUpServoPos, DU_SERVO_MIN, DU_SERVO_MAX);
         downUpServo.setPosition(downUpServoPos);
-        openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_MIN, OC_SERVO_MAX);
+        openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_OPEN, OC_SERVO_MAX);
         openCloseServo.setPosition(openCloseServoPos);
         relicPower = Range.clip(relicPower, -RELIC_PWR_MAX, RELIC_PWR_MAX);
         relicMotor.setPower(relicPower);
@@ -299,9 +298,9 @@ public class GeorgeOp extends OpMode {
     //Step 2: Close the Left/Right Claw by pressing the Left/Right Trigger
     void updateGlyphClaw() {
         glyphLiftPower = -gamepad2.left_stick_y * GLYPH_LIFT_PWR_MAX;
-        if (gamepad2.a)
+        if (gamepad2.x)
             singleClawModeIsOn = true;
-        if (gamepad2.y)
+        if (gamepad2.b)
             singleClawModeIsOn = false;
         if (!singleClawModeIsOn) {
             if (gamepad2.left_bumper) {
@@ -316,7 +315,7 @@ public class GeorgeOp extends OpMode {
                 leftClawTopServoPos = SERVO_GRAB_LEFT_TOP; //left top servo grabbing position
                 rightClawTopServoPos = SERVO_GRAB_RIGHT_TOP; //right top servo grabbing position
             }
-            else if (gamepad2.left_trigger >= 0.20) {
+            else if (gamepad2.left_trigger >= 0.50) {
                 leftClawServoPos = SERVO_MID_LEFT; //left servo slightly open
                 rightClawServoPos = SERVO_MID_RIGHT; //right servo slightly open
                 leftClawTopServoPos = SERVO_MID_LEFT_TOP; //left top servo slightly open
@@ -332,11 +331,11 @@ public class GeorgeOp extends OpMode {
                 leftClawTopServoPos = SERVO_MIN_LEFT_TOP;//left top servo fully open
                 rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //right top servo fully open
             }
-            if (gamepad2.right_trigger >= 0.20) {
+            if (gamepad2.right_trigger >= 0.50) {
                 leftClawServoPos = SERVO_GRAB_LEFT; //left servo grabbing position
                 rightClawServoPos = SERVO_GRAB_RIGHT; //right servo grabbing position
             }
-            else if (gamepad2.left_trigger >= 0.20) {
+            else if (gamepad2.left_trigger >= 0.50) {
                 leftClawServoPos = SERVO_MIN_LEFT; //left servo fully open
                 rightClawServoPos = SERVO_MAX_RIGHT; //right servo fully open
             }
@@ -362,9 +361,9 @@ public class GeorgeOp extends OpMode {
             openCloseServoPos = OC_SERVO_OPEN;
         else if (gamepad2.dpad_down)
             openCloseServoPos = OC_SERVO_MAX;
-        if (gamepad2.dpad_right)
-            downUpServoPos += relicDelta;
-        else if (gamepad2.dpad_left)
+        if (gamepad2.a) //down
+            downUpServoPos += relicDelta * 2;
+        else if (gamepad2.y) //up
             downUpServoPos -= relicDelta;
     }
 

@@ -105,7 +105,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
                     jewelKnocked = true;
                 }
                 else if (waitSec(1) && !jewelKnocked) //Fail Safe: If looking into hole
-                    leftRightPos -= 0.005;
+                    leftRightPos -= 0.0025;
                 leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
                 leftRightServo.setPosition(leftRightPos);
                 if (waitJewelSec(0.5) && (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)) {
@@ -118,7 +118,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 stateName = "Knock off jewel 3 - arm up";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
-                if (!waitSec(2.5)) {//bring up the glyph
+                if (!waitSec(2.0)) {//bring up the glyph
                     glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     glyphLift.setPower(0.30);
                 }
@@ -158,10 +158,10 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 12:
                 stateName = "Drive Forward until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveForward(0.20, 1.70);
+                    moveForward(0.20, 1.45);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(0.20, 1.15);
+                    moveForward(0.20, 0.90);
                 }
                 else if (pictographKey == 0) { //drive to left column
                     moveForward(0.20, 0.25);

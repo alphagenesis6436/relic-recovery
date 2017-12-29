@@ -23,7 +23,7 @@ public class Prototype2WheelIntake extends OpMode {
     Servo rightServo;
 
     //Declare any variables & constants pertaining to specific robot mechanisms (i.e. drive train)
-    final double WHEEL_PWR_MAX = 0.40;
+    final double WHEEL_PWR_MAX = 0.30;
     final double WHEEL_DELTA = 5 / 255.0f;
     final float LEFT_MIN = 0 / 255.0f;
     final float LEFT_MID = 0.39f;
@@ -65,15 +65,30 @@ public class Prototype2WheelIntake extends OpMode {
 
     void updateData() {
         //Add in update methods for specific robot mechanisms
-        if (gamepad2.left_stick_y < 0) {        //out
-            leftServoPos += WHEEL_DELTA;
-            rightServoPos -= WHEEL_DELTA;
+        if (!gamepad2.x && !gamepad2.b) {
+            if (gamepad2.left_stick_y < 0) {        //out
+                leftServoPos += WHEEL_DELTA;
+                rightServoPos -= WHEEL_DELTA;
+            } else if (gamepad2.left_stick_y > 0) {   //in
+                leftServoPos -= WHEEL_DELTA;
+                rightServoPos += WHEEL_DELTA;
+            }
+            wheelPower = -gamepad2.right_stick_y * WHEEL_PWR_MAX;
         }
-        else if (gamepad2.left_stick_y > 0) {   //in
-            leftServoPos -= WHEEL_DELTA;
-            rightServoPos += WHEEL_DELTA;
+        if (Math.abs(leftServoPos - rightServoPos) > (RIGHT_MID - LEFT_MID)) {
+            if (gamepad2.x) {
+                if (gamepad2.left_stick_y < 0)
+                    leftServoPos += WHEEL_DELTA;
+                if (gamepad2.left_stick_y > 0)
+                    leftServoPos -= WHEEL_DELTA;
+            }
+            if (gamepad2.b) {
+                if (gamepad2.right_stick_y < 0)
+                    rightServoPos += WHEEL_DELTA;
+                if (gamepad2.right_stick_y > 0)
+                    rightServoPos -= WHEEL_DELTA;
+            }
         }
-        wheelPower = -gamepad2.right_stick_y * WHEEL_PWR_MAX;
     }
 
     void initialization() {

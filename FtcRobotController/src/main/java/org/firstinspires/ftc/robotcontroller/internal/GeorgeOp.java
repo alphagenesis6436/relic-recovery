@@ -107,15 +107,7 @@ public class GeorgeOp extends OpMode {
     double rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //start right claw fully open
     boolean singleClawModeIsOn = false;
     double clawDelta = 0.0075;
-
-    int currentLevel = 0; //start off at currentLevel 0
-    int zeroLevelHeight = 10; //encoder count at currentLevel 0
-    int firstLevelHeight = 1010; //encoder count at currentLevel 1
-    int secondLevelHeight = 2010; //encoder count at currentLevel 2
-    int thirdLevelHeight = 3010; //encoder count at currentLevel 3
-    final int LEVEL_MIN = 0;
-    final int LEVEL_MAX = 3;
-
+    
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
     final float UPDOWN_MIN = 131 / 255.0f;   //fully down (maybe 131)

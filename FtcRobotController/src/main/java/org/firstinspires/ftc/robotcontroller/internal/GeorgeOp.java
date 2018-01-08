@@ -90,24 +90,24 @@ public class GeorgeOp extends OpMode {
     final float GLYPH_LIFT_PWR_MAX = 0.70f;
     double glyphLiftPower = 0;
     final float SERVO_MIN_LEFT = 139 / 255.0f; //left claw is fully open
-    final float SERVO_MID_LEFT = 176 / 255.0f; //left claw is slightly open
+    final float SERVO_MID_LEFT = 170 / 255.0f; //left claw is slightly open
     final float SERVO_GRAB_LEFT = 208 / 255.0f; //left claw is gripping glyph
-    final float SERVO_GRAB_RIGHT = 95 / 255.0f; //right claw is gripping the glyph 168
-    final float SERVO_MID_RIGHT = 121 / 255.0f; //right claw is slightly open 188
-    final float SERVO_MAX_RIGHT = 133 / 255.0f; //right claw is fully open 203
+    final float SERVO_GRAB_RIGHT = 90 / 255.0f; //right claw is gripping the glyph 168
+    final float SERVO_MID_RIGHT = 118 / 255.0f; //right claw is slightly open 188
+    final float SERVO_MAX_RIGHT = 150 / 255.0f; //right claw is fully open 203
     double leftClawServoPos = SERVO_MIN_LEFT; //start left claw fully open
     double rightClawServoPos = SERVO_MAX_RIGHT; //start right claw fully open
     final float SERVO_MIN_LEFT_TOP = 173 / 255.0f; //left claw is fully open
     final float SERVO_MID_LEFT_TOP = 207 / 255.0f; //left claw is slightly open
     final float SERVO_GRAB_LEFT_TOP = 240 / 255.0f; //left claw is gripping glyph
     final float SERVO_GRAB_RIGHT_TOP = 102 / 255.0f; //right claw is gripping the glyph
-    final float SERVO_MID_RIGHT_TOP = 143 / 255.0f; //right claw is slightly open
+    final float SERVO_MID_RIGHT_TOP = 136 / 255.0f; //right claw is slightly open
     final float SERVO_MAX_RIGHT_TOP = 163 / 255.0f; //right claw is fully open
     double leftClawTopServoPos = SERVO_MIN_LEFT_TOP; //start left claw fully open
     double rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //start right claw fully open
     boolean singleClawModeIsOn = false;
     double clawDelta = 0.0075;
-    
+
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
     final float UPDOWN_MIN = 131 / 255.0f;   //fully down (maybe 131)

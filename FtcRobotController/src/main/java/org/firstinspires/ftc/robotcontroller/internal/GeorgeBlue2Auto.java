@@ -152,13 +152,13 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 12:
                 stateName = "Drive Forward until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveForward(0.20, 1.50);
+                    moveForward(0.20, 1.39);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(0.20, 0.775);
+                    moveForward(0.20, 0.735);
                 }
                 else if (pictographKey == 0) { //drive to left column
-                    moveForward(0.20, 0.25);
+                    moveForward(0.20, 0.15);
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -167,9 +167,9 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                 break;
 
             case 14:
-                stateName = "Rotate to 15 degrees to have glyph face CryptoBox";
-                turnClockwise(15);
-                if (turnAbsolute(15))
+                stateName = "Rotate to 25 degrees to have glyph face CryptoBox";
+                turnClockwise(25);
+                if (turnAbsolute(25))
                     state++;
                 break;
 

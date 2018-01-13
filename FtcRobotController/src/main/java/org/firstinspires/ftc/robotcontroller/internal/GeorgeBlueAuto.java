@@ -161,7 +161,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
                     moveForward(0.20, 1.45);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(0.20, 0.90);
+                    moveForward(0.20, 0.91);
                 }
                 else if (pictographKey == 0) { //drive to left column
                     moveForward(0.20, 0.25);

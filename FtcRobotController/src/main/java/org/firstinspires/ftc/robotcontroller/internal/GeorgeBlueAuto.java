@@ -34,6 +34,50 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 public class GeorgeBlueAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 
+    @Override
+    public void init() {
+        //Initialize motors & set direction
+        driveFR = hardwareMap.dcMotor.get("dfr");
+        driveFR.setDirection(DcMotorSimple.Direction.FORWARD);
+        driveFL = hardwareMap.dcMotor.get("dfl");
+        driveFL.setDirection(DcMotorSimple.Direction.REVERSE);
+        driveBR = hardwareMap.dcMotor.get("dbr");
+        driveBR.setDirection(DcMotorSimple.Direction.FORWARD);
+        driveBL = hardwareMap.dcMotor.get("dbl");
+        driveBL.setDirection(DcMotorSimple.Direction.REVERSE);
+        glyphLift = hardwareMap.dcMotor.get("gl");
+        glyphLift.setDirection(DcMotorSimple.Direction.REVERSE);
+        relicMotor = hardwareMap.dcMotor.get("rm");
+        relicMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        //Initialize servos
+        upDownServo = hardwareMap.servo.get("uds");
+        leftRightServo = hardwareMap.servo.get("lrs");
+        leftClaw = hardwareMap.servo.get("lc");
+        rightClaw = hardwareMap.servo.get("rc");
+        topLeftClaw = hardwareMap.servo.get("lct");
+        topRightClaw = hardwareMap.servo.get("rct");
+
+        //Initialize sensors
+        colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
+        gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
+        range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
+        colorSensor.enableLed(true);
+
+        //Initialize Vuforia
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        parameters.vuforiaLicenseKey = APIKey.apiKey;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT; // Use FRONT Camera (Change to BACK if you want to use that one)
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        relicTemplate = relicTrackables.get(0);
+    }
+
+    @Override public void start() {
+        relicTrackables.activate();
+    }
+
     public GeorgeBlueAuto() {}
 
     @Override

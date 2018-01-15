@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name = "Wheel Intake Prototype", group = "Default")
+@Disabled
 public class Prototype2WheelIntake extends OpMode {
     //Declare any motors, servos, and sensors
     DcMotor leftWheel;

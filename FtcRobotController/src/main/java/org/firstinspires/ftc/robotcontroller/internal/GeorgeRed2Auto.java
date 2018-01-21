@@ -1,10 +1,16 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 /**
  * Created by Alex on 11/8/2017.
@@ -29,6 +35,49 @@ public class GeorgeRed2Auto extends GeorgeOp {
 
     public GeorgeRed2Auto() {}
 
+    @Override
+    public void init() {
+        //Initialize motors & set direction
+        driveFR = hardwareMap.dcMotor.get("dfr");
+        driveFR.setDirection(DcMotorSimple.Direction.FORWARD);
+        driveFL = hardwareMap.dcMotor.get("dfl");
+        driveFL.setDirection(DcMotorSimple.Direction.REVERSE);
+        driveBR = hardwareMap.dcMotor.get("dbr");
+        driveBR.setDirection(DcMotorSimple.Direction.FORWARD);
+        driveBL = hardwareMap.dcMotor.get("dbl");
+        driveBL.setDirection(DcMotorSimple.Direction.REVERSE);
+        glyphLift = hardwareMap.dcMotor.get("gl");
+        glyphLift.setDirection(DcMotorSimple.Direction.REVERSE);
+        relicMotor = hardwareMap.dcMotor.get("rm");
+        relicMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        //Initialize servos
+        upDownServo = hardwareMap.servo.get("uds");
+        leftRightServo = hardwareMap.servo.get("lrs");
+        leftClaw = hardwareMap.servo.get("lc");
+        rightClaw = hardwareMap.servo.get("rc");
+        topLeftClaw = hardwareMap.servo.get("lct");
+        topRightClaw = hardwareMap.servo.get("rct");
+
+        //Initialize sensors
+        colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
+        gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
+        range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
+        colorSensor.enableLed(true);
+
+        //Initialize Vuforia
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        parameters.vuforiaLicenseKey = APIKey.apiKey;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT; // Use FRONT Camera (Change to BACK if you want to use that one)
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        relicTemplate = relicTrackables.get(0);
+    }
+
+    @Override public void start() {
+        relicTrackables.activate();
+    }
 
     @Override
     public void loop(){

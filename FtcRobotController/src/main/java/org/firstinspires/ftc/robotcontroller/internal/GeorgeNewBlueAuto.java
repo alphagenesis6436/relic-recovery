@@ -12,6 +12,8 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
+import java.util.ArrayList;
+
 /**
  * Created by Alex on 11/8/2017.
  * Autonomous Objectives:
@@ -33,6 +35,50 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 @Autonomous(name = "GeorgeNewBlueAuto", group = "default")
 public class GeorgeNewBlueAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
+
+    @Override
+    public void init() {
+        //Initialize motors & set direction
+        driveFR = hardwareMap.dcMotor.get("dfr");
+        driveFR.setDirection(DcMotorSimple.Direction.FORWARD);
+        driveFL = hardwareMap.dcMotor.get("dfl");
+        driveFL.setDirection(DcMotorSimple.Direction.REVERSE);
+        driveBR = hardwareMap.dcMotor.get("dbr");
+        driveBR.setDirection(DcMotorSimple.Direction.FORWARD);
+        driveBL = hardwareMap.dcMotor.get("dbl");
+        driveBL.setDirection(DcMotorSimple.Direction.REVERSE);
+        glyphLift = hardwareMap.dcMotor.get("gl");
+        glyphLift.setDirection(DcMotorSimple.Direction.REVERSE);
+        relicMotor = hardwareMap.dcMotor.get("rm");
+        relicMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        //Initialize servos
+        upDownServo = hardwareMap.servo.get("uds");
+        leftRightServo = hardwareMap.servo.get("lrs");
+        leftClaw = hardwareMap.servo.get("lc");
+        rightClaw = hardwareMap.servo.get("rc");
+        topLeftClaw = hardwareMap.servo.get("lct");
+        topRightClaw = hardwareMap.servo.get("rct");
+
+        //Initialize sensors
+        colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
+        gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
+        range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
+        colorSensor.enableLed(true);
+
+        //Initialize Vuforia
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        parameters.vuforiaLicenseKey = APIKey.apiKey;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT; // Use FRONT Camera (Change to BACK if you want to use that one)
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        relicTemplate = relicTrackables.get(0);
+    }
+
+    @Override public void start() {
+        relicTrackables.activate();
+    }
 
     public GeorgeNewBlueAuto() {}
 
@@ -95,12 +141,12 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
                 //if leftJewel == blue, leftRightServo moves left to knock off red jewel
                 colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
                 if (colorSensor.red() >= RED_THRESHOLD) {
-                    leftRightPos = LEFTRIGHT_MIN;
+                    leftRightPos = (LEFTRIGHT_MIN + LEFTRIGHT_MID) / 2.0;
                     jewelTime = this.time;
                     jewelKnocked = true;
                 }
                 else if (colorSensor.blue() >= BLUE_THRESHOLD) {
-                    leftRightPos = LEFTRIGHT_MAX;
+                    leftRightPos = (LEFTRIGHT_MAX + LEFTRIGHT_MID) / 2.0;
                     jewelTime = this.time;
                     jewelKnocked = true;
                 }
@@ -108,7 +154,7 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
                     leftRightPos -= 0.0025;
                 leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
                 leftRightServo.setPosition(leftRightPos);
-                if (waitJewelSec(0.5) && (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)) {
+                if (waitJewelSec(0.5) && (leftRightServo.getPosition() == (LEFTRIGHT_MAX + LEFTRIGHT_MID) / 2.0 || leftRightServo.getPosition() == (LEFTRIGHT_MIN + LEFTRIGHT_MID) / 2.0)) {
                     state++;
                     glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }
@@ -134,7 +180,7 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
                 upDownPos += 0.03;
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
-                if (upDownServo.getPosition() == UPDOWN_MAX && waitSec(2.5))
+                if (upDownServo.getPosition() == UPDOWN_MAX && waitSec(2.0))
                     state++;
                 break;
 
@@ -202,9 +248,23 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
                 break;
 
             case 20:
+                stateName = "Drive backward a little bit";
+                moveForward(-0.20);
+                if (waitSec(0.25))
+                    state++;
+                break;
+
+            case 22:
+                stateName = "Drive forward to push glyph in";
+                moveForward(0.20);
+                if (waitSec(0.5))
+                    state++;
+                break;
+
+            case 24:
                 stateName = "Drive backward a little bit to park";
                 moveForward(-0.20);
-                if (waitSec(0.5))
+                if (waitSec(0.25))
                     state = 1000;
                 break;
 
@@ -219,7 +279,7 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
                 stateName = "Calibrating";
                 calibrateVariables();
                 resetEncoders();
-                if (waitSec(1)) {
+                if (waitSec(0.1)) {
                     state++;
                     setTime = this.time;
                 }
@@ -229,4 +289,45 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
 
     //Create any methods needed for this specific autonomous program
 
+    //new and improved turning method, feedback control: PID
+    void turnClockwise(int targetAngle) {
+        double kp = 0.01; //proportionality constant (amount to adjust for immediate deviance) experimentally found
+        double ki = 0.01; //integral constant (amount to adjust for past errors) experimentally found
+        double kd = 0.01; //derivative constant (amount to adjust for future errors) experimentally found
+        double e = targetAngle + gyroMR.getIntegratedZValue(); //error
+        e_list.add(e);
+        t_list.add(this.time);
+        double power = kp*e + ki*integrate() + kd*differentiate();
+        power = Range.clip(power, -DRIVE_PWR_MAX, DRIVE_PWR_MAX); //ensure power doesn't exceed max speed
+        if (Math.abs(e / targetAngle) >= 0.01) //keep adjusting until error is less than 1%
+            turnClockwise(power);
+        else {
+            stopDriveMotors();
+            e_list.clear();
+            t_list.clear();
+        }
+    }
+    ArrayList<Double> e_list; //records past errors
+    ArrayList<Double> t_list; // records times past errors took place
+    //integrates error of angle w/ respect to time
+    double integrate() {
+        double sum = 0; //uses trapezoidal sum approximation method
+        if (e_list.size() >= 2) {
+            for (int i = 0; i <= e_list.size() - 2; i++) {
+                double dt = t_list.get(i+1) - t_list.get(i);
+                sum += (e_list.get(i+1) + e_list.get(i))*dt / 2.0;
+            }
+        }
+        return sum;
+    }
+    //differentiates error of angle w/ respect to time
+    double differentiate() {
+        double slope = 0; //uses secant line approximation
+        if (e_list.size() >= 2) {
+            double de = e_list.get(e_list.size() - 1) - e_list.get(e_list.size() - 2);
+            double dt = t_list.get(t_list.size() - 1) - t_list.get(t_list.size() - 2);
+            slope = de/dt;
+        }
+        return slope;
+    }
 }

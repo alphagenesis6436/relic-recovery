@@ -90,35 +90,27 @@ public class GeorgeOp extends OpMode {
     final float GLYPH_LIFT_PWR_MAX = 0.70f;
     double glyphLiftPower = 0;
     final float SERVO_MIN_LEFT = 139 / 255.0f; //left claw is fully open
-    final float SERVO_MID_LEFT = 176 / 255.0f; //left claw is slightly open
+    final float SERVO_MID_LEFT = 170 / 255.0f; //left claw is slightly open
     final float SERVO_GRAB_LEFT = 208 / 255.0f; //left claw is gripping glyph
-    final float SERVO_GRAB_RIGHT = 95 / 255.0f; //right claw is gripping the glyph 168
-    final float SERVO_MID_RIGHT = 121 / 255.0f; //right claw is slightly open 188
-    final float SERVO_MAX_RIGHT = 133 / 255.0f; //right claw is fully open 203
+    final float SERVO_GRAB_RIGHT = 90 / 255.0f; //right claw is gripping the glyph 168
+    final float SERVO_MID_RIGHT = 118 / 255.0f; //right claw is slightly open 188
+    final float SERVO_MAX_RIGHT = 150 / 255.0f; //right claw is fully open 203
     double leftClawServoPos = SERVO_MIN_LEFT; //start left claw fully open
     double rightClawServoPos = SERVO_MAX_RIGHT; //start right claw fully open
     final float SERVO_MIN_LEFT_TOP = 173 / 255.0f; //left claw is fully open
     final float SERVO_MID_LEFT_TOP = 207 / 255.0f; //left claw is slightly open
     final float SERVO_GRAB_LEFT_TOP = 240 / 255.0f; //left claw is gripping glyph
     final float SERVO_GRAB_RIGHT_TOP = 102 / 255.0f; //right claw is gripping the glyph
-    final float SERVO_MID_RIGHT_TOP = 143 / 255.0f; //right claw is slightly open
+    final float SERVO_MID_RIGHT_TOP = 136 / 255.0f; //right claw is slightly open
     final float SERVO_MAX_RIGHT_TOP = 163 / 255.0f; //right claw is fully open
     double leftClawTopServoPos = SERVO_MIN_LEFT_TOP; //start left claw fully open
     double rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //start right claw fully open
     boolean singleClawModeIsOn = false;
     double clawDelta = 0.0075;
 
-    int currentLevel = 0; //start off at currentLevel 0
-    int zeroLevelHeight = 10; //encoder count at currentLevel 0
-    int firstLevelHeight = 1010; //encoder count at currentLevel 1
-    int secondLevelHeight = 2010; //encoder count at currentLevel 2
-    int thirdLevelHeight = 3010; //encoder count at currentLevel 3
-    final int LEVEL_MIN = 0;
-    final int LEVEL_MAX = 3;
-
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
-    final float UPDOWN_MIN = 131 / 255.0f;   //fully down
+    final float UPDOWN_MIN = 131 / 255.0f;   //fully down (maybe 131)
     final float UPDOWN_MAX = 207 / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
     final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left
@@ -130,16 +122,15 @@ public class GeorgeOp extends OpMode {
     boolean jewelKnocked = false;
 
     //Relic Mechanism Variables and Constants
-    final float OC_SERVO_MIN = 39 / 255.0f;
-    final float OC_SERVO_OPEN = 200 / 255.0f; //open
+    final float OC_SERVO_OPEN = 180 / 255.0f; //open
     final float OC_SERVO_MAX = 255 / 255.0f; //closed
-    final double DU_SERVO_MIN = 0 / 255.0f; //up - 40
-    final double DU_SERVO_MAX = 107 / 255.0f; //down - 115
-    double downUpServoPos = DU_SERVO_MIN;
-    double openCloseServoPos = OC_SERVO_MIN;
+    final double DU_SERVO_MIN = 0 / 255.0f; //up
+    final double DU_SERVO_MAX = 211 / 255.0f; //down
+    double downUpServoPos = DU_SERVO_MAX;
+    double openCloseServoPos = OC_SERVO_MAX;
     final double RELIC_PWR_MAX = 0.40;
     double relicPower = 0;
-    double relicDelta = 0.03;
+    double relicDelta = 0.05;
 
     //Vuforia System Variables and Objects
     //Declare any objects for Vuforia
@@ -181,21 +172,8 @@ public class GeorgeOp extends OpMode {
         gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
-
-        //Initialize Vuforia
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-        parameters.vuforiaLicenseKey = APIKey.apiKey;
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT; // Use FRONT Camera (Change to BACK if you want to use that one)
-        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
-        relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
-        relicTemplate = relicTrackables.get(0);
-
-        telemetry();
     }
-    @Override public void start() {
-        relicTrackables.activate();
-    }
+
     @Override public void loop() {
         //Update all the data based on driver input
         updateData();
@@ -246,7 +224,7 @@ public class GeorgeOp extends OpMode {
         //Clip and Initialize Relic Mechanism
         downUpServoPos = Range.clip(downUpServoPos, DU_SERVO_MIN, DU_SERVO_MAX);
         downUpServo.setPosition(downUpServoPos);
-        openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_MIN, OC_SERVO_MAX);
+        openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_OPEN, OC_SERVO_MAX);
         openCloseServo.setPosition(openCloseServoPos);
         relicPower = Range.clip(relicPower, -RELIC_PWR_MAX, RELIC_PWR_MAX);
         relicMotor.setPower(relicPower);
@@ -299,9 +277,9 @@ public class GeorgeOp extends OpMode {
     //Step 2: Close the Left/Right Claw by pressing the Left/Right Trigger
     void updateGlyphClaw() {
         glyphLiftPower = -gamepad2.left_stick_y * GLYPH_LIFT_PWR_MAX;
-        if (gamepad2.a)
+        if (gamepad2.x)
             singleClawModeIsOn = true;
-        if (gamepad2.y)
+        if (gamepad2.b)
             singleClawModeIsOn = false;
         if (!singleClawModeIsOn) {
             if (gamepad2.left_bumper) {
@@ -316,7 +294,7 @@ public class GeorgeOp extends OpMode {
                 leftClawTopServoPos = SERVO_GRAB_LEFT_TOP; //left top servo grabbing position
                 rightClawTopServoPos = SERVO_GRAB_RIGHT_TOP; //right top servo grabbing position
             }
-            else if (gamepad2.left_trigger >= 0.20) {
+            else if (gamepad2.left_trigger >= 0.50) {
                 leftClawServoPos = SERVO_MID_LEFT; //left servo slightly open
                 rightClawServoPos = SERVO_MID_RIGHT; //right servo slightly open
                 leftClawTopServoPos = SERVO_MID_LEFT_TOP; //left top servo slightly open
@@ -332,11 +310,11 @@ public class GeorgeOp extends OpMode {
                 leftClawTopServoPos = SERVO_MIN_LEFT_TOP;//left top servo fully open
                 rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //right top servo fully open
             }
-            if (gamepad2.right_trigger >= 0.20) {
+            if (gamepad2.right_trigger >= 0.50) {
                 leftClawServoPos = SERVO_GRAB_LEFT; //left servo grabbing position
                 rightClawServoPos = SERVO_GRAB_RIGHT; //right servo grabbing position
             }
-            else if (gamepad2.left_trigger >= 0.20) {
+            else if (gamepad2.left_trigger >= 0.50) {
                 leftClawServoPos = SERVO_MIN_LEFT; //left servo fully open
                 rightClawServoPos = SERVO_MAX_RIGHT; //right servo fully open
             }
@@ -362,9 +340,9 @@ public class GeorgeOp extends OpMode {
             openCloseServoPos = OC_SERVO_OPEN;
         else if (gamepad2.dpad_down)
             openCloseServoPos = OC_SERVO_MAX;
-        if (gamepad2.dpad_right)
-            downUpServoPos += relicDelta;
-        else if (gamepad2.dpad_left)
+        if (gamepad2.a) //down
+            downUpServoPos += relicDelta * 2;
+        else if (gamepad2.y) //up
             downUpServoPos -= relicDelta;
     }
 

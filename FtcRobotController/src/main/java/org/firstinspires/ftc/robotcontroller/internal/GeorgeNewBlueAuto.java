@@ -12,28 +12,29 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
+import java.util.ArrayList;
+
 /**
  * Created by Alex on 11/8/2017.
  * Autonomous Objectives:
  * --Knock Off Jewel for 30 Points
- * --Score 1 Glyph into 1st Column of CryptoBox for 15 points
+ * --Score 1 Glyph (15 points) in Correct Column CryptoBox for (30 points)
+ * --Park in Safe Zone (10 points)
  * Pseudocode:
  * 0. Start on balancing stone, jewel mechanism faces the jewel
  * 1. Knock off jewel (and read Pictograph, and lift Glyph 2 inches up)
- * 2. Drive backward to drive off balancing stone
- * 3. Rotate to 90 degrees to be perpendicular with the walls
+ * 2. Drive forward to drive off balancing stone
+ * 3. Drive backward to allign with balancing stone
  * 4. Drive forward slowly to position needed to score in correct column
- * 5. Rotate to 195 degrees to have glyph face CryptoBox
+ * 5. Rotate to -75 degrees to have glyph face CryptoBox
  * 6. Drive forward toward CryptoBox until glyph is scored
  * 7. Release the glyph
  * 8. Drive backward a little bit to park
+ * End. Robot ends up aligned to score glyph in specific column of CryptoBox
  */
-@Autonomous(name = "GeorgeRed2Auto", group = "default")
-//@Disabled
-public class GeorgeRed2Auto extends GeorgeOp {
+@Autonomous(name = "GeorgeNewBlueAuto", group = "default")
+public class GeorgeNewBlueAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
-
-    public GeorgeRed2Auto() {}
 
     @Override
     public void init() {
@@ -79,6 +80,8 @@ public class GeorgeRed2Auto extends GeorgeOp {
         relicTrackables.activate();
     }
 
+    public GeorgeNewBlueAuto() {}
+
     @Override
     public void loop(){
         //Display Data to be displayed throughout entire Autonomous
@@ -89,7 +92,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
             telemetry.addData("Pictograph", "LEFT");
         }
         else if (pictographKey == 1) {
-            telemetry.addData("Pictograph", "MIDDLE");
+            telemetry.addData("Pictograph", "CENTER");
         }
         else if (pictographKey == 2) {
             telemetry.addData("Pictograph", "RIGHT");
@@ -107,7 +110,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 state++;
                 break;
 
-            case 2: //Use PID Control to ensure servo moves down slowly and safely
+            case 2:
                 stateName = "Knock off jewel 1 - arm down";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
@@ -134,17 +137,16 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 stateName = "Knock off jewel 2 - arm knock";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
-
-                //if leftJewel == red, leftRightServo moves left to knock off blue jewel
-                //if leftJewel == blue, leftRightServo moves right to knock off blue jewel
+                //if leftJewel == red, leftRightServo moves right to knock off red jewel
+                //if leftJewel == blue, leftRightServo moves left to knock off red jewel
                 colorSensor.enableLed(true);//Turns Color Sensor into Active Mode
                 if (colorSensor.red() >= RED_THRESHOLD) {
-                    leftRightPos = LEFTRIGHT_MAX;
+                    leftRightPos = (LEFTRIGHT_MIN + LEFTRIGHT_MID) / 2.0;
                     jewelTime = this.time;
                     jewelKnocked = true;
                 }
                 else if (colorSensor.blue() >= BLUE_THRESHOLD) {
-                    leftRightPos = LEFTRIGHT_MIN;
+                    leftRightPos = (LEFTRIGHT_MAX + LEFTRIGHT_MID) / 2.0;
                     jewelTime = this.time;
                     jewelKnocked = true;
                 }
@@ -152,7 +154,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
                     leftRightPos -= 0.0025;
                 leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
                 leftRightServo.setPosition(leftRightPos);
-                if (waitJewelSec(0.5) && (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)) {
+                if (waitJewelSec(0.5) && (leftRightServo.getPosition() == (LEFTRIGHT_MAX + LEFTRIGHT_MID) / 2.0 || leftRightServo.getPosition() == (LEFTRIGHT_MIN + LEFTRIGHT_MID) / 2.0)) {
                     state++;
                     glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }
@@ -162,12 +164,13 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 stateName = "Knock off jewel 3 - arm up";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
-                if (!waitSec(2.0)) {//bring up glyph
+                if (!waitSec(2.0)) {//bring up the glyph
                     glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     glyphLift.setPower(0.30);
                 }
                 else
                     glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
                 //leftRight servo moves back to center of robot
                 if (leftRightPos != LEFTRIGHT_MID)
                     leftRightPos = LEFTRIGHT_MID;
@@ -177,36 +180,37 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 upDownPos += 0.03;
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
                 upDownServo.setPosition(upDownPos);
-                if (upDownServo.getPosition() == UPDOWN_MAX && waitSec(2.5))
+                if (upDownServo.getPosition() == UPDOWN_MAX && waitSec(2.0))
                     state++;
                 break;
 
             case 8:
-                stateName = "Drive backward to drive off balancing stone";
+                stateName = "Drive forward to drive off balancing stone";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
-                moveForward(-0.20, -1.75);
+                moveForward(0.20, 1.5);
                 if (encoderTargetReached)
                     state++;
                 break;
 
             case 10:
-                stateName = "Rotate to -90 degrees to be perpendicular with the walls";
-                turnClockwise(-90);
-                if (turnAbsolute(-90))
+                stateName = "Drive backward to align with balancing stone";
+                //have robot drive to be square with the balancing stone
+                moveForward(-0.20);
+                if (waitSec(0.5))
                     state++;
                 break;
 
             case 12:
-                stateName = "Drive forward until correct column reached";
-                if (pictographKey == 0) { //drive to left column
-                    moveForward(-0.20, -2.075);
+                stateName = "Drive Forward until correct column reached";
+                if (pictographKey == 2) { //drive to right column
+                    moveForward(0.20, 1.45);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(-0.20, -1.375);
+                    moveForward(0.20, 0.91);
                 }
-                else if (pictographKey == 2) { //drive to right column
-                    moveForward(-0.20, -0.825);
+                else if (pictographKey == 0) { //drive to left column
+                    moveForward(0.20, 0.25);
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -215,22 +219,22 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 break;
 
             case 14:
-                stateName = "Rotate to 195 degrees to have glyph face CryptoBox";
-                turnClockwise(-165);
-                if (turnAbsolute(-165))
+                stateName = "Rotate to -75 degrees to have glyph face CryptoBox";
+                turnClockwise(-75);
+                if (turnAbsolute(-75))
                     state++;
                 break;
 
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (range.getDistance(DistanceUnit.INCH) <= 4.50 || waitSec(3))
+                if (range.getDistance(DistanceUnit.INCH) <= 4.5 || waitSec(3))
                     state++;
                 break;
 
             case 18:
                 stateName = "Drop and Release Glyph";
-                //open the claws to release the glyph
+                //open the claw to relase the glyph
                 leftClawServoPos = SERVO_MIN_LEFT;
                 leftClaw.setPosition(leftClawServoPos);
                 rightClawServoPos = SERVO_MAX_RIGHT;
@@ -244,9 +248,23 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 break;
 
             case 20:
+                stateName = "Drive backward a little bit";
+                moveForward(-0.20);
+                if (waitSec(0.25))
+                    state++;
+                break;
+
+            case 22:
+                stateName = "Drive forward to push glyph in";
+                moveForward(0.20);
+                if (waitSec(0.5))
+                    state++;
+                break;
+
+            case 24:
                 stateName = "Drive backward a little bit to park";
                 moveForward(-0.20);
-                if (waitSec(0.5))
+                if (waitSec(0.25))
                     state = 1000;
                 break;
 
@@ -261,7 +279,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 stateName = "Calibrating";
                 calibrateVariables();
                 resetEncoders();
-                if (waitSec(1)) {
+                if (waitSec(0.1)) {
                     state++;
                     setTime = this.time;
                 }
@@ -271,4 +289,45 @@ public class GeorgeRed2Auto extends GeorgeOp {
 
     //Create any methods needed for this specific autonomous program
 
+    //new and improved turning method, feedback control: PID
+    void turnClockwise(int targetAngle) {
+        double kp = 0.01; //proportionality constant (amount to adjust for immediate deviance) experimentally found
+        double ki = 0.01; //integral constant (amount to adjust for past errors) experimentally found
+        double kd = 0.01; //derivative constant (amount to adjust for future errors) experimentally found
+        double e = targetAngle + gyroMR.getIntegratedZValue(); //error
+        e_list.add(e);
+        t_list.add(this.time);
+        double power = kp*e + ki*integrate() + kd*differentiate();
+        power = Range.clip(power, -DRIVE_PWR_MAX, DRIVE_PWR_MAX); //ensure power doesn't exceed max speed
+        if (Math.abs(e / targetAngle) >= 0.01) //keep adjusting until error is less than 1%
+            turnClockwise(power);
+        else {
+            stopDriveMotors();
+            e_list.clear();
+            t_list.clear();
+        }
+    }
+    ArrayList<Double> e_list; //records past errors
+    ArrayList<Double> t_list; // records times past errors took place
+    //integrates error of angle w/ respect to time
+    double integrate() {
+        double sum = 0; //uses trapezoidal sum approximation method
+        if (e_list.size() >= 2) {
+            for (int i = 0; i <= e_list.size() - 2; i++) {
+                double dt = t_list.get(i+1) - t_list.get(i);
+                sum += (e_list.get(i+1) + e_list.get(i))*dt / 2.0;
+            }
+        }
+        return sum;
+    }
+    //differentiates error of angle w/ respect to time
+    double differentiate() {
+        double slope = 0; //uses secant line approximation
+        if (e_list.size() >= 2) {
+            double de = e_list.get(e_list.size() - 1) - e_list.get(e_list.size() - 2);
+            double dt = t_list.get(t_list.size() - 1) - t_list.get(t_list.size() - 2);
+            slope = de/dt;
+        }
+        return slope;
+    }
 }

@@ -34,6 +34,50 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 public class GeorgeBlueAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 
+    @Override
+    public void init() {
+        //Initialize motors & set direction
+        driveFR = hardwareMap.dcMotor.get("dfr");
+        driveFR.setDirection(DcMotorSimple.Direction.FORWARD);
+        driveFL = hardwareMap.dcMotor.get("dfl");
+        driveFL.setDirection(DcMotorSimple.Direction.REVERSE);
+        driveBR = hardwareMap.dcMotor.get("dbr");
+        driveBR.setDirection(DcMotorSimple.Direction.FORWARD);
+        driveBL = hardwareMap.dcMotor.get("dbl");
+        driveBL.setDirection(DcMotorSimple.Direction.REVERSE);
+        glyphLift = hardwareMap.dcMotor.get("gl");
+        glyphLift.setDirection(DcMotorSimple.Direction.REVERSE);
+        relicMotor = hardwareMap.dcMotor.get("rm");
+        relicMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        //Initialize servos
+        upDownServo = hardwareMap.servo.get("uds");
+        leftRightServo = hardwareMap.servo.get("lrs");
+        leftClaw = hardwareMap.servo.get("lc");
+        rightClaw = hardwareMap.servo.get("rc");
+        topLeftClaw = hardwareMap.servo.get("lct");
+        topRightClaw = hardwareMap.servo.get("rct");
+
+        //Initialize sensors
+        colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
+        gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
+        range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
+        colorSensor.enableLed(true);
+
+        //Initialize Vuforia
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        parameters.vuforiaLicenseKey = APIKey.apiKey;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT; // Use FRONT Camera (Change to BACK if you want to use that one)
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        relicTemplate = relicTrackables.get(0);
+    }
+
+    @Override public void start() {
+        relicTrackables.activate();
+    }
+
     public GeorgeBlueAuto() {}
 
     @Override
@@ -105,7 +149,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
                     jewelKnocked = true;
                 }
                 else if (waitSec(1) && !jewelKnocked) //Fail Safe: If looking into hole
-                    leftRightPos -= 0.005;
+                    leftRightPos -= 0.0025;
                 leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
                 leftRightServo.setPosition(leftRightPos);
                 if (waitJewelSec(0.5) && (leftRightServo.getPosition() == LEFTRIGHT_MAX || leftRightServo.getPosition() == LEFTRIGHT_MIN)) {
@@ -118,7 +162,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 stateName = "Knock off jewel 3 - arm up";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
-                if (!waitSec(2.5)) {//bring up the glyph
+                if (!waitSec(2.0)) {//bring up the glyph
                     glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     glyphLift.setPower(0.30);
                 }
@@ -158,10 +202,10 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 12:
                 stateName = "Drive Forward until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveForward(0.20, 1.70);
+                    moveForward(0.20, 1.45);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(0.20, 1.25);
+                    moveForward(0.20, 0.91);
                 }
                 else if (pictographKey == 0) { //drive to left column
                     moveForward(0.20, 0.25);

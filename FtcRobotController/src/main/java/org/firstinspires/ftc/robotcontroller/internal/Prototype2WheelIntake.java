@@ -8,10 +8,14 @@ import com.qualcomm.robotcore.util.Range;
 
 /**
  * Updated by Alex on 6/1/2017.
- * 2 motors * 40%, 2 servos (same angle from center)
+ *
+ * servos should rotate at same angle from the vertical
+ * wheels should be at least 5.9 inches away from each other
+ * servos should not rotate too quickly
  */
 
 @TeleOp(name = "Wheel Intake Prototype", group = "Default")
+@Disabled
 public class Prototype2WheelIntake extends OpMode {
     //Declare any motors, servos, and sensors
     DcMotor leftWheel;
@@ -20,11 +24,12 @@ public class Prototype2WheelIntake extends OpMode {
     Servo rightServo;
 
     //Declare any variables & constants pertaining to specific robot mechanisms (i.e. drive train)
-    final double WHEEL_PWR_MAX = 0.40;
+    final double WHEEL_PWR_MAX = 0.30;
+    final double WHEEL_DELTA = 5 / 255.0f;
     final float LEFT_MIN = 0 / 255.0f;
-    final float LEFT_MID = 120 / 255.0f;
-    final float RIGHT_MID = 135 / 255.0f;
-    final float RIGHT_MAX = 255 / 255.0f;
+    final float LEFT_MID = 0.39f;
+    final float RIGHT_MID = 0.61f;
+    final float RIGHT_MAX = 250 / 255.0f;
 
     double wheelPower = 0;
     double leftServoPos = LEFT_MIN;
@@ -61,7 +66,30 @@ public class Prototype2WheelIntake extends OpMode {
 
     void updateData() {
         //Add in update methods for specific robot mechanisms
-        wheelPower = gamepad2.left_stick_x * WHEEL_PWR_MAX;
+        if (!gamepad2.x && !gamepad2.b) {
+            if (gamepad2.left_stick_y < 0) {        //out
+                leftServoPos += WHEEL_DELTA;
+                rightServoPos -= WHEEL_DELTA;
+            } else if (gamepad2.left_stick_y > 0) {   //in
+                leftServoPos -= WHEEL_DELTA;
+                rightServoPos += WHEEL_DELTA;
+            }
+            wheelPower = -gamepad2.right_stick_y * WHEEL_PWR_MAX;
+        }
+        if (Math.abs(leftServoPos - rightServoPos) > (RIGHT_MID - LEFT_MID)) {
+            if (gamepad2.x) {
+                if (gamepad2.left_stick_y < 0)
+                    leftServoPos += WHEEL_DELTA;
+                if (gamepad2.left_stick_y > 0)
+                    leftServoPos -= WHEEL_DELTA;
+            }
+            if (gamepad2.b) {
+                if (gamepad2.right_stick_y < 0)
+                    rightServoPos += WHEEL_DELTA;
+                if (gamepad2.right_stick_y > 0)
+                    rightServoPos -= WHEEL_DELTA;
+            }
+        }
     }
 
     void initialization() {
@@ -79,6 +107,8 @@ public class Prototype2WheelIntake extends OpMode {
     void telemetry() {
         //Show Data for Specific Robot Mechanisms
         telemetry.addData("Wheel Power", String.format("%.2f", wheelPower));
+        telemetry.addData("Left Servo Pos", String.format("%.2f", leftServoPos));
+        telemetry.addData("Right Servo Pos", String.format("%.2f", rightServoPos));
     }
 
     //Create Methods that will update the driver data

@@ -72,10 +72,10 @@ public class GeorgeOp extends OpMode {
     DcMotor relicMotor;     //40:1, relic lift
 
     //Mecanum Drive Train Variables and Constants
-    final double DRIVE_PWR_MAX = 0.80;
-    final double TURN_PWR_MAX = 0.70;
+    final double DRIVE_PWR_MAX = 0.90;
+    final double TURN_PWR_MAX = 0.90;
     final int COUNTS_PER_REVOLUTION = 1120; //AndyMark Motors
-    final double DRIVE_GEAR_RATIO = 16.0 / 16.0; //Driven / Driver
+    final double DRIVE_GEAR_RATIO = 24.0 / 16.0; //Driven / Driver
     final double COUNTS_PER_INCH_RF = COUNTS_PER_REVOLUTION / (4 * Math.PI / DRIVE_GEAR_RATIO); //forward / right / backward / left
     final double COUNTS_PER_INCH_DG = COUNTS_PER_REVOLUTION / (2 * Math.PI * Math.sqrt(2) / DRIVE_GEAR_RATIO); //diagonal
     final int WHITE_THRESHOLD = 30;
@@ -394,7 +394,7 @@ public class GeorgeOp extends OpMode {
         move(power, power, power, power);
     }
     void moveForward(double power, double revolutions) {
-        double target = revolutions * COUNTS_PER_REVOLUTION;
+        double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
 
         if (!encoderTargetReached) {
             moveForward(power);
@@ -415,7 +415,7 @@ public class GeorgeOp extends OpMode {
         move(power, -power, -power, power);
     }
     void moveRight(double power, double revolutions) {
-        double target = revolutions * COUNTS_PER_REVOLUTION;
+        double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
 
         if (!encoderTargetReached) {
             moveRight(power);
@@ -435,7 +435,7 @@ public class GeorgeOp extends OpMode {
         move(power, 0.0, 0.0, power);
     }
     void moveForwardRight(double power, double revolutions) {
-        double target = revolutions * COUNTS_PER_REVOLUTION;
+        double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
 
         if (!encoderTargetReached) {
             moveForwardRight(power);
@@ -455,7 +455,7 @@ public class GeorgeOp extends OpMode {
         move(0.0,power, power, 0.0);
     }
     void moveForwardLeft(double power, double revolutions) {
-        double target = revolutions * COUNTS_PER_REVOLUTION;
+        double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
 
         if (!encoderTargetReached)
             moveForwardLeft(power);

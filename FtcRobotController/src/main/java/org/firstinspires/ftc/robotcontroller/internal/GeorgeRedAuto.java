@@ -200,31 +200,47 @@ public class GeorgeRedAuto extends GeorgeOp {
             case 12:
                 stateName = "Drive Back until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveForward(-0.20, -1.425);
+                    moveForward(-0.20, -1.30);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(-0.20, -1.975);
+                    moveForward(-0.20, -2.15);
                 }
                 else if (pictographKey == 0) { //drive to left column
-                    moveForward(-0.20, -2.65);
+                    moveForward(-0.20, -2.45);
                 }
                 if (encoderTargetReached) {
-                    state++;
-                    pictographKey = -1;
+                    if (pictographKey == 0) {
+                        state++;
+                        pictographKey = -2; //tells robot to robot to different angle
+                    }
+                    else {
+                        state++;
+                        pictographKey = -1;
+                    }
                 }
                 break;
 
             case 14:
                 stateName = "Rotate to -75 degrees to have glyph face CryptoBox";
-                turnClockwise(-75);
-                if (turnAbsolute(-75))
-                    state++;
+                //if cyrptokey = left column rotate to -85 degrees to prevent from hitting balancing stone
+                if (pictographKey == -2) {
+                    turnClockwise(-85);
+                    if (turnAbsolute(-85)) {
+                        state++;
+                        pictographKey = -1;
+                    }
+                }
+                else {
+                    turnClockwise(-75);
+                    if (turnAbsolute(-75))
+                        state++;
+                }
                 break;
 
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (range.getDistance(DistanceUnit.INCH) <= 4.5 || waitSec(3))
+                if (waitSec(3.5))
                     state++;
                 break;
 
@@ -246,9 +262,30 @@ public class GeorgeRedAuto extends GeorgeOp {
             case 20:
                 stateName = "Drive backward a little bit to park";
                 moveForward(-0.20);
-                if (waitSec(0.5))
+                if (!waitSec(0.95)) {//bring up the glyph
+                    glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    glyphLift.setPower(-0.50);
+                }
+                else
+                    glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                if (waitSec(1))
                     state = 1000;
                 break;
+
+//            case 22:
+//                stateName = "Drive forward to push glyph in";
+//                moveForward(0.30);
+//                if (waitSec(2))
+//                    state++;
+//                break;
+//
+//            case 24:
+//                stateName = "Drive backward a little bit to park";
+//                moveForward(-0.20);
+//                if (waitSec(1.25))
+//                    state = 1000;
+//                break;
 
             case 1000: //Run When Autonomous is Complete
                 stateName = "Autonomous Complete";
@@ -261,7 +298,7 @@ public class GeorgeRedAuto extends GeorgeOp {
                 stateName = "Calibrating";
                 calibrateVariables();
                 resetEncoders();
-                if (waitSec(1)) {
+                if (waitSec(0.25)) {
                     state++;
                     setTime = this.time;
                 }

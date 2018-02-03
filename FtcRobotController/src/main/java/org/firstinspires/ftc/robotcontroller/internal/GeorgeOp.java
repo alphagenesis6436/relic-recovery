@@ -73,7 +73,8 @@ public class GeorgeOp extends OpMode {
 
     //Mecanum Drive Train Variables and Constants
     final double DRIVE_PWR_MAX = 0.90;
-    final double TURN_PWR_MAX = 0.90;
+    final double DRIVE_AUTO_PWR = 0.30;
+    final double TURN_PWR_MAX = 1.00;
     final int COUNTS_PER_REVOLUTION = 1120; //AndyMark Motors
     final double DRIVE_GEAR_RATIO = 24.0 / 16.0; //Driven / Driver
     final double COUNTS_PER_INCH_RF = COUNTS_PER_REVOLUTION / (4 * Math.PI / DRIVE_GEAR_RATIO); //forward / right / backward / left
@@ -87,7 +88,7 @@ public class GeorgeOp extends OpMode {
     double backwardLeftPower = 0;
 
     //Glyph Claw Mechanism Variables and Constants
-    final float GLYPH_LIFT_PWR_MAX = 0.70f;
+    final float GLYPH_LIFT_PWR_MAX = 0.90f;
     double glyphLiftPower = 0;
     final float SERVO_MIN_LEFT = 139 / 255.0f; //left claw is fully open
     final float SERVO_MID_LEFT = 170 / 255.0f; //left claw is slightly open
@@ -128,7 +129,7 @@ public class GeorgeOp extends OpMode {
     final double DU_SERVO_MAX = 211 / 255.0f; //down
     double downUpServoPos = DU_SERVO_MAX;
     double openCloseServoPos = OC_SERVO_MAX;
-    final double RELIC_PWR_MAX = 0.40;
+    final double RELIC_PWR_MAX = 0.50;
     double relicPower = 0;
     double relicDelta = 0.05;
 
@@ -253,10 +254,10 @@ public class GeorgeOp extends OpMode {
 
     //Create Methods that will update the driver data
     void updateDriveTrain() {
-        forwardRightPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
-        forwardLeftPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
-        backwardRightPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
-        backwardLeftPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
+        forwardRightPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
+        forwardLeftPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
+        backwardRightPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
+        backwardLeftPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         if (gamepad1.right_bumper) {
             drivePreciseIsOn = false;
             colorSensor.enableLed(false);
@@ -341,7 +342,7 @@ public class GeorgeOp extends OpMode {
         else if (gamepad2.dpad_down)
             openCloseServoPos = OC_SERVO_MAX;
         if (gamepad2.a) //down
-            downUpServoPos += relicDelta * 2;
+            downUpServoPos += relicDelta;
         else if (gamepad2.y) //up
             downUpServoPos -= relicDelta;
     }
@@ -412,7 +413,7 @@ public class GeorgeOp extends OpMode {
     }
     void moveRight(double power) {
         runConstantSpeed();
-        move(power, -power, -power, power);
+        move(-power, power, power, -power);
     }
     void moveRight(double power, double revolutions) {
         double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
@@ -421,18 +422,18 @@ public class GeorgeOp extends OpMode {
             moveRight(power);
         }
 
-        if ((target > 0 && target - driveFR.getCurrentPosition() <= 10) || (target < 0 && -target + driveFR.getCurrentPosition() <= 10)) {
+        if ((target > 0 && target - driveFL.getCurrentPosition() <= 10) || (target < 0 && -target + driveFL.getCurrentPosition() <= 10)) {
             stopDriveMotors();
             encoderTargetReached = true;
         }
         else {
             //Wait until target position is reached
-            telemetry.addData("FR Encoder", driveFR.getCurrentPosition());
+            telemetry.addData("FL Encoder", driveFL.getCurrentPosition());
         }
     }
     void moveForwardRight(double power) {
         runConstantSpeed();
-        move(power, 0.0, 0.0, power);
+        move(0.0, power, power, 0.0);
     }
     void moveForwardRight(double power, double revolutions) {
         double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
@@ -441,25 +442,6 @@ public class GeorgeOp extends OpMode {
             moveForwardRight(power);
         }
 
-        if ((target > 0 && target - driveFR.getCurrentPosition() <= 10) || (target < 0 && -target + driveFR.getCurrentPosition() <= 10)) {
-            stopDriveMotors();
-            encoderTargetReached = true;
-        }
-        else {
-            //Wait until target position is reached
-            telemetry.addData("FR Encoder", driveFR.getCurrentPosition());
-        }
-    }
-    void moveForwardLeft(double power) {
-        runConstantSpeed();
-        move(0.0,power, power, 0.0);
-    }
-    void moveForwardLeft(double power, double revolutions) {
-        double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
-
-        if (!encoderTargetReached)
-            moveForwardLeft(power);
-
         if ((target > 0 && target - driveFL.getCurrentPosition() <= 10) || (target < 0 && -target + driveFL.getCurrentPosition() <= 10)) {
             stopDriveMotors();
             encoderTargetReached = true;
@@ -467,6 +449,25 @@ public class GeorgeOp extends OpMode {
         else {
             //Wait until target position is reached
             telemetry.addData("FL Encoder", driveFL.getCurrentPosition());
+        }
+    }
+    void moveForwardLeft(double power) {
+        runConstantSpeed();
+        move(power, 0.0, 0.0, power);
+    }
+    void moveForwardLeft(double power, double revolutions) {
+        double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
+
+        if (!encoderTargetReached)
+            moveForwardLeft(power);
+
+        if ((target > 0 && target - driveFR.getCurrentPosition() <= 10) || (target < 0 && -target + driveFR.getCurrentPosition() <= 10)) {
+            stopDriveMotors();
+            encoderTargetReached = true;
+        }
+        else {
+            //Wait until target position is reached
+            telemetry.addData("FR Encoder", driveFR.getCurrentPosition());
         }
     }
     void turnClockwise(double power) {

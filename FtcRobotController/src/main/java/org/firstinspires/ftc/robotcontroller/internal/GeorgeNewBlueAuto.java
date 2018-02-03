@@ -4,6 +4,7 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
@@ -15,6 +16,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import java.util.ArrayList;
 
 /**
+ * PID test
+ *
  * Created by Alex on 11/8/2017.
  * Autonomous Objectives:
  * --Knock Off Jewel for 30 Points
@@ -33,6 +36,7 @@ import java.util.ArrayList;
  * End. Robot ends up aligned to score glyph in specific column of CryptoBox
  */
 @Autonomous(name = "GeorgeNewBlueAuto", group = "default")
+@Disabled
 public class GeorgeNewBlueAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 
@@ -188,7 +192,7 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
                 stateName = "Drive forward to drive off balancing stone";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
-                moveForward(0.20, 1.5);
+                moveForward(DRIVE_AUTO_PWR, 1.5);
                 if (encoderTargetReached)
                     state++;
                 break;
@@ -196,7 +200,7 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
             case 10:
                 stateName = "Drive backward to align with balancing stone";
                 //have robot drive to be square with the balancing stone
-                moveForward(-0.20);
+                moveForward(-DRIVE_AUTO_PWR);
                 if (waitSec(0.5))
                     state++;
                 break;
@@ -204,13 +208,13 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
             case 12:
                 stateName = "Drive Forward until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveForward(0.20, 1.45);
+                    moveForward(DRIVE_AUTO_PWR, 1.45);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(0.20, 0.91);
+                    moveForward(DRIVE_AUTO_PWR, 0.91);
                 }
                 else if (pictographKey == 0) { //drive to left column
-                    moveForward(0.20, 0.25);
+                    moveForward(DRIVE_AUTO_PWR, 0.25);
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -227,7 +231,7 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
 
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
-                moveForward(0.20);
+                moveForward(DRIVE_AUTO_PWR);
                 if (range.getDistance(DistanceUnit.INCH) <= 4.5 || waitSec(3))
                     state++;
                 break;
@@ -249,22 +253,22 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
 
             case 20:
                 stateName = "Drive backward a little bit";
-                moveForward(-0.20);
-                if (waitSec(0.25))
+                moveForward(-DRIVE_AUTO_PWR);
+                if (waitSec(0.75))
                     state++;
                 break;
 
             case 22:
                 stateName = "Drive forward to push glyph in";
-                moveForward(0.20);
-                if (waitSec(0.5))
+                moveForward(DRIVE_AUTO_PWR);
+                if (waitSec(1.5))
                     state++;
                 break;
 
             case 24:
                 stateName = "Drive backward a little bit to park";
-                moveForward(-0.20);
-                if (waitSec(0.25))
+                moveForward(-DRIVE_AUTO_PWR);
+                if (waitSec(1))
                     state = 1000;
                 break;
 
@@ -291,8 +295,8 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
 
     //new and improved turning method, feedback control: PID
     void turnClockwise(int targetAngle) {
-        double kp = 0.01; //proportionality constant (amount to adjust for immediate deviance) experimentally found
-        double ki = 0.01; //integral constant (amount to adjust for past errors) experimentally found
+        double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
+        double ki = 0.011; //integral constant (amount to adjust for past errors) experimentally found
         double kd = 0.01; //derivative constant (amount to adjust for future errors) experimentally found
         double e = targetAngle + gyroMR.getIntegratedZValue(); //error
         e_list.add(e);
@@ -307,8 +311,8 @@ public class GeorgeNewBlueAuto extends GeorgeOp {
             t_list.clear();
         }
     }
-    ArrayList<Double> e_list; //records past errors
-    ArrayList<Double> t_list; // records times past errors took place
+    ArrayList<Double> e_list = new ArrayList<>(); //records past errors
+    ArrayList<Double> t_list = new ArrayList<>(); // records times past errors took place
     //integrates error of angle w/ respect to time
     double integrate() {
         double sum = 0; //uses trapezoidal sum approximation method

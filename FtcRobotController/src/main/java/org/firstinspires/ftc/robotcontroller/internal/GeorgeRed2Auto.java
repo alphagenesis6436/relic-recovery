@@ -12,6 +12,8 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
+import java.util.ArrayList;
+
 /**
  * Created by Alex on 11/8/2017.
  * Autonomous Objectives:
@@ -200,13 +202,13 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 12:
                 stateName = "Drive forward until correct column reached";
                 if (pictographKey == 0) { //drive to left column
-                    moveForward(-0.20, -2.075);
+                    moveForward(-0.20, -1.625);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(-0.20, -1.375);
+                    moveForward(-0.20, -1.075);
                 }
                 else if (pictographKey == 2) { //drive to right column
-                    moveForward(-0.20, -0.825);
+                    moveForward(-0.20, -0.525);
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -224,7 +226,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (range.getDistance(DistanceUnit.INCH) <= 4.50 || waitSec(3))
+                if (waitSec(3.5))
                     state++;
                 break;
 
@@ -246,9 +248,30 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 20:
                 stateName = "Drive backward a little bit to park";
                 moveForward(-0.20);
-                if (waitSec(0.5))
+                if (!waitSec(0.95)) {//bring up the glyph
+                    glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    glyphLift.setPower(-0.50);
+                }
+                else
+                    glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                if (waitSec(1))
                     state = 1000;
                 break;
+
+//            case 22:
+//                stateName = "Drive forward to push glyph in";
+//                moveForward(0.30);
+//                if (waitSec(2.5))
+//                    state++;
+//                break;
+//
+//            case 24:
+//                stateName = "Drive backward a little bit to park";
+//                moveForward(-0.20);
+//                if (waitSec(1.5))
+//                    state = 1000;
+//                break;
 
             case 1000: //Run When Autonomous is Complete
                 stateName = "Autonomous Complete";
@@ -261,14 +284,55 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 stateName = "Calibrating";
                 calibrateVariables();
                 resetEncoders();
-                if (waitSec(1)) {
+                if (waitSec(0.25)) {
                     state++;
                     setTime = this.time;
                 }
                 break;
         }
+
     }
 
     //Create any methods needed for this specific autonomous program
-
+    //new and improved turning method, feedback control: PID
+    void turnClockwise(int targetAngle) {
+        double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
+        double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found
+        double kd = 0.011; //derivative constant (amount to adjust for future errors) experimentally found
+        double e = targetAngle + gyroMR.getIntegratedZValue(); //error
+        e_list.add(e);
+        t_list.add(this.time);
+        double power = kp*e + ki*integrate() + kd*differentiate();
+        power = Range.clip(power, -DRIVE_PWR_MAX, DRIVE_PWR_MAX); //ensure power doesn't exceed max speed
+        if (Math.abs(e / targetAngle) >= 0.01) //keep adjusting until error is less than 1%
+            turnClockwise(power);
+        else {
+            stopDriveMotors();
+            e_list.clear();
+            t_list.clear();
+        }
+    }
+    ArrayList<Double> e_list = new ArrayList<>(); //records past errors
+    ArrayList<Double> t_list = new ArrayList<>(); // records times past errors took place
+    //integrates error of angle w/ respect to time
+    double integrate() {
+        double sum = 0; //uses trapezoidal sum approximation method
+        if (e_list.size() >= 2) {
+            for (int i = 0; i <= e_list.size() - 2; i++) {
+                double dt = t_list.get(i+1) - t_list.get(i);
+                sum += (e_list.get(i+1) + e_list.get(i))*dt / 2.0;
+            }
+        }
+        return sum;
+    }
+    //differentiates error of angle w/ respect to time
+    double differentiate() {
+        double slope = 0; //uses secant line approximation
+        if (e_list.size() >= 2) {
+            double de = e_list.get(e_list.size() - 1) - e_list.get(e_list.size() - 2);
+            double dt = t_list.get(t_list.size() - 1) - t_list.get(t_list.size() - 2);
+            slope = de/dt;
+        }
+        return slope;
+    }
 }

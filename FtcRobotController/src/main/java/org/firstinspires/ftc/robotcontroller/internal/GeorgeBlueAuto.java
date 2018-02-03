@@ -202,7 +202,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 12:
                 stateName = "Drive Forward until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveForward(0.20, 1.45);
+                    moveForward(0.20, 1.48);
                 }
                 else if (pictographKey == 1) { //drive to middle column
                     moveForward(0.20, 0.91);
@@ -226,7 +226,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (range.getDistance(DistanceUnit.INCH) <= 4.5 || waitSec(3))
+                if (waitSec(3.5))
                     state++;
                 break;
 
@@ -248,9 +248,30 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 20:
                 stateName = "Drive backward a little bit to park";
                 moveForward(-0.20);
-                if (waitSec(0.5))
+                if (!waitSec(0.95)) {//bring up the glyph
+                    glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    glyphLift.setPower(-0.50);
+                }
+                else
+                    glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                if (waitSec(1))
                     state = 1000;
                 break;
+
+//            case 22:
+//                stateName = "Drive forward to push glyph in";
+//                moveForward(0.30);
+//                if (waitSec(2.5))
+//                    state++;
+//                break;
+//
+//            case 24:
+//                stateName = "Drive backward a little bit to park";
+//                moveForward(-0.20);
+//                if (waitSec(1.5))
+//                    state = 1000;
+//                break;
 
             case 1000: //Run When Autonomous is Complete
                 stateName = "Autonomous Complete";
@@ -263,7 +284,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
                 stateName = "Calibrating";
                 calibrateVariables();
                 resetEncoders();
-                if (waitSec(1)) {
+                if (waitSec(0.25)) {
                     state++;
                     setTime = this.time;
                 }

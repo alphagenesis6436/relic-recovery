@@ -208,7 +208,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
                     moveForward(-0.20, -1.075);
                 }
                 else if (pictographKey == 2) { //drive to right column
-                    moveForward(-0.20, -0.525);
+                    moveForward(-0.20, -0.525); //-.450
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -218,8 +218,8 @@ public class GeorgeRed2Auto extends GeorgeOp {
 
             case 14:
                 stateName = "Rotate to 195 degrees to have glyph face CryptoBox";
-                turnClockwise(-165);
-                if (turnAbsolute(-165))
+                turnClockwise(-150); //-165
+                if (turnAbsolute(-150))  //-165
                     state++;
                 break;
 

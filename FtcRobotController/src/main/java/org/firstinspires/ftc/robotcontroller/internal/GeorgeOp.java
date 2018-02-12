@@ -129,7 +129,7 @@ public class GeorgeOp extends OpMode {
     final double DU_SERVO_MAX = 211 / 255.0f; //down
     double downUpServoPos = DU_SERVO_MAX;
     double openCloseServoPos = OC_SERVO_MAX;
-    final double RELIC_PWR_MAX = 0.60;
+    final double RELIC_PWR_MAX = 0.50;
     double relicPower = 0;
     double relicDelta = 0.05;
 

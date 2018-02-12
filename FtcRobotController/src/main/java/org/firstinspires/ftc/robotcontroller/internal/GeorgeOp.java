@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
@@ -123,12 +122,12 @@ public class GeorgeOp extends OpMode {
     boolean jewelKnocked = false;
 
     //Relic Mechanism Variables and Constants
-    final float OC_SERVO_OPEN = 180 / 255.0f; //open
+    final float OC_SERVO_CLOSE = 140 / 255.0f; //open - 180 o.g.
     final float OC_SERVO_MAX = 255 / 255.0f; //closed
-    final double DU_SERVO_MIN = 0 / 255.0f; //up
+    final double DU_SERVO_MIN = 70 / 255.0f; //up
     final double DU_SERVO_MAX = 211 / 255.0f; //down
     double downUpServoPos = DU_SERVO_MAX;
-    double openCloseServoPos = OC_SERVO_MAX;
+    double openCloseServoPos = OC_SERVO_CLOSE;
     final double RELIC_PWR_MAX = 0.50;
     double relicPower = 0;
     double relicDelta = 0.05;
@@ -225,7 +224,7 @@ public class GeorgeOp extends OpMode {
         //Clip and Initialize Relic Mechanism
         downUpServoPos = Range.clip(downUpServoPos, DU_SERVO_MIN, DU_SERVO_MAX);
         downUpServo.setPosition(downUpServoPos);
-        openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_OPEN, OC_SERVO_MAX);
+        openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_CLOSE, OC_SERVO_MAX);
         openCloseServo.setPosition(openCloseServoPos);
         relicPower = Range.clip(relicPower, -RELIC_PWR_MAX, RELIC_PWR_MAX);
         relicMotor.setPower(relicPower);
@@ -338,9 +337,9 @@ public class GeorgeOp extends OpMode {
     void updateRelic() {
         relicPower = -gamepad2.right_stick_y * RELIC_PWR_MAX;
         if (gamepad2.dpad_up)
-            openCloseServoPos = OC_SERVO_OPEN;
-        else if (gamepad2.dpad_down)
             openCloseServoPos = OC_SERVO_MAX;
+        else if (gamepad2.dpad_down)
+            openCloseServoPos = OC_SERVO_CLOSE;
         if (gamepad2.a) //down
             downUpServoPos += relicDelta;
         else if (gamepad2.y) //up

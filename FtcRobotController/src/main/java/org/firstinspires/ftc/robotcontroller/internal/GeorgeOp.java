@@ -123,12 +123,12 @@ public class GeorgeOp extends OpMode {
 
     //Relic Mechanism Variables and Constants
     final float OC_SERVO_CLOSE = 140 / 255.0f; //close - 180 o.g.
-    final float OC_SERVO_MAX = 245 / 255.0f; //open
+    final float OC_SERVO_MAX = 206 / 255.0f; //open
     final double DU_SERVO_MIN = 70 / 255.0f; //up
     final double DU_SERVO_MAX = 211 / 255.0f; //down
     double downUpServoPos = DU_SERVO_MAX;
     double openCloseServoPos = OC_SERVO_CLOSE;
-    final double RELIC_PWR_MAX = 0.40;
+    final double RELIC_PWR_MAX = 0.80;
     double relicPower = 0;
     double relicDelta = 0.05;
 

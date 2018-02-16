@@ -187,7 +187,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 stateName = "Drive backward to drive off balancing stone";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
-                moveForward(-0.20, -1.75);
+                moveForward(-0.20, -2.00);
                 if (encoderTargetReached)
                     state++;
                 break;
@@ -202,13 +202,13 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 12:
                 stateName = "Drive forward until correct column reached";
                 if (pictographKey == 0) { //drive to left column
-                    moveForward(-0.20, -1.625);
+                    moveForward(-0.20, -2.025);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(-0.20, -1.075);
+                    moveForward(-0.20, -1.450);
                 }
                 else if (pictographKey == 2) { //drive to right column
-                    moveForward(-0.20, -0.525); //-.450
+                    moveForward(-0.20, -0.775); //-.450
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -226,7 +226,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (waitSec(3.5))
+                if (waitSec(2.5))
                     state++;
                 break;
 

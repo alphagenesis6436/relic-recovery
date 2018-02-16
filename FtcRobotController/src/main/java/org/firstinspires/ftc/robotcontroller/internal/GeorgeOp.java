@@ -112,8 +112,8 @@ public class GeorgeOp extends OpMode {
     final float LEFTRIGHT_MID = 110 / 255.0f;
     final float UPDOWN_MIN = 131 / 255.0f;   //fully down (maybe 131)
     final float UPDOWN_MAX = 207 / 255.0f;  //fully up
-    final float LEFTRIGHT_MIN = 70 / 255.0f; //far right
-    final float LEFTRIGHT_MAX = 140 / 255.0f;   //far left
+    final float LEFTRIGHT_MIN = 95 / 255.0f; //far right (70)
+    final float LEFTRIGHT_MAX = 125 / 255.0f;   //far left (140)
     final int BLUE_THRESHOLD = 3;   //holes
     final int RED_THRESHOLD = 3;    //holes
     double upDownPos = UPDOWN_MAX;
@@ -139,6 +139,8 @@ public class GeorgeOp extends OpMode {
     VuforiaTrackables relicTrackables;
     VuforiaTrackable relicTemplate;
     int pictographKey = 0; //Left = 0, Center = 1, Right = 2
+
+    VoltageSensor driveVoltage;
 
     public GeorgeOp() {}
 

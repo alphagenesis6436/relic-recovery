@@ -63,6 +63,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
         gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
+        driveVoltage = hardwareMap.voltageSensor.get("Expansion Hub 2");
 
         //Initialize Vuforia
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());

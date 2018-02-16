@@ -63,6 +63,7 @@ public class GeorgeRedAuto extends GeorgeOp {
         gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
+        driveVoltage = hardwareMap.voltageSensor.get("Expansion Hub 2");
 
         //Initialize Vuforia
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -203,7 +204,7 @@ public class GeorgeRedAuto extends GeorgeOp {
                     moveForward(-0.20, -1.30);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(-0.20, -2.15);
+                    moveForward(-0.20, -1.975);
                 }
                 else if (pictographKey == 0) { //drive to left column
                     moveForward(-0.20, -2.45);
@@ -240,7 +241,7 @@ public class GeorgeRedAuto extends GeorgeOp {
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (waitSec(3.5))
+                if (waitSec(3.0))
                     state++;
                 break;
 

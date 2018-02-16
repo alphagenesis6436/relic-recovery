@@ -68,6 +68,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
         gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
+        driveVoltage = hardwareMap.voltageSensor.get("Expansion Hub 2");
 
         //Initialize Vuforia
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -204,13 +205,13 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 12:
                 stateName = "Drive Right until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveRight(0.20, 0.950);
+                    moveRight(0.20, 1.150);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveRight(0.20, 0.25);
+                    moveRight(0.20, 0.60);
                 }
                 else if (pictographKey == 0) { //drive to left column
-                    moveRight(-0.20, -0.40);
+                    moveRight(-0.20, -0.10);
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -228,7 +229,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (waitSec(3.5))
+                if (waitSec(2.5))
                     state++;
                 break;
 
@@ -296,44 +297,55 @@ public class GeorgeBlue2Auto extends GeorgeOp {
 
 //    //Create any methods needed for this specific autonomous program
 //    //new and improved turning method, feedback control: PID
-//    void turnClockwise(int targetAngle) {
-//        double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
-//        double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found
-//        double kd = 0.01; //derivative constant (amount to adjust for future errors) experimentally found
-//        double e = targetAngle + gyroMR.getIntegratedZValue(); //error
-//        e_list.add(e);
-//        t_list.add(this.time);
-//        double power = kp*e + ki*integrate() + kd*differentiate();
-//        power = Range.clip(power, -DRIVE_PWR_MAX, DRIVE_PWR_MAX); //ensure power doesn't exceed max speed
-//        if (Math.abs(e / targetAngle) >= 0.01) //keep adjusting until error is less than 1%
-//            turnClockwise(power);
-//        else {
-//            stopDriveMotors();
-//            e_list.clear();
-//            t_list.clear();
-//        }
-//    }
-//    ArrayList<Double> e_list = new ArrayList<>(); //records past errors
-//    ArrayList<Double> t_list = new ArrayList<>(); // records times past errors took place
-//    //integrates error of angle w/ respect to time
-//    double integrate() {
-//        double sum = 0; //uses trapezoidal sum approximation method
-//        if (e_list.size() >= 2) {
-//            for (int i = 0; i <= e_list.size() - 2; i++) {
-//                double dt = t_list.get(i+1) - t_list.get(i);
-//                sum += (e_list.get(i+1) + e_list.get(i))*dt / 2.0;
-//            }
-//        }
-//        return sum;
-//    }
-//    //differentiates error of angle w/ respect to time
-//    double differentiate() {
-//        double slope = 0; //uses secant line approximation
-//        if (e_list.size() >= 2) {
-//            double de = e_list.get(e_list.size() - 1) - e_list.get(e_list.size() - 2);
-//            double dt = t_list.get(t_list.size() - 1) - t_list.get(t_list.size() - 2);
-//            slope = de/dt;
-//        }
-//        return slope;
-//    }
+void turnClockwise(int targetAngle) {
+    if (driveVoltage.getVoltage() < 13.5) {
+        double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
+        double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found
+        double kd = 0.011; //derivative constant (amount to adjust for future errors) experimentally found
+        double e = targetAngle + gyroMR.getIntegratedZValue(); //error
+        e_list.add(e);
+        t_list.add(this.time);
+        double power = kp*e + ki*integrate() + kd*differentiate();
+        power = Range.clip(power, -DRIVE_PWR_MAX, DRIVE_PWR_MAX); //ensure power doesn't exceed max speed
+        if (Math.abs(e / targetAngle) >= 0.01) //keep adjusting until error is less than 1%
+            turnClockwise(power);
+        else {
+            stopDriveMotors();
+            e_list.clear();
+            t_list.clear();
+        }
+    }
+    else {
+        double k = 1; //experimentally found
+        double power = k * (targetAngle + gyroMR.getIntegratedZValue())
+                / Math.abs(targetAngle);
+        if (Math.abs(targetAngle + gyroMR.getIntegratedZValue()) >= 10)
+            turnClockwise(power);
+        else
+            stopDriveMotors();
+    }
+}
+    ArrayList<Double> e_list = new ArrayList<>(); //records past errors
+    ArrayList<Double> t_list = new ArrayList<>(); // records times past errors took place
+    //integrates error of angle w/ respect to time
+    double integrate() {
+        double sum = 0; //uses trapezoidal sum approximation method
+        if (e_list.size() >= 2) {
+            for (int i = 0; i <= e_list.size() - 2; i++) {
+                double dt = t_list.get(i+1) - t_list.get(i);
+                sum += (e_list.get(i+1) + e_list.get(i))*dt / 2.0;
+            }
+        }
+        return sum;
+    }
+    //differentiates error of angle w/ respect to time
+    double differentiate() {
+        double slope = 0; //uses secant line approximation
+        if (e_list.size() >= 2) {
+            double de = e_list.get(e_list.size() - 1) - e_list.get(e_list.size() - 2);
+            double dt = t_list.get(t_list.size() - 1) - t_list.get(t_list.size() - 2);
+            slope = de / dt;
+        }
+        return slope;
+    }
 }

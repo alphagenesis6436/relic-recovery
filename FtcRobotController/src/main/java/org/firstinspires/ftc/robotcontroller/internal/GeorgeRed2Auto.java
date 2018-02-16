@@ -66,6 +66,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
         gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
+        driveVoltage = hardwareMap.voltageSensor.get("Expansion Hub 2");
 
         //Initialize Vuforia
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -226,7 +227,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 16:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (waitSec(2.5))
+                if (waitSec(3))
                     state++;
                 break;
 
@@ -296,20 +297,31 @@ public class GeorgeRed2Auto extends GeorgeOp {
     //Create any methods needed for this specific autonomous program
     //new and improved turning method, feedback control: PID
     void turnClockwise(int targetAngle) {
-        double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
-        double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found
-        double kd = 0.011; //derivative constant (amount to adjust for future errors) experimentally found
-        double e = targetAngle + gyroMR.getIntegratedZValue(); //error
-        e_list.add(e);
-        t_list.add(this.time);
-        double power = kp*e + ki*integrate() + kd*differentiate();
-        power = Range.clip(power, -DRIVE_PWR_MAX, DRIVE_PWR_MAX); //ensure power doesn't exceed max speed
-        if (Math.abs(e / targetAngle) >= 0.01) //keep adjusting until error is less than 1%
-            turnClockwise(power);
+        if (driveVoltage.getVoltage() < 14.0) {
+            double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
+            double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found
+            double kd = 0.011; //derivative constant (amount to adjust for future errors) experimentally found
+            double e = targetAngle + gyroMR.getIntegratedZValue(); //error
+            e_list.add(e);
+            t_list.add(this.time);
+            double power = kp*e + ki*integrate() + kd*differentiate();
+            power = Range.clip(power, -DRIVE_PWR_MAX, DRIVE_PWR_MAX); //ensure power doesn't exceed max speed
+            if (Math.abs(e / targetAngle) >= 0.01) //keep adjusting until error is less than 1%
+                turnClockwise(power);
+            else {
+                stopDriveMotors();
+                e_list.clear();
+                t_list.clear();
+            }
+        }
         else {
-            stopDriveMotors();
-            e_list.clear();
-            t_list.clear();
+            double k = 3.5; //experimentally found
+            double power = k * (targetAngle + gyroMR.getIntegratedZValue())
+                    / Math.abs(targetAngle);
+            if (Math.abs(targetAngle + gyroMR.getIntegratedZValue()) >= 10)
+                turnClockwise(power);
+            else
+                stopDriveMotors();
         }
     }
     ArrayList<Double> e_list = new ArrayList<>(); //records past errors

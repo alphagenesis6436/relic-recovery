@@ -122,13 +122,15 @@ public class GeorgeOp extends OpMode {
     boolean jewelKnocked = false;
 
     //Relic Mechanism Variables and Constants
-    final float OC_SERVO_CLOSE = 140 / 255.0f; //close - 180 o.g.
+    final float OC_SERVO_CLOSE = 137 / 255.0f; //close - 180 o.g.
     final float OC_SERVO_MAX = 206 / 255.0f; //open
     final double DU_SERVO_MIN = 70 / 255.0f; //up
     final double DU_SERVO_MAX = 211 / 255.0f; //down
     double downUpServoPos = DU_SERVO_MAX;
     double openCloseServoPos = OC_SERVO_CLOSE;
     final double RELIC_PWR_MAX = 0.80;
+    boolean relicPwrSustained = false;
+    boolean relicBtnPressed = false;
     double relicPower = 0;
     double relicDelta = 0.05;
 
@@ -337,7 +339,18 @@ public class GeorgeOp extends OpMode {
     }
 
     void updateRelic() {
-        relicPower = -gamepad2.right_stick_y * RELIC_PWR_MAX;
+        if (!relicPwrSustained) {
+            relicPower = -gamepad2.right_stick_y * RELIC_PWR_MAX;
+        }
+        if (gamepad2.right_trigger >= 0.50 && !relicBtnPressed) {
+            relicBtnPressed = true;
+            relicPwrSustained = !relicPwrSustained;
+        }
+        else if (gamepad2.right_trigger < 0.30 && relicBtnPressed
+                || gamepad2.back) {
+            relicBtnPressed = false;
+        }
+
         if (gamepad2.dpad_up)
             openCloseServoPos = OC_SERVO_MAX;
         else if (gamepad2.dpad_down)

@@ -205,13 +205,13 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 12:
                 stateName = "Drive Right until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveRight(0.20, 1.150);
+                    moveRight(0.20, 1.40);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveRight(0.20, 0.60);
+                    moveRight(0.20, 0.90);
                 }
                 else if (pictographKey == 0) { //drive to left column
-                    moveRight(-0.20, -0.10);
+                    moveRight(0.20, 0.15);
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -298,7 +298,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
 //    //Create any methods needed for this specific autonomous program
 //    //new and improved turning method, feedback control: PID
 void turnClockwise(int targetAngle) {
-    if (driveVoltage.getVoltage() < 13.5) {
+    if (driveVoltage.getVoltage() < 10.5) {
         double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
         double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found
         double kd = 0.011; //derivative constant (amount to adjust for future errors) experimentally found

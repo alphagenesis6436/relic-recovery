@@ -205,13 +205,13 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 12:
                 stateName = "Drive Right until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveRight(0.20, 1.40);
+                    moveRight(0.20, 1.50);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveRight(0.20, 0.90);
+                    moveRight(0.20, 1.00);
                 }
                 else if (pictographKey == 0) { //drive to left column
-                    moveRight(0.20, 0.15);
+                    moveRight(0.20, 0.25);
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -316,13 +316,7 @@ void turnClockwise(int targetAngle) {
         }
     }
     else {
-        double k = 1; //experimentally found
-        double power = k * (targetAngle + gyroMR.getIntegratedZValue())
-                / Math.abs(targetAngle);
-        if (Math.abs(targetAngle + gyroMR.getIntegratedZValue()) >= 10)
-            turnClockwise(power);
-        else
-            stopDriveMotors();
+        super.turnClockwise(targetAngle);
     }
 }
     ArrayList<Double> e_list = new ArrayList<>(); //records past errors

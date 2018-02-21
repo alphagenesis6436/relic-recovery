@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
@@ -9,7 +11,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 import java.util.ArrayList;
@@ -65,10 +72,15 @@ public class GeorgeBlue2Auto extends GeorgeOp {
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
-        gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
-        range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
         driveVoltage = hardwareMap.voltageSensor.get("Expansion Hub 2");
+        BNO055IMU.Parameters parameterz = new BNO055IMU.Parameters();
+        parameterz.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameterz.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameterz.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        //parameterz.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameterz);
 
         //Initialize Vuforia
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -82,6 +94,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
 
     @Override public void start() {
         relicTrackables.activate();
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
     }
 
     @Override
@@ -299,10 +312,11 @@ public class GeorgeBlue2Auto extends GeorgeOp {
 //    //new and improved turning method, feedback control: PID
 void turnClockwise(int targetAngle) {
     if (driveVoltage.getVoltage() < 10.5) {
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
         double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found
         double kd = 0.011; //derivative constant (amount to adjust for future errors) experimentally found
-        double e = targetAngle + gyroMR.getIntegratedZValue(); //error
+        double e = targetAngle + angles.firstAngle; //error
         e_list.add(e);
         t_list.add(this.time);
         double power = kp*e + ki*integrate() + kd*differentiate();

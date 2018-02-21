@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
@@ -10,6 +12,8 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 /**
@@ -60,10 +64,15 @@ public class GeorgeBlueAuto extends GeorgeOp {
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
-        gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
-        range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
         driveVoltage = hardwareMap.voltageSensor.get("Expansion Hub 2");
+        BNO055IMU.Parameters parameterz = new BNO055IMU.Parameters();
+        parameterz.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameterz.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameterz.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        //parameterz.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameterz);
 
         //Initialize Vuforia
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -77,6 +86,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
 
     @Override public void start() {
         relicTrackables.activate();
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
     }
 
     public GeorgeBlueAuto() {}

@@ -1,20 +1,26 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+
+import java.util.ArrayList;
 
 /**
  * Updated by Alex on 11/18/17
@@ -59,8 +65,8 @@ public class GeorgeOp extends OpMode {
     Servo upDownServo; //Metal Gear, 180
     Servo leftRightServo; //Metal Gear, 180
     ModernRoboticsI2cColorSensor colorSensor; //For Jewel Mechanism
-    ModernRoboticsI2cGyro gyroMR; //For Mecanum Drive Train
-    ModernRoboticsI2cRangeSensor range; //for detecting the wall in autonomous
+    BNO055IMU imu; //For detecting rotation
+    Orientation angles;
     Servo leftClaw; //180, glyph claw
     Servo rightClaw; //180, glyph claw
     Servo topLeftClaw; //180, glyph top claw
@@ -75,7 +81,7 @@ public class GeorgeOp extends OpMode {
     final double DRIVE_AUTO_PWR = 0.30;
     final double TURN_PWR_MAX = 1.00;
     final int COUNTS_PER_REVOLUTION = 1120; //AndyMark Motors
-    final double DRIVE_GEAR_RATIO = 24.0 / 16.0; //Driven / Driver
+    final double DRIVE_GEAR_RATIO = 16.0 / 16.0; //Driven / Driver
     final double COUNTS_PER_INCH_RF = COUNTS_PER_REVOLUTION / (4 * Math.PI / DRIVE_GEAR_RATIO); //forward / right / backward / left
     final double COUNTS_PER_INCH_DG = COUNTS_PER_REVOLUTION / (2 * Math.PI * Math.sqrt(2) / DRIVE_GEAR_RATIO); //diagonal
     final int WHITE_THRESHOLD = 30;
@@ -173,9 +179,18 @@ public class GeorgeOp extends OpMode {
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
-        gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
-        range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
+        BNO055IMU.Parameters parameterz = new BNO055IMU.Parameters();
+        parameterz.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameterz.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameterz.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        //parameterz.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameterz);
+    }
+
+    @Override public void start() {
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
     }
 
     @Override public void loop() {
@@ -241,10 +256,10 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("BL Pwr", String.format("%.2f",driveBL.getPower()));
         telemetry.addData("UD Pos", String.format("%.0f", upDownServo.getPosition() * 255));
         telemetry.addData("LR Pos", String.format("%.0f", leftRightServo.getPosition() * 255));
-        telemetry.addData("Gyro", gyroMR.getIntegratedZValue());
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        telemetry.addData("IMU Heading", String.format("%.0f", angles.firstAngle));
         telemetry.addData("Red1", colorSensor.red());
         telemetry.addData("Blue1", colorSensor.blue());
-        telemetry.addData("Distance", String.format("%.2f", range.getDistance(DistanceUnit.INCH)) + " in");
         telemetry.addData("LC Pos", String.format("%.0f", leftClaw.getPosition() * 255));
         telemetry.addData("RC Pos", String.format("%.0f", rightClaw.getPosition() * 255));
         telemetry.addData("TLC Pos", String.format("%.0f", topLeftClaw.getPosition() * 255));
@@ -408,20 +423,26 @@ public class GeorgeOp extends OpMode {
         runConstantSpeed();
         move(power, power, power, power);
     }
-    void moveForward(double power, double revolutions) {
+    void moveForward(double speed, double revolutions) {
+        //Proportional Drive Control: for the last half rotation of the motor,
+        //the motors will decelerate to from the input speed to 10% speed
         double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
-
+        double kp = 2 * (Math.abs(speed) - 0.10) / COUNTS_PER_REVOLUTION;
+        double error = target - driveFR.getCurrentPosition();
         if (!encoderTargetReached) {
-            moveForward(power);
+            if (Math.abs(error) <= COUNTS_PER_REVOLUTION / 2) {
+                speed = 0.10 + (error * kp);
+            }
+            moveForward(speed);
         }
 
-        if ((target > 0 && target - driveFR.getCurrentPosition() <= 10) || (target < 0 && -target + driveFR.getCurrentPosition() <= 10)) {
+        if (Math.abs(error) <= 4) {
             stopDriveMotors();
             encoderTargetReached = true;
         }
         else {
             //Wait until target position is reached
-            telemetry.addData("FR Encoder", driveFR.getCurrentPosition());
+            telemetry.addData("Rotations left", String.format("$.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
         }
 
     }
@@ -436,7 +457,7 @@ public class GeorgeOp extends OpMode {
             moveRight(power);
         }
 
-        if ((target > 0 && target - driveFL.getCurrentPosition() <= 10) || (target < 0 && -target + driveFL.getCurrentPosition() <= 10)) {
+        if (Math.abs(target - driveFL.getCurrentPosition()) <= 4) {
             stopDriveMotors();
             encoderTargetReached = true;
         }
@@ -456,7 +477,7 @@ public class GeorgeOp extends OpMode {
             moveForwardRight(power);
         }
 
-        if ((target > 0 && target - driveFL.getCurrentPosition() <= 10) || (target < 0 && -target + driveFL.getCurrentPosition() <= 10)) {
+        if (Math.abs(target - driveFL.getCurrentPosition()) <= 4) {
             stopDriveMotors();
             encoderTargetReached = true;
         }
@@ -473,9 +494,10 @@ public class GeorgeOp extends OpMode {
         double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
 
         if (!encoderTargetReached)
+
             moveForwardLeft(power);
 
-        if ((target > 0 && target - driveFR.getCurrentPosition() <= 10) || (target < 0 && -target + driveFR.getCurrentPosition() <= 10)) {
+        if (Math.abs(target - driveFR.getCurrentPosition()) <= 4) {
             stopDriveMotors();
             encoderTargetReached = true;
         }
@@ -489,18 +511,73 @@ public class GeorgeOp extends OpMode {
         move(-power, power, -power, power);
     }
     void turnClockwise(int targetAngle) {
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double k = 1; //experimentally found
-        double power = k * (targetAngle + gyroMR.getIntegratedZValue())
+        double power = k * (targetAngle + angles.firstAngle) //clockwise is negative for thirdAngle
                 / Math.abs(targetAngle);
-        if (Math.abs(targetAngle + gyroMR.getIntegratedZValue()) >= 10)
+        if (Math.abs(targetAngle + angles.firstAngle) >= 10)
             turnClockwise(power);
         else
             stopDriveMotors();
     }
 
+    void turnClockwisePID(int targetAngle) {
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        if (driveVoltage.getVoltage() < 14.0) {
+            double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
+            double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found
+            double kd = 0.011; //derivative constant (amount to adjust for future errors) experimentally found
+            double e = targetAngle + angles.firstAngle; //error
+            e_list.add(e);
+            t_list.add(this.time);
+            double power = kp*e + ki*integrate() + kd*differentiate();
+            power = Range.clip(power, -DRIVE_PWR_MAX, DRIVE_PWR_MAX); //ensure power doesn't exceed max speed
+            if (Math.abs(e / targetAngle) >= 0.01) //keep adjusting until error is less than 1%
+                turnClockwise(power);
+            else {
+                stopDriveMotors();
+                e_list.clear();
+                t_list.clear();
+            }
+        }
+        else {
+            double k = 3.5; //experimentally found
+            double power = k * (targetAngle + angles.firstAngle)
+                    / Math.abs(targetAngle);
+            if (Math.abs(targetAngle + angles.firstAngle) >= 10)
+                turnClockwise(power);
+            else
+                stopDriveMotors();
+        }
+    }
+    ArrayList<Double> e_list = new ArrayList<>(); //records past errors
+    ArrayList<Double> t_list = new ArrayList<>(); // records times past errors took place
+    //integrates error of angle w/ respect to time
+    double integrate() {
+        double sum = 0; //uses trapezoidal sum approximation method
+        if (e_list.size() >= 2) {
+            for (int i = 0; i <= e_list.size() - 2; i++) {
+                double dt = t_list.get(i+1) - t_list.get(i);
+                sum += (e_list.get(i+1) + e_list.get(i))*dt / 2.0;
+            }
+        }
+        return sum;
+    }
+    //differentiates error of angle w/ respect to time
+    double differentiate() {
+        double slope = 0; //uses secant line approximation
+        if (e_list.size() >= 2) {
+            double de = e_list.get(e_list.size() - 1) - e_list.get(e_list.size() - 2);
+            double dt = t_list.get(t_list.size() - 1) - t_list.get(t_list.size() - 2);
+            slope = de/dt;
+        }
+        return slope;
+    }
+
     boolean turnAbsolute(double target) { //Tells robot to rotate to an absolute heading (degrees)
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         boolean absoluteReached = false;
-        if (Math.abs(gyroMR.getIntegratedZValue() + target) <= 10) {
+        if (Math.abs(target + angles.firstAngle) <= 10) {
             stopDriveMotors();
             absoluteReached = true;
         }

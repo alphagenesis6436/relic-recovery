@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
@@ -9,7 +11,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 import java.util.ArrayList;
@@ -63,10 +70,15 @@ public class GeorgeRed2Auto extends GeorgeOp {
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
-        gyroMR = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gs");
-        range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "r");
         colorSensor.enableLed(true);
         driveVoltage = hardwareMap.voltageSensor.get("Expansion Hub 2");
+        BNO055IMU.Parameters parameterz = new BNO055IMU.Parameters();
+        parameterz.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameterz.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameterz.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        //parameterz.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameterz);
 
         //Initialize Vuforia
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -80,6 +92,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
 
     @Override public void start() {
         relicTrackables.activate();
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
     }
 
     @Override
@@ -195,7 +208,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
 
             case 10:
                 stateName = "Rotate to -90 degrees to be perpendicular with the walls";
-                turnClockwise(-90);
+                turnClockwisePID(-90);
                 if (turnAbsolute(-90))
                     state++;
                 break;
@@ -219,7 +232,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
 
             case 14:
                 stateName = "Rotate to 195 degrees to have glyph face CryptoBox";
-                turnClockwise(-150); //-165
+                turnClockwisePID(-150); //-165
                 if (turnAbsolute(-150))  //-165
                     state++;
                 break;
@@ -295,56 +308,4 @@ public class GeorgeRed2Auto extends GeorgeOp {
     }
 
     //Create any methods needed for this specific autonomous program
-    //new and improved turning method, feedback control: PID
-    void turnClockwise(int targetAngle) {
-        if (driveVoltage.getVoltage() < 14.0) {
-            double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
-            double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found
-            double kd = 0.011; //derivative constant (amount to adjust for future errors) experimentally found
-            double e = targetAngle + gyroMR.getIntegratedZValue(); //error
-            e_list.add(e);
-            t_list.add(this.time);
-            double power = kp*e + ki*integrate() + kd*differentiate();
-            power = Range.clip(power, -DRIVE_PWR_MAX, DRIVE_PWR_MAX); //ensure power doesn't exceed max speed
-            if (Math.abs(e / targetAngle) >= 0.01) //keep adjusting until error is less than 1%
-                turnClockwise(power);
-            else {
-                stopDriveMotors();
-                e_list.clear();
-                t_list.clear();
-            }
-        }
-        else {
-            double k = 3.5; //experimentally found
-            double power = k * (targetAngle + gyroMR.getIntegratedZValue())
-                    / Math.abs(targetAngle);
-            if (Math.abs(targetAngle + gyroMR.getIntegratedZValue()) >= 10)
-                turnClockwise(power);
-            else
-                stopDriveMotors();
-        }
-    }
-    ArrayList<Double> e_list = new ArrayList<>(); //records past errors
-    ArrayList<Double> t_list = new ArrayList<>(); // records times past errors took place
-    //integrates error of angle w/ respect to time
-    double integrate() {
-        double sum = 0; //uses trapezoidal sum approximation method
-        if (e_list.size() >= 2) {
-            for (int i = 0; i <= e_list.size() - 2; i++) {
-                double dt = t_list.get(i+1) - t_list.get(i);
-                sum += (e_list.get(i+1) + e_list.get(i))*dt / 2.0;
-            }
-        }
-        return sum;
-    }
-    //differentiates error of angle w/ respect to time
-    double differentiate() {
-        double slope = 0; //uses secant line approximation
-        if (e_list.size() >= 2) {
-            double de = e_list.get(e_list.size() - 1) - e_list.get(e_list.size() - 2);
-            double dt = t_list.get(t_list.size() - 1) - t_list.get(t_list.size() - 2);
-            slope = de/dt;
-        }
-        return slope;
-    }
 }

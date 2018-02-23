@@ -216,13 +216,13 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 12:
                 stateName = "Drive forward until correct column reached";
                 if (pictographKey == 0) { //drive to left column
-                    moveForward(-0.20, -2.025);
+                    moveForward(-0.20, -2.100);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(-0.20, -1.450);
+                    moveForward(-0.20, -1.600);
                 }
                 else if (pictographKey == 2) { //drive to right column
-                    moveForward(-0.20, -0.775); //-.450
+                    moveForward(-0.20, -1.000); //-.450
                 }
                 if (encoderTargetReached) {
                     state++;

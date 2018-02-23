@@ -208,23 +208,23 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                     state++;
                 break;
 
-            /*case 10:
+            case 10:
                 stateName = "Rotate to 90 degrees to be perpendicular with the walls";
                 turnClockwise(90);
                 if (turnAbsolute(90))
                     state++;
-                break;*/
+                break;
 
             case 12:
-                stateName = "Drive Right until correct column reached";
+                stateName = "Drive Forward until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveRight(0.20, 1.50);
+                    moveForward(0.20, 0.85);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveRight(0.20, 1.00);
+                    moveForward(0.20, 0.20);
                 }
                 else if (pictographKey == 0) { //drive to left column
-                    moveRight(0.20, 0.25);
+                    moveForward(-0.20, -0.40);
                 }
                 if (encoderTargetReached) {
                     state++;

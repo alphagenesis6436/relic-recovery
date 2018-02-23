@@ -428,7 +428,7 @@ public class GeorgeOp extends OpMode {
         double error = target - driveFR.getCurrentPosition();
         if (!encoderTargetReached) {
             if (Math.abs(error) <= COUNTS_PER_REVOLUTION / 2) {
-                speed = 0.10 + (error * kp);
+                speed = (0.10 * error / Math.abs(error)) + (error * kp);
             }
             moveForward(speed);
         }
@@ -455,7 +455,7 @@ public class GeorgeOp extends OpMode {
         double error = target - driveFL.getCurrentPosition();
         if (!encoderTargetReached) {
             if (Math.abs(error) <= COUNTS_PER_REVOLUTION / 2) {
-                speed = 0.10 + (error * kp);
+                speed = (0.10 * revolutions / Math.abs(revolutions)) + (error * kp);
             }
             moveRight(speed);
         }
@@ -481,7 +481,7 @@ public class GeorgeOp extends OpMode {
         double error = target - driveFL.getCurrentPosition();
         if (!encoderTargetReached) {
             if (Math.abs(error) <= COUNTS_PER_REVOLUTION / 2) {
-                speed = 0.10 + (error * kp);
+                speed = (0.10 * revolutions / Math.abs(revolutions)) + (error * kp);
             }
             moveForwardRight(speed);
         }
@@ -507,7 +507,7 @@ public class GeorgeOp extends OpMode {
         double error = target - driveFR.getCurrentPosition();
         if (!encoderTargetReached) {
             if (Math.abs(error) <= COUNTS_PER_REVOLUTION / 2) {
-                speed = 0.10 + (error * kp);
+                speed = (0.10 * revolutions / Math.abs(revolutions)) + (error * kp);
             }
             moveForwardLeft(speed);
         }
@@ -542,15 +542,15 @@ public class GeorgeOp extends OpMode {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("Heading", String.format("%.0f", angles.firstAngle));
         if (driveVoltage.getVoltage() < 14.0) {
-            double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
-            double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found
-            double kd = 0.011; //derivative constant (amount to adjust for future errors) experimentally found
+            double kp = 0.010; //proportionality constant (amount to adjust for immediate deviance) experimentally found
+            double ki = 0.001; //integral constant (amount to adjust for past errors) experimentally found
+            double kd = 0.002; //derivative constant (amount to adjust for future errors) experimentally found
             double e = targetAngle + angles.firstAngle; //error
             e_list.add(e);
             t_list.add(this.time);
             double power = kp*e + ki*integrate() + kd*differentiate();
             power = Range.clip(power, -DRIVE_PWR_MAX, DRIVE_PWR_MAX); //ensure power doesn't exceed max speed
-            if (Math.abs(e / targetAngle) >= 0.01) //keep adjusting until error is less than 1%
+            if (Math.abs(e) >= 5) //5 degree angle slack / uncertainty
                 turnClockwise(power);
             else {
                 stopDriveMotors();

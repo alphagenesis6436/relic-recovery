@@ -214,10 +214,10 @@ public class GeorgeRedAuto extends GeorgeOp {
                     moveForward(-0.20, -1.30);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(-0.20, -1.975);
+                    moveForward(-0.20, -2.100);
                 }
                 else if (pictographKey == 0) { //drive to left column
-                    moveForward(-0.20, -2.45);
+                    moveForward(-0.20, -2.325);
                 }
                 if (encoderTargetReached) {
                     if (pictographKey == 0) {
@@ -232,7 +232,7 @@ public class GeorgeRedAuto extends GeorgeOp {
                 break;
 
             case 14:
-                stateName = "Rotate to -75 degrees to have glyph face CryptoBox";
+                stateName = "Rotate to -85 degrees to have glyph face CryptoBox";
                 //if cyrptokey = left column rotate to -85 degrees to prevent from hitting balancing stone
                 if (pictographKey == -2) {
                     turnClockwise(-85);

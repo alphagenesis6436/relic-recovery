@@ -113,7 +113,7 @@ public class GeorgeOp extends OpMode {
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
-    final float UPDOWN_MIN = 131 / 255.0f;   //fully down (maybe 131)
+    final float UPDOWN_MIN = 125 / 255.0f;   //fully down (maybe 131)
     final float UPDOWN_MAX = 207 / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 95 / 255.0f; //far right (70)
     final float LEFTRIGHT_MAX = 125 / 255.0f;   //far left (140)
@@ -125,7 +125,7 @@ public class GeorgeOp extends OpMode {
     boolean jewelKnocked = false;
 
     //Relic Mechanism Variables and Constants
-    final float OC_SERVO_CLOSE = 137 / 255.0f; //close - 180 o.g.
+    final float OC_SERVO_CLOSE = 130 / 255.0f; //close - 180 o.g.
     final float OC_SERVO_MAX = 206 / 255.0f; //open
     final double DU_SERVO_MIN = 70 / 255.0f; //up
     final double DU_SERVO_MAX = 211 / 255.0f; //down
@@ -439,7 +439,7 @@ public class GeorgeOp extends OpMode {
         }
         else {
             //Wait until target position is reached
-            telemetry.addData("Rotations left", String.format("$.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
+            telemetry.addData("Rotations left", String.format("%.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
         }
 
     }
@@ -466,7 +466,7 @@ public class GeorgeOp extends OpMode {
         }
         else {
             //Wait until target position is reached
-            telemetry.addData("Rotations left", String.format("$.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
+            telemetry.addData("Rotations left", String.format("%.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
         }
     }
     void moveForwardRight(double power) {
@@ -492,7 +492,7 @@ public class GeorgeOp extends OpMode {
         }
         else {
             //Wait until target position is reached
-            telemetry.addData("Rotations left", String.format("$.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
+            telemetry.addData("Rotations left", String.format("%.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
         }
     }
     void moveForwardLeft(double power) {
@@ -518,7 +518,7 @@ public class GeorgeOp extends OpMode {
         }
         else {
             //Wait until target position is reached
-            telemetry.addData("Rotations left", String.format("$.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
+            telemetry.addData("Rotations left", String.format("%.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
         }
     }
     void turnClockwise(double power) {
@@ -527,10 +527,12 @@ public class GeorgeOp extends OpMode {
     }
     void turnClockwise(int targetAngle) {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double k = 1; //experimentally found
-        double power = k * (targetAngle + angles.firstAngle) //clockwise is negative for thirdAngle
-                / Math.abs(targetAngle);
-        if (Math.abs(targetAngle + angles.firstAngle) >= 10)
+        telemetry.addData("Heading", String.format("%.0f", angles.firstAngle));
+        double k = 0.005; //experimentally found
+        double e = targetAngle + angles.firstAngle; //clockwise is negative for thirdAngle
+        double power = (0.05 * e / Math.abs(e)) + k * e;
+        power = Range.clip(power, -1.0, 1.0);
+        if (Math.abs(e) >= 5)
             turnClockwise(power);
         else
             stopDriveMotors();
@@ -538,6 +540,7 @@ public class GeorgeOp extends OpMode {
 
     void turnClockwisePID(int targetAngle) {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        telemetry.addData("Heading", String.format("%.0f", angles.firstAngle));
         if (driveVoltage.getVoltage() < 14.0) {
             double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
             double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found

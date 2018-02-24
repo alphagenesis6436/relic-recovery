@@ -273,7 +273,7 @@ public class GeorgeOp extends OpMode {
         forwardLeftPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         backwardRightPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         backwardLeftPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
-        /*if (gamepad1.right_bumper) {
+        if (gamepad1.right_bumper) {
             drivePreciseIsOn = false;
             colorSensor.enableLed(false);
         }
@@ -286,7 +286,8 @@ public class GeorgeOp extends OpMode {
             forwardLeftPower *= 0.30;
             backwardRightPower *= 0.30;
             backwardLeftPower *= 0.30;
-        }*/
+        }
+        
     }
     //Controlled by Driver 2
     //Step 1: Open Left/Right Claw by pressing the Left/Right Bumper

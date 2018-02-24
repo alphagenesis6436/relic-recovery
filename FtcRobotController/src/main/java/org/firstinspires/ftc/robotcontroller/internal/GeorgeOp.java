@@ -78,14 +78,11 @@ public class GeorgeOp extends OpMode {
 
     //Mecanum Drive Train Variables and Constants
     final double DRIVE_PWR_MAX = 0.90;
-    final double DRIVE_AUTO_PWR = 0.30;
     final double TURN_PWR_MAX = 1.00;
     final int COUNTS_PER_REVOLUTION = 1120; //AndyMark Motors
     final double DRIVE_GEAR_RATIO = 16.0 / 16.0; //Driven / Driver
     final double COUNTS_PER_INCH_RF = COUNTS_PER_REVOLUTION / (4 * Math.PI / DRIVE_GEAR_RATIO); //forward / right / backward / left
     final double COUNTS_PER_INCH_DG = COUNTS_PER_REVOLUTION / (2 * Math.PI * Math.sqrt(2) / DRIVE_GEAR_RATIO); //diagonal
-    final int WHITE_THRESHOLD = 30;
-    boolean whitePreviouslyDetected = false;
     boolean drivePreciseIsOn = false; //true halfs drive speed, false returns drive speed to max
     double forwardRightPower = 0;
     double forwardLeftPower = 0;
@@ -116,7 +113,7 @@ public class GeorgeOp extends OpMode {
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
-    final float UPDOWN_MIN = 131 / 255.0f;   //fully down (maybe 131)
+    final float UPDOWN_MIN = 125 / 255.0f;   //fully down (maybe 131)
     final float UPDOWN_MAX = 207 / 255.0f;  //fully up
     final float LEFTRIGHT_MIN = 95 / 255.0f; //far right (70)
     final float LEFTRIGHT_MAX = 125 / 255.0f;   //far left (140)
@@ -128,7 +125,7 @@ public class GeorgeOp extends OpMode {
     boolean jewelKnocked = false;
 
     //Relic Mechanism Variables and Constants
-    final float OC_SERVO_CLOSE = 137 / 255.0f; //close - 180 o.g.
+    final float OC_SERVO_CLOSE = 130 / 255.0f; //close - 180 o.g.
     final float OC_SERVO_MAX = 206 / 255.0f; //open
     final double DU_SERVO_MIN = 70 / 255.0f; //up
     final double DU_SERVO_MAX = 211 / 255.0f; //down
@@ -277,7 +274,7 @@ public class GeorgeOp extends OpMode {
         forwardLeftPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         backwardRightPower = (-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
         backwardLeftPower = (-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x * TURN_PWR_MAX) * DRIVE_PWR_MAX;
-        if (gamepad1.right_bumper) {
+        /*if (gamepad1.right_bumper) {
             drivePreciseIsOn = false;
             colorSensor.enableLed(false);
         }
@@ -286,11 +283,11 @@ public class GeorgeOp extends OpMode {
             colorSensor.enableLed(true);
         }
         if (drivePreciseIsOn) {
-            forwardRightPower *= 0.40;
-            forwardLeftPower *= 0.40;
-            backwardRightPower *= 0.40;
-            backwardLeftPower *= 0.40;
-        }
+            forwardRightPower *= 0.30;
+            forwardLeftPower *= 0.30;
+            backwardRightPower *= 0.30;
+            backwardLeftPower *= 0.30;
+        }*/
     }
     //Controlled by Driver 2
     //Step 1: Open Left/Right Claw by pressing the Left/Right Bumper
@@ -445,7 +442,7 @@ public class GeorgeOp extends OpMode {
         }
         else {
             //Wait until target position is reached
-            telemetry.addData("Rotations left", String.format("$.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
+            telemetry.addData("Rotations left", String.format("%.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
         }
 
     }
@@ -453,60 +450,78 @@ public class GeorgeOp extends OpMode {
         runConstantSpeed();
         move(-power, power, power, -power);
     }
-    void moveRight(double power, double revolutions) {
+    void moveRight(double speed, double revolutions) {
+        //Proportional Drive Control: for the last half rotation of the motor,
+        //the motors will decelerate to from the input speed to 10% speed
         double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
-
+        double kp = 2 * (Math.abs(speed) - 0.10) / COUNTS_PER_REVOLUTION;
+        double error = target - driveFL.getCurrentPosition();
         if (!encoderTargetReached) {
-            moveRight(power);
+            if (Math.abs(error) <= COUNTS_PER_REVOLUTION / 2) {
+                speed = 0.10 + (error * kp);
+            }
+            moveRight(speed);
         }
 
-        if (Math.abs(target - driveFL.getCurrentPosition()) <= 4) {
+        if (Math.abs(error) <= 4) {
             stopDriveMotors();
             encoderTargetReached = true;
         }
         else {
             //Wait until target position is reached
-            telemetry.addData("FL Encoder", driveFL.getCurrentPosition());
+            telemetry.addData("Rotations left", String.format("%.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
         }
     }
     void moveForwardRight(double power) {
         runConstantSpeed();
         move(0.0, power, power, 0.0);
     }
-    void moveForwardRight(double power, double revolutions) {
+    void moveForwardRight(double speed, double revolutions) {
+        //Proportional Drive Control: for the last half rotation of the motor,
+        //the motors will decelerate to from the input speed to 10% speed
         double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
-
+        double kp = 2 * (Math.abs(speed) - 0.10) / COUNTS_PER_REVOLUTION;
+        double error = target - driveFL.getCurrentPosition();
         if (!encoderTargetReached) {
-            moveForwardRight(power);
+            if (Math.abs(error) <= COUNTS_PER_REVOLUTION / 2) {
+                speed = 0.10 + (error * kp);
+            }
+            moveForwardRight(speed);
         }
 
-        if (Math.abs(target - driveFL.getCurrentPosition()) <= 4) {
+        if (Math.abs(error) <= 4) {
             stopDriveMotors();
             encoderTargetReached = true;
         }
         else {
             //Wait until target position is reached
-            telemetry.addData("FL Encoder", driveFL.getCurrentPosition());
+            telemetry.addData("Rotations left", String.format("%.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
         }
     }
     void moveForwardLeft(double power) {
         runConstantSpeed();
         move(power, 0.0, 0.0, power);
     }
-    void moveForwardLeft(double power, double revolutions) {
+    void moveForwardLeft(double speed, double revolutions) {
+        //Proportional Drive Control: for the last half rotation of the motor,
+        //the motors will decelerate to from the input speed to 10% speed
         double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
+        double kp = 2 * (Math.abs(speed) - 0.10) / COUNTS_PER_REVOLUTION;
+        double error = target - driveFR.getCurrentPosition();
+        if (!encoderTargetReached) {
+            if (Math.abs(error) <= COUNTS_PER_REVOLUTION / 2) {
+                speed = 0.10 + (error * kp);
+            }
+            moveForwardLeft(speed);
+        }
 
-        if (!encoderTargetReached)
-
-            moveForwardLeft(power);
-
-        if (Math.abs(target - driveFR.getCurrentPosition()) <= 4) {
+        if (Math.abs(error) <= 4) {
             stopDriveMotors();
             encoderTargetReached = true;
         }
         else {
             //Wait until target position is reached
-            telemetry.addData("FR Encoder", driveFR.getCurrentPosition());
+            telemetry.addData("Rotations left", String.format("%.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
         }
     }
     void turnClockwise(double power) {
@@ -515,10 +530,12 @@ public class GeorgeOp extends OpMode {
     }
     void turnClockwise(int targetAngle) {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double k = 1; //experimentally found
-        double power = k * (targetAngle + angles.firstAngle) //clockwise is negative for thirdAngle
-                / Math.abs(targetAngle);
-        if (Math.abs(targetAngle + angles.firstAngle) >= 10)
+        telemetry.addData("Heading", String.format("%.0f", angles.firstAngle));
+        double k = 0.005; //experimentally found
+        double e = targetAngle + angles.firstAngle; //clockwise is negative for thirdAngle
+        double power = (0.05 * e / Math.abs(e)) + k * e;
+        power = Range.clip(power, -1.0, 1.0);
+        if (Math.abs(e) >= 5)
             turnClockwise(power);
         else
             stopDriveMotors();
@@ -526,6 +543,7 @@ public class GeorgeOp extends OpMode {
 
     void turnClockwisePID(int targetAngle) {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        telemetry.addData("Heading", String.format("%.0f", angles.firstAngle));
         if (driveVoltage.getVoltage() < 14.0) {
             double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
             double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found

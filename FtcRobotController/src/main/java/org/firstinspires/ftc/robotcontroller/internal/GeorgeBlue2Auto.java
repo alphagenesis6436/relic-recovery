@@ -107,7 +107,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             telemetry.addData("Pictograph", "LEFT");
         }
         else if (pictographKey == 1) {
-            telemetry.addData("Pictograph", "MIDDLE");
+            telemetry.addData("Pictograph", "CENTER");
         }
         else if (pictographKey == 2) {
             telemetry.addData("Pictograph", "RIGHT");

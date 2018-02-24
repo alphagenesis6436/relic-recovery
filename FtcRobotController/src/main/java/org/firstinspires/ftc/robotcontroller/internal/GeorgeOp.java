@@ -182,6 +182,7 @@ public class GeorgeOp extends OpMode {
         parameterz.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameterz.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
         //parameterz.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameterz);
     }
@@ -368,6 +369,8 @@ public class GeorgeOp extends OpMode {
             openCloseServoPos = OC_SERVO_MAX;
         else if (gamepad2.dpad_down)
             openCloseServoPos = OC_SERVO_CLOSE;
+        else if (gamepad2.dpad_left)
+            openCloseServoPos = (OC_SERVO_MAX + OC_SERVO_CLOSE) / 2;
         if (gamepad2.a) //down
             downUpServoPos += relicDelta;
         else if (gamepad2.y) //up

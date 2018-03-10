@@ -236,14 +236,14 @@ public class GeorgeRedAuto extends GeorgeOp {
                 //if cyrptokey = left column rotate to -85 degrees to prevent from hitting balancing stone
                 if (pictographKey == -2) {
                     turnClockwise(-85);
-                    if (turnAbsolute(-85)) {
+                    if (angleTargetReached) {
                         state++;
                         pictographKey = -1;
                     }
                 }
                 else {
                     turnClockwise(-75);
-                    if (turnAbsolute(-75))
+                    if (angleTargetReached)
                         state++;
                 }
                 break;

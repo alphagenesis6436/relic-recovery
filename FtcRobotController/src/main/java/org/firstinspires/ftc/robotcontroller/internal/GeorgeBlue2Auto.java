@@ -211,7 +211,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 10:
                 stateName = "Rotate to 90 degrees to be perpendicular with the walls";
                 turnClockwise(90);
-                if (turnAbsolute(90))
+                if (angleTargetReached)
                     state++;
                 break;
 
@@ -235,7 +235,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
             case 14:
                 stateName = "Rotate to 25 degrees to have glyph face CryptoBox";
                 turnClockwise(25);
-                if (turnAbsolute(25))
+                if (angleTargetReached)
                     state++;
                 break;
 

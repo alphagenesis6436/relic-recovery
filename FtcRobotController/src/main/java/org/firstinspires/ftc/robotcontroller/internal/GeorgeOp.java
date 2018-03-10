@@ -71,6 +71,7 @@ public class GeorgeOp extends OpMode {
     Servo rightClaw; //180, glyph claw
     Servo topLeftClaw; //180, glyph top claw
     Servo topRightClaw; //180, glyph top claw
+    Servo pivotServo; //2880 winch servo, glyph claw pivot
     DcMotor glyphLift; //Andymark 60:1, lift the glyph claw
     Servo downUpServo;    //180, relic claw
     Servo openCloseServo; //180, relic claw
@@ -92,24 +93,30 @@ public class GeorgeOp extends OpMode {
     //Glyph Claw Mechanism Variables and Constants
     final float GLYPH_LIFT_PWR_MAX = 0.90f;
     double glyphLiftPower = 0;
+    final float PIVOT_MIN = 0 / 255.0f; //starting position???
+    final float PIVOT_MAX = 255 / 255.0f; //rotated 180 degrees???
     final float SERVO_MIN_LEFT = 139 / 255.0f; //left claw is fully open
     final float SERVO_MID_LEFT = 170 / 255.0f; //left claw is slightly open
-    final float SERVO_GRAB_LEFT = 208 / 255.0f; //left claw is gripping glyph
-    final float SERVO_GRAB_RIGHT = 90 / 255.0f; //right claw is gripping the glyph 168
-    final float SERVO_MID_RIGHT = 118 / 255.0f; //right claw is slightly open 188
+    final float SERVO_GRAB_LEFT = 215 / 255.0f; //left claw is gripping glyph
+    final float SERVO_GRAB_RIGHT = 77 / 255.0f; //right claw is gripping the glyph 168
+    final float SERVO_MID_RIGHT = 112 / 255.0f; //right claw is slightly open 188
     final float SERVO_MAX_RIGHT = 150 / 255.0f; //right claw is fully open 203
     double leftClawServoPos = SERVO_MIN_LEFT; //start left claw fully open
     double rightClawServoPos = SERVO_MAX_RIGHT; //start right claw fully open
-    final float SERVO_MIN_LEFT_TOP = 173 / 255.0f; //left claw is fully open
-    final float SERVO_MID_LEFT_TOP = 207 / 255.0f; //left claw is slightly open
-    final float SERVO_GRAB_LEFT_TOP = 240 / 255.0f; //left claw is gripping glyph
-    final float SERVO_GRAB_RIGHT_TOP = 102 / 255.0f; //right claw is gripping the glyph
-    final float SERVO_MID_RIGHT_TOP = 136 / 255.0f; //right claw is slightly open
+    final float SERVO_MIN_LEFT_TOP = 163 / 255.0f; //left claw is fully open
+    final float SERVO_MID_LEFT_TOP = 197 / 255.0f; //left claw is slightly open
+    final float SERVO_GRAB_LEFT_TOP = 243 / 255.0f; //left claw is gripping glyph
+    final float SERVO_GRAB_RIGHT_TOP = 89 / 255.0f; //right claw is gripping the glyph
+    final float SERVO_MID_RIGHT_TOP = 131 / 255.0f; //right claw is slightly open
     final float SERVO_MAX_RIGHT_TOP = 163 / 255.0f; //right claw is fully open
     double leftClawTopServoPos = SERVO_MIN_LEFT_TOP; //start left claw fully open
     double rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //start right claw fully open
+    double pivotPos = PIVOT_MIN;
     boolean singleClawModeIsOn = false;
+    boolean clawIsUpRight = true;
+    boolean glpyhBtnPressed = false;
     double clawDelta = 0.0075;
+    double pivotDelta = 0.001;
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
@@ -173,6 +180,7 @@ public class GeorgeOp extends OpMode {
         topRightClaw = hardwareMap.servo.get("rct");
         downUpServo = hardwareMap.servo.get("du");
         openCloseServo = hardwareMap.servo.get("oc");
+        pivotServo = hardwareMap.servo.get("ps");
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
@@ -223,6 +231,8 @@ public class GeorgeOp extends OpMode {
         backwardLeftPower = Range.clip(backwardLeftPower, -DRIVE_PWR_MAX, DRIVE_PWR_MAX);
         driveBL.setPower(backwardLeftPower);
         //Clip and Initialize Glyph Claw Mechanism
+        pivotPos = Range.clip(pivotDelta, PIVOT_MIN, PIVOT_MAX);
+        pivotServo.setPosition(pivotPos);
         leftClawServoPos = Range.clip(leftClawServoPos, SERVO_MIN_LEFT, SERVO_GRAB_LEFT);
         leftClaw.setPosition(leftClawServoPos);
         rightClawServoPos = Range.clip(rightClawServoPos, SERVO_GRAB_RIGHT, SERVO_MAX_RIGHT);
@@ -258,6 +268,7 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("IMU Heading", String.format("%.0f", angles.firstAngle));
         telemetry.addData("Red1", colorSensor.red());
         telemetry.addData("Blue1", colorSensor.blue());
+        telemetry.addData("PS Pos", String.format("%.0f", pivotServo.getPosition() * 255));
         telemetry.addData("LC Pos", String.format("%.0f", leftClaw.getPosition() * 255));
         telemetry.addData("RC Pos", String.format("%.0f", rightClaw.getPosition() * 255));
         telemetry.addData("TLC Pos", String.format("%.0f", topLeftClaw.getPosition() * 255));
@@ -295,49 +306,60 @@ public class GeorgeOp extends OpMode {
     //Step 2: Close the Left/Right Claw by pressing the Left/Right Trigger
     void updateGlyphClaw() {
         glyphLiftPower = -gamepad2.left_stick_y * GLYPH_LIFT_PWR_MAX;
-        if (gamepad2.x)
-            singleClawModeIsOn = true;
-        if (gamepad2.b)
-            singleClawModeIsOn = false;
-        if (!singleClawModeIsOn) {
+        if (gamepad2.dpad_left) {
+            pivotPos += pivotDelta;
+        }
+        else if (gamepad2.dpad_right)
+            pivotPos -= pivotDelta;
+        if (gamepad2.x && !glpyhBtnPressed) {
+            glpyhBtnPressed = true;
+            clawIsUpRight = !clawIsUpRight;
+        }
+        else if (!gamepad2.x && glpyhBtnPressed)
+            glpyhBtnPressed = false;
+        if (clawIsUpRight) {
+            //pivotPos = PIVOT_MIN;
+            if (gamepad2.left_bumper) {
+                leftClawServoPos = SERVO_MIN_LEFT; //left servo fully open
+                rightClawServoPos = SERVO_MAX_RIGHT; //right servo fully open
+            }
+            else if (gamepad2.right_bumper) {
+                leftClawServoPos = SERVO_GRAB_LEFT; //left servo grabbing position
+                rightClawServoPos = SERVO_GRAB_RIGHT; //right servo grabbing position
+            }
+        }
+        else {
+            //pivotPos = PIVOT_MAX;
             if (gamepad2.left_bumper) {
                 leftClawServoPos = SERVO_MIN_LEFT; //left servo fully open
                 rightClawServoPos = SERVO_MAX_RIGHT; //right servo fully open
                 leftClawTopServoPos = SERVO_MIN_LEFT_TOP;//left top servo fully open
                 rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //right top servo fully open
-            }
-            else if (gamepad2.right_bumper) {
+            } else if (gamepad2.right_bumper) {
                 leftClawServoPos = SERVO_GRAB_LEFT; //left servo grabbing position
                 rightClawServoPos = SERVO_GRAB_RIGHT; //right servo grabbing position
                 leftClawTopServoPos = SERVO_GRAB_LEFT_TOP; //left top servo grabbing position
                 rightClawTopServoPos = SERVO_GRAB_RIGHT_TOP; //right top servo grabbing position
             }
-            else if (gamepad2.left_trigger >= 0.50) {
-                leftClawServoPos = SERVO_MID_LEFT; //left servo slightly open
-                rightClawServoPos = SERVO_MID_RIGHT; //right servo slightly open
-                leftClawTopServoPos = SERVO_MID_LEFT_TOP; //left top servo slightly open
-                rightClawTopServoPos = SERVO_MID_RIGHT_TOP; //right top servo slightly open
-            }
         }
-        else {
-            if (gamepad2.right_bumper) {
-                leftClawTopServoPos = SERVO_GRAB_LEFT_TOP; //left top servo grabbing position
-                rightClawTopServoPos = SERVO_GRAB_RIGHT_TOP; //right top servo grabbing position
-            }
-            else if (gamepad2.left_bumper) {
-                leftClawTopServoPos = SERVO_MIN_LEFT_TOP;//left top servo fully open
-                rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //right top servo fully open
-            }
-            if (gamepad2.right_trigger >= 0.50) {
-                leftClawServoPos = SERVO_GRAB_LEFT; //left servo grabbing position
-                rightClawServoPos = SERVO_GRAB_RIGHT; //right servo grabbing position
-            }
-            else if (gamepad2.left_trigger >= 0.50) {
-                leftClawServoPos = SERVO_MIN_LEFT; //left servo fully open
-                rightClawServoPos = SERVO_MAX_RIGHT; //right servo fully open
-            }
+        if (gamepad2.b) {
+            leftClawServoPos = SERVO_MID_LEFT; //left servo slightly open
+            rightClawServoPos = SERVO_MID_RIGHT; //right servo slightly open
+            leftClawTopServoPos = SERVO_MID_LEFT_TOP; //left top servo slightly open
+            rightClawTopServoPos = SERVO_MID_RIGHT_TOP; //right top servo slightly open
         }
-
+        if (gamepad2.right_trigger >= 0.50) {
+            leftClawServoPos = SERVO_GRAB_LEFT; //left servo grabbing position
+            rightClawServoPos = SERVO_GRAB_RIGHT; //right servo grabbing position
+            leftClawTopServoPos = SERVO_GRAB_LEFT_TOP; //left top servo grabbing position
+            rightClawTopServoPos = SERVO_GRAB_RIGHT_TOP; //right top servo grabbing position
+        }
+        else if (gamepad2.left_trigger >= 0.50) {
+            leftClawServoPos = SERVO_MIN_LEFT; //left servo fully open
+            rightClawServoPos = SERVO_MAX_RIGHT; //right servo fully open
+            leftClawTopServoPos = SERVO_MIN_LEFT_TOP;//left top servo fully open
+            rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //right top servo fully open
+        }
         //Manually Control Glyph Lift
         glyphLiftPower = -gamepad2.left_stick_y * GLYPH_LIFT_PWR_MAX;
     }
@@ -385,6 +407,7 @@ public class GeorgeOp extends OpMode {
     int state = 0; //used to control the steps taken during autonomous
     String stateName = ""; //Overwrite this as the specific step used in Autonomous
     boolean encoderTargetReached = false;
+    boolean angleTargetReached = false;
 
     void resetEncoders() {
         driveFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -436,16 +459,13 @@ public class GeorgeOp extends OpMode {
             }
             moveForward(speed);
         }
-
         if (Math.abs(error) <= 4) {
             stopDriveMotors();
             encoderTargetReached = true;
         }
-        else {
-            //Wait until target position is reached
+        else {//Wait until target position is reached
             telemetry.addData("Rotations left", String.format("%.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
         }
-
     }
     void moveRight(double power) {
         runConstantSpeed();
@@ -538,8 +558,10 @@ public class GeorgeOp extends OpMode {
         power = Range.clip(power, -1.0, 1.0);
         if (Math.abs(e) >= 5)
             turnClockwise(power);
-        else
+        else {
             stopDriveMotors();
+            angleTargetReached = true;
+        }
     }
 
     void turnClockwisePID(int targetAngle) {
@@ -560,6 +582,7 @@ public class GeorgeOp extends OpMode {
                 stopDriveMotors();
                 e_list.clear();
                 t_list.clear();
+                angleTargetReached = true;
             }
         }
         else {
@@ -568,8 +591,10 @@ public class GeorgeOp extends OpMode {
                     / Math.abs(targetAngle);
             if (Math.abs(targetAngle + angles.firstAngle) >= 10)
                 turnClockwise(power);
-            else
+            else {
                 stopDriveMotors();
+                angleTargetReached = true;
+            }
         }
     }
     ArrayList<Double> e_list = new ArrayList<>(); //records past errors
@@ -596,7 +621,7 @@ public class GeorgeOp extends OpMode {
         return slope;
     }
 
-    boolean turnAbsolute(double target) { //Tells robot to rotate to an absolute heading (degrees)
+    /*boolean turnAbsolute(double target) { //Tells robot to rotate to an absolute heading (degrees)
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         boolean absoluteReached = false;
         if (Math.abs(target + angles.firstAngle) <= 10) {
@@ -604,7 +629,7 @@ public class GeorgeOp extends OpMode {
             absoluteReached = true;
         }
         return absoluteReached;
-    }
+    }*/
 
     void updateVuforia() {
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
@@ -635,6 +660,7 @@ public class GeorgeOp extends OpMode {
 
     void calibrateVariables() {//Used if any autonomous methods need initial state variables
         encoderTargetReached = false;
+        angleTargetReached = false;
         colorSensor.enableLed(false);
         jewelKnocked = false;
     }

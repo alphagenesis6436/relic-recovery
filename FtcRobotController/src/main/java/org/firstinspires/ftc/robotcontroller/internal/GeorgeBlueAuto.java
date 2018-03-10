@@ -230,7 +230,7 @@ public class GeorgeBlueAuto extends GeorgeOp {
             case 14:
                 stateName = "Rotate to -75 degrees to have glyph face CryptoBox";
                 turnClockwise(-75);
-                if (turnAbsolute(-75))
+                if (angleTargetReached)
                     state++;
                 break;
 

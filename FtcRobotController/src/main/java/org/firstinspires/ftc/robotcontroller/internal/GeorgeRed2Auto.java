@@ -209,7 +209,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 10:
                 stateName = "Rotate to -90 degrees to be perpendicular with the walls";
                 turnClockwisePID(-90);
-                if (turnAbsolute(-90))
+                if (angleTargetReached)
                     state++;
                 break;
 
@@ -233,7 +233,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 14:
                 stateName = "Rotate to 195 degrees to have glyph face CryptoBox";
                 turnClockwisePID(-150); //-165
-                if (turnAbsolute(-150))  //-165
+                if (angleTargetReached)  //-165
                     state++;
                 break;
 

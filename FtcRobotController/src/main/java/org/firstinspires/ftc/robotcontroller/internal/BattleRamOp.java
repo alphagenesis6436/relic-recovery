@@ -55,106 +55,10 @@ import java.util.ArrayList;
  * ----Follows Same Code from VuforiaTestOp
  * ----Adds updateVuforia method for autonomous
  */
-@TeleOp(name = "GeorgeOp", group = "Default")
-public class GeorgeOp extends OpMode {
-    //Declare any motors, servos, and sensors
-    DcMotor driveFR; //AndyMark, 40:1
-    DcMotor driveFL; //AndyMark, 40:1
-    DcMotor driveBR; //AndyMark, 40:1
-    DcMotor driveBL; //AndyMark, 40:1
-    Servo upDownServo; //Metal Gear, 180
-    Servo leftRightServo; //Metal Gear, 180
-    ModernRoboticsI2cColorSensor colorSensor; //For Jewel Mechanism
-    BNO055IMU imu; //For detecting rotation
-    Orientation angles;
-    Servo leftClaw; //180, glyph claw
-    Servo rightClaw; //180, glyph claw
-    Servo topLeftClaw; //180, glyph top claw
-    Servo topRightClaw; //180, glyph top claw
-    Servo pivotServo; //2880 winch servo, glyph claw pivot
-    DcMotor glyphLift; //Andymark 60:1, lift the glyph claw
-    Servo downUpServo;    //180, relic claw
-    Servo openCloseServo; //180, relic claw
-    DcMotor relicMotor;     //40:1, relic lift
+@TeleOp(name = "BattleRamOp", group = "Default")
+public class BattleRamOp extends GeorgeOp {
 
-    //Mecanum Drive Train Variables and Constants
-    final double DRIVE_PWR_MAX = 0.90;
-    final double TURN_PWR_MAX = 1.00;
-    final int COUNTS_PER_REVOLUTION = 1120; //AndyMark Motors
-    final double DRIVE_GEAR_RATIO = 16.0 / 16.0; //Driven / Driver
-    final double COUNTS_PER_INCH_RF = COUNTS_PER_REVOLUTION / (4 * Math.PI / DRIVE_GEAR_RATIO); //forward / right / backward / left
-    final double COUNTS_PER_INCH_DG = COUNTS_PER_REVOLUTION / (2 * Math.PI * Math.sqrt(2) / DRIVE_GEAR_RATIO); //diagonal
-    boolean drivePreciseIsOn = false; //true halfs drive speed, false returns drive speed to max
-    double forwardRightPower = 0;
-    double forwardLeftPower = 0;
-    double backwardRightPower = 0;
-    double backwardLeftPower = 0;
-
-    //Glyph Claw Mechanism Variables and Constants
-    final float GLYPH_LIFT_PWR_MAX = 0.90f;
-    double glyphLiftPower = 0;
-    final float PIVOT_MIN = 0 / 255.0f; // (189/2295) starting position???
-    final float PIVOT_MAX = 170 / 225.0f; // (365/2295) rotated 180 degrees???
-    final float SERVO_GRAB_LEFT = 110 / 255.0f; //left claw is fully open
-    final float SERVO_MID_LEFT = 170 / 255.0f; //left claw is slightly open
-    final float SERVO_MAX_LEFT = 255 / 255.0f; //left claw is gripping glyph
-    final float SERVO_MIN_RIGHT = 37 / 255.0f; //right claw is gripping the glyph 168
-    final float SERVO_MID_RIGHT = 112 / 255.0f; //right claw is slightly open 188
-    final float SERVO_GRAB_RIGHT = 180 / 255.0f; //right claw is fully open 203
-    double leftClawServoPos = SERVO_MAX_LEFT; //start left claw fully open
-    double rightClawServoPos = SERVO_MIN_RIGHT; //start right claw fully open
-    final float SERVO_MIN_LEFT_TOP = 88 / 255.0f; //left claw is fully open
-    final float SERVO_MID_LEFT_TOP = 175 / 255.0f; //left claw is slightly open
-    final float SERVO_GRAB_LEFT_TOP = 235 / 255.0f; //left claw is gripping glyph
-    final float SERVO_GRAB_RIGHT_TOP = 78 / 255.0f; //right claw is gripping the glyph
-    final float SERVO_MID_RIGHT_TOP = 140 / 255.0f; //right claw is slightly open
-    final float SERVO_MAX_RIGHT_TOP = 226 / 255.0f; //right claw is fully open
-    double leftClawTopServoPos = SERVO_MIN_LEFT_TOP; //start left claw fully open
-    double rightClawTopServoPos = SERVO_MAX_RIGHT_TOP; //start right claw fully open
-    double pivotPos = PIVOT_MIN;
-    boolean singleClawModeIsOn = false;
-    boolean clawIsUpRight = true;
-    boolean glpyhBtnPressed = false;
-    double clawDelta = 0.0075;
-    double pivotDelta = 1 / 225.0f; //rotated 180 degrees???
-
-    //Jewel Mechanism Variables and Constants
-    final float LEFTRIGHT_MID = 110 / 255.0f;
-    final float UPDOWN_MIN = 125 / 255.0f;   //fully down (maybe 131)
-    final float UPDOWN_MAX = 207 / 255.0f;  //fully up
-    final float LEFTRIGHT_MIN = 95 / 255.0f; //far right (70)
-    final float LEFTRIGHT_MAX = 125 / 255.0f;   //far left (140)
-    final int BLUE_THRESHOLD = 3;   //holes
-    final int RED_THRESHOLD = 3;    //holes
-    double upDownPos = UPDOWN_MAX;
-    double leftRightPos = LEFTRIGHT_MID;
-    double jewelDelta = 0.01;
-    boolean jewelKnocked = false;
-
-    //Relic Mechanism Variables and Constants
-    final float OC_SERVO_CLOSE = 130 / 255.0f; //close - 180 o.g.
-    final float OC_SERVO_MAX = 206 / 255.0f; //open
-    final double DU_SERVO_MIN = 70 / 255.0f; //up
-    final double DU_SERVO_MAX = 211 / 255.0f; //down
-    double downUpServoPos = DU_SERVO_MAX;
-    double openCloseServoPos = OC_SERVO_CLOSE;
-    final double RELIC_PWR_MAX = 0.80;
-    boolean relicPwrSustained = false;
-    boolean relicBtnPressed = false;
-    double relicPower = 0;
-    double relicDelta = 0.05;
-
-    //Vuforia System Variables and Objects
-    //Declare any objects for Vuforia
-    OpenGLMatrix lastLocation = null;
-    VuforiaLocalizer vuforia;
-    VuforiaTrackables relicTrackables;
-    VuforiaTrackable relicTemplate;
-    int pictographKey = 0; //Left = 0, Center = 1, Right = 2
-
-    VoltageSensor driveVoltage;
-
-    public GeorgeOp() {}
+    public BattleRamOp() {}
 
     @Override public void init() {
         //Initialize motors & set direction
@@ -166,37 +70,9 @@ public class GeorgeOp extends OpMode {
         driveBR.setDirection(DcMotorSimple.Direction.FORWARD);
         driveBL = hardwareMap.dcMotor.get("dbl");
         driveBL.setDirection(DcMotorSimple.Direction.REVERSE);
-        glyphLift = hardwareMap.dcMotor.get("gl");
-        glyphLift.setDirection(DcMotorSimple.Direction.REVERSE);
-        relicMotor = hardwareMap.dcMotor.get("rm");
-        relicMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        //Initialize servos
-        upDownServo = hardwareMap.servo.get("uds");
-        leftRightServo = hardwareMap.servo.get("lrs");
-        leftClaw = hardwareMap.servo.get("lc");
-        rightClaw = hardwareMap.servo.get("rc");
-        topLeftClaw = hardwareMap.servo.get("lct");
-        topRightClaw = hardwareMap.servo.get("rct");
-        downUpServo = hardwareMap.servo.get("du");
-        openCloseServo = hardwareMap.servo.get("oc");
-        pivotServo = hardwareMap.servo.get("ps");
-
-        //Initialize sensors
-        colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
-        colorSensor.enableLed(true);
-        BNO055IMU.Parameters parameterz = new BNO055IMU.Parameters();
-        parameterz.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameterz.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameterz.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        //parameterz.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameterz);
     }
 
     @Override public void start() {
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
     }
 
     @Override public void loop() {
@@ -214,10 +90,6 @@ public class GeorgeOp extends OpMode {
     void updateData() {
         //Add in update methods for specific robot mechanisms
         updateDriveTrain();
-        updateGlyphClaw();
-        //updateJewel();
-        updateRelic();
-        //updateVuforia();
     }
 
     void initialization() {
@@ -230,31 +102,7 @@ public class GeorgeOp extends OpMode {
         driveBR.setPower(backwardRightPower);
         backwardLeftPower = Range.clip(backwardLeftPower, -DRIVE_PWR_MAX, DRIVE_PWR_MAX);
         driveBL.setPower(backwardLeftPower);
-        //Clip and Initialize Glyph Claw Mechanism
-        pivotPos = Range.clip(pivotPos, PIVOT_MIN, PIVOT_MAX);
-        pivotServo.setPosition(pivotPos);
-        leftClawServoPos = Range.clip(leftClawServoPos, SERVO_GRAB_LEFT, SERVO_MAX_LEFT);
-        leftClaw.setPosition(leftClawServoPos);
-        rightClawServoPos = Range.clip(rightClawServoPos, SERVO_MIN_RIGHT, SERVO_GRAB_RIGHT);
-        rightClaw.setPosition(rightClawServoPos);
-        glyphLiftPower = Range.clip(glyphLiftPower, -GLYPH_LIFT_PWR_MAX, GLYPH_LIFT_PWR_MAX);
-        glyphLift.setPower(glyphLiftPower);
-        leftClawTopServoPos = Range.clip(leftClawTopServoPos, SERVO_MIN_LEFT_TOP, SERVO_GRAB_LEFT_TOP);
-        topLeftClaw.setPosition(leftClawTopServoPos);
-        rightClawTopServoPos = Range.clip(rightClawTopServoPos, SERVO_GRAB_RIGHT_TOP, SERVO_MAX_RIGHT_TOP);
-        topRightClaw.setPosition(rightClawTopServoPos);
-        //Clip and Initialize Jewel Mechanism
-        upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
-        upDownServo.setPosition(upDownPos);
-        leftRightPos = Range.clip(leftRightPos, LEFTRIGHT_MIN, LEFTRIGHT_MAX);
-        leftRightServo.setPosition(leftRightPos);
-        //Clip and Initialize Relic Mechanism
-        downUpServoPos = Range.clip(downUpServoPos, DU_SERVO_MIN, DU_SERVO_MAX);
-        downUpServo.setPosition(downUpServoPos);
-        openCloseServoPos = Range.clip(openCloseServoPos, OC_SERVO_CLOSE, OC_SERVO_MAX);
-        openCloseServo.setPosition(openCloseServoPos);
-        relicPower = Range.clip(relicPower, -RELIC_PWR_MAX, RELIC_PWR_MAX);
-        relicMotor.setPower(relicPower);
+
     }
     void telemetry() {
         //Show Data for Specific Robot Mechanisms
@@ -262,21 +110,6 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("FL Pwr", String.format("%.2f",driveFL.getPower()));
         telemetry.addData("BR Pwr", String.format("%.2f",driveBR.getPower()));
         telemetry.addData("BL Pwr", String.format("%.2f",driveBL.getPower()));
-        telemetry.addData("UD Pos", String.format("%.0f", upDownServo.getPosition() * 255));
-        telemetry.addData("LR Pos", String.format("%.0f", leftRightServo.getPosition() * 255));
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        telemetry.addData("IMU Heading", String.format("%.0f", angles.firstAngle));
-        telemetry.addData("Red1", colorSensor.red());
-        telemetry.addData("Blue1", colorSensor.blue());
-        telemetry.addData("PS Pos", String.format("%.0f", pivotServo.getPosition() * 225));
-        telemetry.addData("LC Pos", String.format("%.0f", leftClaw.getPosition() * 255));
-        telemetry.addData("RC Pos", String.format("%.0f", rightClaw.getPosition() * 255));
-        telemetry.addData("TLC Pos", String.format("%.0f", topLeftClaw.getPosition() * 255));
-        telemetry.addData("TRC Pos", String.format("%.0f", topRightClaw.getPosition() * 255));
-        telemetry.addData("GL Pwr", String.format("%.2f", glyphLift.getPower()));
-        telemetry.addData("DU Pos", String.format("%.0f", downUpServo.getPosition() * 255));
-        telemetry.addData("OC Pos", String.format("%.0f", openCloseServo.getPosition() * 255));
-        telemetry.addData("RM Pwr", String.format("%.2f", relicMotor.getPower()));
     }
 
     //Create Methods that will update the driver data
@@ -299,7 +132,7 @@ public class GeorgeOp extends OpMode {
             backwardRightPower *= 0.30;
             backwardLeftPower *= 0.30;
         }
-        
+
     }
     //Controlled by Driver 2
     //Step 1: Open Left/Right Claw by pressing the Left/Right Bumper

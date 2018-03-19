@@ -291,15 +291,32 @@ public class GeorgeOp extends OpMode {
         }
         else if (gamepad1.left_bumper) {
             drivePreciseIsOn = true;
-            colorSensor.enableLed(true);
+            if (Math.round(this.time) % 2 == 0)
+                colorSensor.enableLed(true);
+            else
+                colorSensor.enableLed(false);
         }
         if (drivePreciseIsOn) {
-            forwardRightPower *= 0.30;
-            forwardLeftPower *= 0.30;
-            backwardRightPower *= 0.30;
-            backwardLeftPower *= 0.30;
+            runConstantSpeed();
+            forwardRightPower = preciseDriveScaling(forwardRightPower);
+            forwardLeftPower = preciseDriveScaling(forwardLeftPower);
+            backwardRightPower = preciseDriveScaling(backwardRightPower);
+            backwardLeftPower = preciseDriveScaling(backwardLeftPower);
+            if (Math.round(this.time) % 2 == 0)
+                colorSensor.enableLed(true);
+            else
+                colorSensor.enableLed(false);
+        }
+        else {
+            colorSensor.enableLed(false);
+            runConstantPower();
         }
         
+    }
+
+    double preciseDriveScaling(double v) {
+        v = Math.pow((Math.tanh(v)/Math.tanh(1)), 3);
+        return v;
     }
     //Controlled by Driver 2
     //Step 1: Open Left/Right Claw by pressing the Left/Right Bumper

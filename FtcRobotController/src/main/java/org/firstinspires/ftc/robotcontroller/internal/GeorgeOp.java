@@ -315,7 +315,7 @@ public class GeorgeOp extends OpMode {
     }
 
     double preciseDriveScaling(double v) {
-        v = Math.pow((Math.tanh(v)/Math.tanh(1)), 3);
+        v = Math.pow(Math.tanh(v), 3)/Math.tanh(1);
         return v;
     }
     //Controlled by Driver 2
@@ -328,11 +328,12 @@ public class GeorgeOp extends OpMode {
         }
         else if (gamepad2.dpad_right)
             pivotPos += pivotDelta;
-        if (gamepad2.x && !glpyhBtnPressed) {
+        if (gamepad2.right_stick_button && !glpyhBtnPressed) {
             glpyhBtnPressed = true;
             clawIsUpRight = !clawIsUpRight;
         }
-        else if (!gamepad2.x && glpyhBtnPressed)
+        else if (!gamepad2.right_stick_button
+                && glpyhBtnPressed)
             glpyhBtnPressed = false;
         if (clawIsUpRight) {
             pivotPos = PIVOT_MIN;
@@ -344,6 +345,10 @@ public class GeorgeOp extends OpMode {
                 leftClawServoPos = SERVO_GRAB_LEFT; //left servo grabbing position
                 rightClawServoPos = SERVO_GRAB_RIGHT; //right servo grabbing position
             }
+            else if (gamepad2.x) {
+                leftClawServoPos = SERVO_MID_LEFT; //left servo slightly open
+                rightClawServoPos = SERVO_MID_RIGHT; //right servo slightly open
+            }
         }
         else {
             pivotPos = PIVOT_MAX;
@@ -353,6 +358,10 @@ public class GeorgeOp extends OpMode {
             } else if (gamepad2.right_bumper) {
                 leftClawTopServoPos = SERVO_GRAB_LEFT_TOP; //left top servo grabbing position
                 rightClawTopServoPos = SERVO_GRAB_RIGHT_TOP; //right top servo grabbing position
+            }
+            else if (gamepad2.x) {
+                leftClawTopServoPos = SERVO_MID_LEFT_TOP; //left top servo slightly open
+                rightClawTopServoPos = SERVO_MID_RIGHT_TOP; //right top servo slightly open
             }
         }
         if (gamepad2.b) {

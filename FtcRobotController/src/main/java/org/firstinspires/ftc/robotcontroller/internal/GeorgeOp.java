@@ -81,7 +81,7 @@ public class GeorgeOp extends OpMode {
     final double DRIVE_PWR_MAX = 0.90;
     final double TURN_PWR_MAX = 1.00;
     final int COUNTS_PER_REVOLUTION = 1120; //AndyMark Motors
-    final double DRIVE_GEAR_RATIO = 16.0 / 16.0; //Driven / Driver
+    final double DRIVE_GEAR_RATIO = 16.0 / 24.0; //Driven / Driver
     final double COUNTS_PER_INCH_RF = COUNTS_PER_REVOLUTION / (4 * Math.PI / DRIVE_GEAR_RATIO); //forward / right / backward / left
     final double COUNTS_PER_INCH_DG = COUNTS_PER_REVOLUTION / (2 * Math.PI * Math.sqrt(2) / DRIVE_GEAR_RATIO); //diagonal
     boolean drivePreciseIsOn = false; //true halfs drive speed, false returns drive speed to max

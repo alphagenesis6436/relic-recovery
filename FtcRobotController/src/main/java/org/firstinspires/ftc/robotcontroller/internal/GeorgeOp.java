@@ -93,7 +93,7 @@ public class GeorgeOp extends OpMode {
     double backwardRightPower = 0;
     double backwardLeftPower = 0;
 
-    //Glyph Claw Mechanism Variables and Constants
+    //Glyph Claw Mechanism Variables and  Constants
     final float GLYPH_LIFT_PWR_MAX = 0.90f;
     double glyphLiftPower = 0;
     final float PIVOT_MIN = 0 / 255.0f; // (189/2295) starting position???

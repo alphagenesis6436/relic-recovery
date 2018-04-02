@@ -78,8 +78,11 @@ public class GeorgeOp extends OpMode {
     DcMotor relicMotor;     //40:1, relic lift
 
     //Mecanum Drive Train Variables and Constants
-    final double DRIVE_PWR_MAX = 0.90;
+    final double DRIVE_PWR_MAX = 0.50;
     final double TURN_PWR_MAX = 1.00;
+
+
+
     final int COUNTS_PER_REVOLUTION = 1120; //AndyMark Motors
     final double DRIVE_GEAR_RATIO = 16.0 / 24.0; //Driven / Driver
     final double COUNTS_PER_INCH_RF = COUNTS_PER_REVOLUTION / (4 * Math.PI / DRIVE_GEAR_RATIO); //forward / right / backward / left
@@ -120,10 +123,10 @@ public class GeorgeOp extends OpMode {
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
-    final float UPDOWN_MIN = 125 / 255.0f;   //fully down (maybe 131)
+    final float UPDOWN_MIN = 127 / 255.0f;   //fully down (maybe 131)
     final float UPDOWN_MAX = 207 / 255.0f;  //fully up
-    final float LEFTRIGHT_MIN = 95 / 255.0f; //far right (70)
-    final float LEFTRIGHT_MAX = 125 / 255.0f;   //far left (140)
+    final float LEFTRIGHT_MIN = 50 / 255.0f; //far right (70)
+    final float LEFTRIGHT_MAX = 160 / 255.0f;   //far left (140)
     final int BLUE_THRESHOLD = 3;   //holes
     final int RED_THRESHOLD = 3;    //holes
     double upDownPos = UPDOWN_MAX;
@@ -665,20 +668,25 @@ public class GeorgeOp extends OpMode {
             { // Test to see if Image is the "LEFT" image and display value.
                 telemetry.addData("VuMark is", "Left");
                 pictographKey = 0;
+                keyDetected = true;
             } else if (vuMark == RelicRecoveryVuMark.RIGHT)
             { // Test to see if Image is the "RIGHT" image and display values.
                 telemetry.addData("VuMark is", "Right");
                 pictographKey = 2;
+                keyDetected = true;
             } else if (vuMark == RelicRecoveryVuMark.CENTER)
             { // Test to see if Image is the "CENTER" image and display values.
                 telemetry.addData("VuMark is", "Center");
                 pictographKey = 1;
+                keyDetected = true;
             }
         } else
         {
             telemetry.addData("VuMark", "not visible");
+            keyDetected = false;
         }
     }
+    boolean keyDetected = false;
 
     void calibrateVariables() {//Used if any autonomous methods need initial state variables
         encoderTargetReached = false;

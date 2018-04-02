@@ -78,7 +78,7 @@ public class GeorgeOp extends OpMode {
     DcMotor relicMotor;     //40:1, relic lift
 
     //Mecanum Drive Train Variables and Constants
-    final double DRIVE_PWR_MAX = 0.90;
+    final double DRIVE_PWR_MAX = 0.50;
     final double TURN_PWR_MAX = 1.00;
     final int COUNTS_PER_REVOLUTION = 1120; //AndyMark Motors
     final double DRIVE_GEAR_RATIO = 16.0 / 24.0; //Driven / Driver
@@ -90,7 +90,7 @@ public class GeorgeOp extends OpMode {
     double backwardRightPower = 0;
     double backwardLeftPower = 0;
 
-    //Glyph Claw Mechanism Variables and Constants
+    //Glyph Claw Mechanism Variables and  Constants
     final float GLYPH_LIFT_PWR_MAX = 0.90f;
     double glyphLiftPower = 0;
     final float PIVOT_MIN = 0 / 255.0f; // (189/2295) starting position???

@@ -216,41 +216,32 @@ public class GeorgeRedAuto extends GeorgeOp {
 
             case 14:
                 stateName = "Drive Back until correct column reached";
+
+                telemetry.addData("FR", String.format("%.2f", driveFR.getPower()));
+                telemetry.addData("FL", String.format("%.2f", driveFL.getPower()));
+                telemetry.addData("BR", String.format("%.2f", driveBR.getPower()));
+                telemetry.addData("BL", String.format("%.2f", driveBL.getPower()));
+
                 if (pictographKey == 2) { //drive to right column
-                    moveForward(-0.20, -1.30);
+                    moveForward(-0.20, -1.275);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(-0.20, -2.100);
+                    moveForward(-0.20, -1.850);
                 }
                 else if (pictographKey == 0) { //drive to left column
-                    moveForward(-0.20, -2.325);
+                    moveForward(-0.20, -2.500);
                 }
                 if (encoderTargetReached) {
-                    if (pictographKey == 0) {
-                        state++;
-                        pictographKey = -2; //tells robot to robot to different angle
-                    }
-                    else {
-                        state++;
-                        pictographKey = -1;
-                    }
+                    state++;
                 }
                 break;
 
             case 16:
-                stateName = "Rotate to -85 degrees to have glyph face CryptoBox";
+                stateName = "Rotate to -75 degrees to have glyph face CryptoBox";
                 //if cyrptokey = left column rotate to -85 degrees to prevent from hitting balancing stone
-                if (pictographKey == -2) {
-                    turnClockwise(-85);
-                    if (angleTargetReached) {
-                        state++;
-                        pictographKey = -1;
-                    }
-                }
-                else {
-                    turnClockwise(-75);
-                    if (angleTargetReached)
-                        state++;
+                turnClockwisePID(-75);
+                if (angleTargetReached) {
+                    state++;
                 }
                 break;
 

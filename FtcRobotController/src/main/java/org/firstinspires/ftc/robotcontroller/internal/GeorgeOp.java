@@ -507,7 +507,7 @@ public class GeorgeOp extends OpMode {
         //the motors will decelerate to from the input speed to 10% speed
         double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
         double kp = 2 * (Math.abs(speed) - 0.10) / COUNTS_PER_REVOLUTION;
-        double error = target - driveFL.getCurrentPosition();
+        double error = target - driveFR.getCurrentPosition();
         if (!encoderTargetReached) {
             if (Math.abs(error) <= COUNTS_PER_REVOLUTION / 2) {
                 speed = (0.10 * revolutions / Math.abs(revolutions)) + (error * kp);
@@ -535,7 +535,7 @@ public class GeorgeOp extends OpMode {
         //the motors will decelerate to from the input speed to 10% speed
         double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
         double kp = 2 * (Math.abs(speed) - 0.10) / COUNTS_PER_REVOLUTION;
-        double error = target - driveFL.getCurrentPosition();
+        double error = target - driveFR.getCurrentPosition();
         if (!encoderTargetReached) {
             if (Math.abs(error) <= COUNTS_PER_REVOLUTION / 2) {
                 speed = (0.10 * revolutions / Math.abs(revolutions)) + (error * kp);

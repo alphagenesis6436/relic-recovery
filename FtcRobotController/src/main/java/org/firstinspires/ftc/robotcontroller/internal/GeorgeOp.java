@@ -80,6 +80,9 @@ public class GeorgeOp extends OpMode {
     //Mecanum Drive Train Variables and Constants
     final double DRIVE_PWR_MAX = 0.50;
     final double TURN_PWR_MAX = 1.00;
+
+
+
     final int COUNTS_PER_REVOLUTION = 1120; //AndyMark Motors
     final double DRIVE_GEAR_RATIO = 16.0 / 24.0; //Driven / Driver
     final double COUNTS_PER_INCH_RF = COUNTS_PER_REVOLUTION / (4 * Math.PI / DRIVE_GEAR_RATIO); //forward / right / backward / left
@@ -120,10 +123,10 @@ public class GeorgeOp extends OpMode {
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
-    final float UPDOWN_MIN = 125 / 255.0f;   //fully down (maybe 131)
+    final float UPDOWN_MIN = 127 / 255.0f;   //fully down (maybe 131)
     final float UPDOWN_MAX = 207 / 255.0f;  //fully up
-    final float LEFTRIGHT_MIN = 95 / 255.0f; //far right (70)
-    final float LEFTRIGHT_MAX = 125 / 255.0f;   //far left (140)
+    final float LEFTRIGHT_MIN = 50 / 255.0f; //far right (70)
+    final float LEFTRIGHT_MAX = 160 / 255.0f;   //far left (140)
     final int BLUE_THRESHOLD = 3;   //holes
     final int RED_THRESHOLD = 3;    //holes
     double upDownPos = UPDOWN_MAX;
@@ -469,6 +472,7 @@ public class GeorgeOp extends OpMode {
         runConstantSpeed();
         move(power, power, power, power);
     }
+
     void moveForward(double speed, double revolutions) {
         //Proportional Drive Control: for the last half rotation of the motor,
         //the motors will decelerate to from the input speed to 10% speed
@@ -493,17 +497,22 @@ public class GeorgeOp extends OpMode {
         runConstantSpeed();
         move(-power, power, power, -power);
     }
-    void moveRight(double speed, double revolutions) {
+    void moveRight(double power, int targetAngle) {
+        runConstantSpeed();
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        move(-power - (targetAngle + angles.firstAngle) / 100.0, (power + (targetAngle + angles.firstAngle) / 100.0), (power - (targetAngle + angles.firstAngle) / 100.0), -(power + (targetAngle + angles.firstAngle) / 100.0));
+    }
+    void moveRight(double speed, double revolutions, int targetAngle) {
         //Proportional Drive Control: for the last half rotation of the motor,
         //the motors will decelerate to from the input speed to 10% speed
         double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
         double kp = 2 * (Math.abs(speed) - 0.10) / COUNTS_PER_REVOLUTION;
-        double error = target - driveFL.getCurrentPosition();
+        double error = target - driveFR.getCurrentPosition();
         if (!encoderTargetReached) {
             if (Math.abs(error) <= COUNTS_PER_REVOLUTION / 2) {
                 speed = (0.10 * revolutions / Math.abs(revolutions)) + (error * kp);
             }
-            moveRight(speed);
+            moveRight(speed, targetAngle);
         }
 
         if (Math.abs(error) <= 4) {
@@ -515,6 +524,8 @@ public class GeorgeOp extends OpMode {
             telemetry.addData("Rotations left", String.format("%.2f", error / COUNTS_PER_REVOLUTION / DRIVE_GEAR_RATIO));
         }
     }
+
+
     void moveForwardRight(double power) {
         runConstantSpeed();
         move(0.0, power, power, 0.0);
@@ -524,7 +535,7 @@ public class GeorgeOp extends OpMode {
         //the motors will decelerate to from the input speed to 10% speed
         double target = revolutions * COUNTS_PER_REVOLUTION * DRIVE_GEAR_RATIO;
         double kp = 2 * (Math.abs(speed) - 0.10) / COUNTS_PER_REVOLUTION;
-        double error = target - driveFL.getCurrentPosition();
+        double error = target - driveFR.getCurrentPosition();
         if (!encoderTargetReached) {
             if (Math.abs(error) <= COUNTS_PER_REVOLUTION / 2) {
                 speed = (0.10 * revolutions / Math.abs(revolutions)) + (error * kp);
@@ -578,7 +589,7 @@ public class GeorgeOp extends OpMode {
         double e = targetAngle + angles.firstAngle; //clockwise is negative for thirdAngle
         double power = (0.05 * e / Math.abs(e)) + k * e;
         power = Range.clip(power, -1.0, 1.0);
-        if (Math.abs(e) >= 5)
+        if (Math.abs(e) >= 2)
             turnClockwise(power);
         else {
             stopDriveMotors();
@@ -592,7 +603,7 @@ public class GeorgeOp extends OpMode {
         if (driveVoltage.getVoltage() < 14.0) {
             double kp = 0.010; //proportionality constant (amount to adjust for immediate deviance) experimentally found
             double ki = 0.001; //integral constant (amount to adjust for past errors) experimentally found
-            double kd = 0.002; //derivative constant (amount to adjust for future errors) experimentally found
+            double kd = 0.0022; //derivative constant (amount to adjust for future errors) experimentally found
             double e = targetAngle + angles.firstAngle; //error
             e_list.add(e);
             t_list.add(this.time);
@@ -665,20 +676,25 @@ public class GeorgeOp extends OpMode {
             { // Test to see if Image is the "LEFT" image and display value.
                 telemetry.addData("VuMark is", "Left");
                 pictographKey = 0;
+                keyDetected = true;
             } else if (vuMark == RelicRecoveryVuMark.RIGHT)
             { // Test to see if Image is the "RIGHT" image and display values.
                 telemetry.addData("VuMark is", "Right");
                 pictographKey = 2;
+                keyDetected = true;
             } else if (vuMark == RelicRecoveryVuMark.CENTER)
             { // Test to see if Image is the "CENTER" image and display values.
                 telemetry.addData("VuMark is", "Center");
                 pictographKey = 1;
+                keyDetected = true;
             }
         } else
         {
             telemetry.addData("VuMark", "not visible");
+            keyDetected = false;
         }
     }
+    boolean keyDetected = false;
 
     void calibrateVariables() {//Used if any autonomous methods need initial state variables
         encoderTargetReached = false;

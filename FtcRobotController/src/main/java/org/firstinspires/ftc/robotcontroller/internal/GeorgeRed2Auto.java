@@ -58,6 +58,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
         rightClaw = hardwareMap.servo.get("rc");
         topLeftClaw = hardwareMap.servo.get("lct");
         topRightClaw = hardwareMap.servo.get("rct");
+        pivotServo = hardwareMap.servo.get("ps");
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
@@ -127,6 +128,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 topLeftClaw.setPosition(leftClawTopServoPos);
                 rightClawTopServoPos = SERVO_GRAB_RIGHT_TOP;
                 topRightClaw.setPosition(rightClawTopServoPos);
+                pivotServo.setPosition(PIVOT_MIN);
                 //upDownServo moves down to down position
                 upDownPos -= 0.03;
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
@@ -189,22 +191,47 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 break;
 
             case 8:
-                stateName = "Drive backward to drive off balancing stone";
-                //Check Pictograph to score glyph in correct column
+                stateName = "Drive forward to detect crypto key";
                 updateVuforia();
-                moveForward(-0.20, -2.00);
-                if (encoderTargetReached)
+                moveForward(0.075);
+                if (keyDetected)
                     state++;
                 break;
 
             case 10:
+                stateName = "Drive backward to drive off balancing stone";
+                //Check Pictograph to score glyph in correct column
+                updateVuforia();
+                moveForward(-0.20, -1.55);
+                if (encoderTargetReached)
+                    state++;
+                break;
+
+            case 12:
+                stateName = "Drive forward to align with balancing stone";
+                //have robot drive to be square with the balancing stone
+                moveForward(0.20);
+                if (waitSec(0.5))
+                    state++;
+                break;
+
+            case 14:
+                stateName = "Drive backward to drive off balancing stone";
+                //Check Pictograph to score glyph in correct column
+                updateVuforia();
+                moveForward(-0.20, -0.50);
+                if (encoderTargetReached)
+                    state++;
+                break;
+
+            case 16:
                 stateName = "Rotate to -90 degrees to be perpendicular with the walls";
                 turnClockwisePID(-90);
                 if (angleTargetReached)
                     state++;
                 break;
 
-            case 12:
+            case 18:
                 stateName = "Drive forward until correct column reached";
                 if (pictographKey == 0) { //drive to left column
                     moveForward(-0.20, -2.100);
@@ -221,21 +248,27 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 }
                 break;
 
-            case 14:
+            case 20:
                 stateName = "Rotate to 195 degrees to have glyph face CryptoBox";
                 turnClockwisePID(-150); //-165
                 if (angleTargetReached)  //-165
                     state++;
                 break;
 
-            case 16:
+            case 22:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
+                if (!waitSec(0.95)) {//bring up the glyph
+                    glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    glyphLift.setPower(-0.50);
+                }
+                else
+                    glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 if (waitSec(3))
                     state++;
                 break;
 
-            case 18:
+            case 24:
                 stateName = "Drop and Release Glyph";
                 //open the claws to release the glyph
                 leftClawServoPos = SERVO_MAX_LEFT;
@@ -250,17 +283,11 @@ public class GeorgeRed2Auto extends GeorgeOp {
                     state++;
                 break;
 
-            case 20:
+            case 26:
                 stateName = "Drive backward a little bit to park";
                 moveForward(-0.20);
-                if (!waitSec(0.95)) {//bring up the glyph
-                    glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    glyphLift.setPower(-0.50);
-                }
-                else
-                    glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-                if (waitSec(1))
+                if (waitSec(0.75))
                     state = 1000;
                 break;
 

@@ -39,7 +39,6 @@ import java.util.ArrayList;
 public class GeorgeBlue2Auto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 
-
     public GeorgeBlue2Auto() {}
 
     @Override
@@ -65,6 +64,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
         rightClaw = hardwareMap.servo.get("rc");
         topLeftClaw = hardwareMap.servo.get("lct");
         topRightClaw = hardwareMap.servo.get("rct");
+        pivotServo = hardwareMap.servo.get("ps");
 
         //Initialize sensors
         colorSensor = (ModernRoboticsI2cColorSensor) hardwareMap.colorSensor.get("cs");
@@ -134,6 +134,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                 topLeftClaw.setPosition(leftClawTopServoPos);
                 rightClawTopServoPos = SERVO_GRAB_RIGHT_TOP;
                 topRightClaw.setPosition(rightClawTopServoPos);
+                pivotServo.setPosition(PIVOT_MIN);
                 //upDownServo moves down to down position
                 upDownPos -= 0.03;
                 upDownPos = Range.clip(upDownPos, UPDOWN_MIN, UPDOWN_MAX);
@@ -196,31 +197,66 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                 break;
 
             case 8:
-                stateName = "Drive forward to drive off balancing stone";
-                //Check Pictograph to score glyph in correct column
+                stateName = "Drive backwards to detect crypto key";
                 updateVuforia();
-                moveForward(0.20, 1.95);
-                if (encoderTargetReached)
+                turnClockwise(-0.075);
+                if (keyDetected)
                     state++;
                 break;
 
             case 10:
-                stateName = "Rotate to 90 degrees to be perpendicular with the walls";
-                turnClockwise(90);
+                stateName = "Rotate to align if drive backwards to detect crypto key";
+                turnClockwisePID(0);
                 if (angleTargetReached)
                     state++;
                 break;
 
             case 12:
+                stateName = "Drive forward to drive off balancing stone";
+                //Check Pictograph to score glyph in correct column
+                updateVuforia();
+                moveForward(0.20, 1.55);
+                if (encoderTargetReached)
+                    state++;
+                break;
+
+            case 14:
+                stateName = "Drive backward to align with balancing stone";
+                //have robot drive to be square with the balancing stone
+                moveForward(-0.20);
+                if (waitSec(0.75))
+                    state++;
+                break;
+
+            case 16:
+                stateName = "Drive forward closer to cryptobox";
+                //Check Pictograph to score glyph in correct column
+                updateVuforia();
+                moveForward(0.20, 0.625);
+                if (pictographKey == 0)
+                    state = 19;
+                else if (encoderTargetReached)
+                    state++;
+                break;
+
+            case 18:
+                stateName = "Rotate to 90 degrees to be perpendicular with the walls";
+                turnClockwisePID(85);
+                if (angleTargetReached)
+                    state++;
+                break;
+
+            case 20:
                 stateName = "Drive Forward until correct column reached";
                 if (pictographKey == 2) { //drive to right column
-                    moveForward(0.20, 0.85);
+                    moveForward(0.20, 1.10);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(0.20, 0.20);
+                    moveForward(0.20, 0.45);
                 }
                 else if (pictographKey == 0) { //drive to left column
-                    moveForward(-0.20, -0.40);
+                    encoderTargetReached = true;
+                    //moveRight(0, 0, 0);
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -228,21 +264,27 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                 }
                 break;
 
-            case 14:
-                stateName = "Rotate to 25 degrees to have glyph face CryptoBox";
-                turnClockwise(25);
+            case 22:
+                stateName = "Rotate to 15 degrees to have glyph face CryptoBox";
+                turnClockwisePID(15);
                 if (angleTargetReached)
                     state++;
                 break;
 
-            case 16:
+            case 24:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (waitSec(2.5))
+                if (!waitSec(0.95)) {//bring up the glyph
+                    glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    glyphLift.setPower(-0.50);
+                }
+                else
+                    glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                if (waitSec(3))
                     state++;
                 break;
 
-            case 18:
+            case 26:
                 stateName = "Drop and Release Glyph";
                 //open the claws to release the glyph
                 leftClawServoPos = SERVO_MAX_LEFT;
@@ -257,17 +299,11 @@ public class GeorgeBlue2Auto extends GeorgeOp {
                     state++;
                 break;
 
-            case 20:
+            case 28:
                 stateName = "Drive backward a little bit to park";
                 moveForward(-0.20);
-                if (!waitSec(0.95)) {//bring up the glyph
-                    glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    glyphLift.setPower(-0.50);
-                }
-                else
-                    glyphLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-                if (waitSec(1))
+                if (waitSec(0.75))
                     state = 1000;
                 break;
 
@@ -304,52 +340,4 @@ public class GeorgeBlue2Auto extends GeorgeOp {
         }
     }
 
-//    //Create any methods needed for this specific autonomous program
-//    //new and improved turning method, feedback control: PID
-void turnClockwise(int targetAngle) {
-    if (driveVoltage.getVoltage() < 10.5) {
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double kp = 0.019; //proportionality constant (amount to adjust for immediate deviance) experimentally found
-        double ki = 0.010; //integral constant (amount to adjust for past errors) experimentally found
-        double kd = 0.011; //derivative constant (amount to adjust for future errors) experimentally found
-        double e = targetAngle + angles.firstAngle; //error
-        e_list.add(e);
-        t_list.add(this.time);
-        double power = kp*e + ki*integrate() + kd*differentiate();
-        power = Range.clip(power, -DRIVE_PWR_MAX, DRIVE_PWR_MAX); //ensure power doesn't exceed max speed
-        if (Math.abs(e / targetAngle) >= 0.01) //keep adjusting until error is less than 1%
-            turnClockwise(power);
-        else {
-            stopDriveMotors();
-            e_list.clear();
-            t_list.clear();
-        }
-    }
-    else {
-        super.turnClockwise(targetAngle);
-    }
-}
-    ArrayList<Double> e_list = new ArrayList<>(); //records past errors
-    ArrayList<Double> t_list = new ArrayList<>(); // records times past errors took place
-    //integrates error of angle w/ respect to time
-    double integrate() {
-        double sum = 0; //uses trapezoidal sum approximation method
-        if (e_list.size() >= 2) {
-            for (int i = 0; i <= e_list.size() - 2; i++) {
-                double dt = t_list.get(i+1) - t_list.get(i);
-                sum += (e_list.get(i+1) + e_list.get(i))*dt / 2.0;
-            }
-        }
-        return sum;
-    }
-    //differentiates error of angle w/ respect to time
-    double differentiate() {
-        double slope = 0; //uses secant line approximation
-        if (e_list.size() >= 2) {
-            double de = e_list.get(e_list.size() - 1) - e_list.get(e_list.size() - 2);
-            double dt = t_list.get(t_list.size() - 1) - t_list.get(t_list.size() - 2);
-            slope = de / dt;
-        }
-        return slope;
-    }
 }

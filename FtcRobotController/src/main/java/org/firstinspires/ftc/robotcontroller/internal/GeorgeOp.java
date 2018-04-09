@@ -94,7 +94,7 @@ public class GeorgeOp extends OpMode {
     final float GLYPH_LIFT_PWR_MAX = 0.90f;
     double glyphLiftPower = 0;
     final float PIVOT_MIN = 0 / 255.0f; // (189/2295) starting position???
-    final float PIVOT_MAX = 170 / 225.0f; // (365/2295) rotated 180 degrees???
+    final float PIVOT_MAX = 180 / 225.0f; // (365/2295) rotated 180 degrees???
     final float SERVO_GRAB_LEFT = 110 / 255.0f; //left claw is fully open
     final float SERVO_MID_LEFT = 170 / 255.0f; //left claw is slightly open
     final float SERVO_MAX_LEFT = 255 / 255.0f; //left claw is gripping glyph

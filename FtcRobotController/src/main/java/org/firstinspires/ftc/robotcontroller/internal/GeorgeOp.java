@@ -305,7 +305,7 @@ public class GeorgeOp extends OpMode {
             forwardLeftPower = preciseDriveScaling(forwardLeftPower);
             backwardRightPower = preciseDriveScaling(backwardRightPower);
             backwardLeftPower = preciseDriveScaling(backwardLeftPower);
-            if (Math.round(this.time) % 2 == 0)
+            if (Math.round(this.time * 5) % 2 == 0) //flash led 5 times per second when one
                 colorSensor.enableLed(true);
             else
                 colorSensor.enableLed(false);

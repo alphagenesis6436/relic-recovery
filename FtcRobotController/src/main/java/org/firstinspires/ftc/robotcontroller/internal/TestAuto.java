@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.robotcontroller.internal;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 /**
  * Updated by Alex on 11/5/2017.
  */
 @Autonomous(name = "AutoTemplate", group = "default")
+@Disabled
 public class TestAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
 

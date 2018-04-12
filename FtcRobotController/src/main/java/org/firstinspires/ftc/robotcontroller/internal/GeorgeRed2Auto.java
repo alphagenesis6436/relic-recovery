@@ -32,6 +32,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 //@Disabled
 public class GeorgeRed2Auto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
+    boolean checkedBack = false;
 
     public GeorgeRed2Auto() {}
 
@@ -47,7 +48,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
         driveBL = hardwareMap.dcMotor.get("dbl");
         driveBL.setDirection(DcMotorSimple.Direction.REVERSE);
         glyphLift = hardwareMap.dcMotor.get("gl");
-        glyphLift.setDirection(DcMotorSimple.Direction.REVERSE);
+        glyphLift.setDirection(DcMotorSimple.Direction.FORWARD);
         relicMotor = hardwareMap.dcMotor.get("rm");
         relicMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -191,10 +192,19 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 break;
 
             case 8:
-                stateName = "Drive forward to detect crypto key";
+                stateName = "Drive backwards to detect crypto key";
+                disableEncoderCalibration = true; //carry over encoder values to next state
                 updateVuforia();
-                moveForward(0.075);
-                if (keyDetected)
+                //continuously drive back and forth in a specific range until cryptograph is detected or 5 after 5 seconds
+                if (!checkedBack) {
+                    moveForward(-0.075);
+                }
+                else {
+                    moveForward(0.075);
+                }
+                if (driveFR.getCurrentPosition() <= -0.5 * COUNTS_PER_REVOLUTION || driveFR.getCurrentPosition() >= 0.1 * COUNTS_PER_REVOLUTION)
+                    checkedBack = !checkedBack;
+                if (keyDetected || waitSec(5))
                     state++;
                 break;
 
@@ -202,7 +212,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 stateName = "Drive backward to drive off balancing stone";
                 //Check Pictograph to score glyph in correct column
                 updateVuforia();
-                moveForward(-0.20, -1.55);
+                moveForward(-0.20, -1.40);
                 if (encoderTargetReached)
                     state++;
                 break;
@@ -234,13 +244,13 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 18:
                 stateName = "Drive forward until correct column reached";
                 if (pictographKey == 0) { //drive to left column
-                    moveForward(-0.20, -2.100);
+                    moveForward(-0.20, -2.10);
                 }
                 else if (pictographKey == 1) { //drive to middle column
-                    moveForward(-0.20, -1.600);
+                    moveForward(-0.20, -1.45);
                 }
                 else if (pictographKey == 2) { //drive to right column
-                    moveForward(-0.20, -1.000); //-.450
+                    moveForward(-0.20, -0.80); //-.450
                 }
                 if (encoderTargetReached) {
                     state++;
@@ -250,7 +260,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
 
             case 20:
                 stateName = "Rotate to 195 degrees to have glyph face CryptoBox";
-                turnClockwisePID(-150); //-165
+                turnClockwisePID(-165); //-165
                 if (angleTargetReached)  //-165
                     state++;
                 break;
@@ -258,7 +268,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
             case 22:
                 stateName = "Drive forward toward CryptoBox until glyph is scored";
                 moveForward(0.20);
-                if (!waitSec(0.95)) {//bring up the glyph
+                if (!waitSec(0.70)) {//bring up the glyph
                     glyphLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     glyphLift.setPower(-0.50);
                 }
@@ -287,7 +297,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 stateName = "Drive backward a little bit to park";
                 moveForward(-0.20);
 
-                if (waitSec(0.75))
+                if (waitSec(0.45))
                     state = 1000;
                 break;
 
@@ -318,6 +328,7 @@ public class GeorgeRed2Auto extends GeorgeOp {
                 resetEncoders();
                 if (waitSec(0.25)) {
                     state++;
+                    disableEncoderCalibration = false;
                     setTime = this.time;
                 }
                 break;

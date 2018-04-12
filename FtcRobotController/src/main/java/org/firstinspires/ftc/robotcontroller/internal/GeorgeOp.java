@@ -78,7 +78,7 @@ public class GeorgeOp extends OpMode {
     DcMotor relicMotor;     //40:1, relic lift
 
     //Mecanum Drive Train Variables and Constants
-    final double DRIVE_PWR_MAX = 0.50;
+    final double DRIVE_PWR_MAX = 0.70;
     final double TURN_PWR_MAX = 1.00;
 
 
@@ -97,7 +97,7 @@ public class GeorgeOp extends OpMode {
     final float GLYPH_LIFT_PWR_MAX = 0.90f;
     double glyphLiftPower = 0;
     final float PIVOT_MIN = 0 / 255.0f; // (189/2295) starting position???
-    final float PIVOT_MAX = 170 / 225.0f; // (365/2295) rotated 180 degrees???
+    final float PIVOT_MAX = 180 / 225.0f; // (365/2295) rotated 180 degrees???
     final float SERVO_GRAB_LEFT = 110 / 255.0f; //left claw is fully open
     final float SERVO_MID_LEFT = 170 / 255.0f; //left claw is slightly open
     final float SERVO_MAX_LEFT = 255 / 255.0f; //left claw is gripping glyph
@@ -170,7 +170,7 @@ public class GeorgeOp extends OpMode {
         driveBL = hardwareMap.dcMotor.get("dbl");
         driveBL.setDirection(DcMotorSimple.Direction.REVERSE);
         glyphLift = hardwareMap.dcMotor.get("gl");
-        glyphLift.setDirection(DcMotorSimple.Direction.REVERSE);
+        glyphLift.setDirection(DcMotorSimple.Direction.FORWARD);
         relicMotor = hardwareMap.dcMotor.get("rm");
         relicMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -294,7 +294,7 @@ public class GeorgeOp extends OpMode {
         }
         else if (gamepad1.left_bumper) {
             drivePreciseIsOn = true;
-            if (Math.round(this.time) % 2 == 0)
+            if (Math.round(this.time) % 2 == 0 || Math.round(this.time) % 3 == 0)
                 colorSensor.enableLed(true);
             else
                 colorSensor.enableLed(false);
@@ -435,10 +435,18 @@ public class GeorgeOp extends OpMode {
     boolean angleTargetReached = false;
 
     void resetEncoders() {
-        driveFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driveFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driveBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driveBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        if (disableEncoderCalibration) {
+            driveFR.setPower(0);
+            driveFL.setPower(0);
+            driveBR.setPower(0);
+            driveBL.setPower(0);
+        }
+        else {
+            driveFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            driveFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            driveBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            driveBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
     }
     void runConstantSpeed() {
         driveFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -696,6 +704,7 @@ public class GeorgeOp extends OpMode {
     }
     boolean keyDetected = false;
 
+    boolean disableEncoderCalibration = false;
     void calibrateVariables() {//Used if any autonomous methods need initial state variables
         encoderTargetReached = false;
         angleTargetReached = false;

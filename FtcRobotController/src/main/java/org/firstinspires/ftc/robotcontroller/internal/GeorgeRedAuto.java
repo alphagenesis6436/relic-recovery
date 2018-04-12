@@ -31,6 +31,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 @Autonomous(name = "GeorgeRedAuto", group = "default")
 public class GeorgeRedAuto extends GeorgeOp {
     //Declare and Initialize any variables needed for this specific autonomous program
+    boolean checkedBack = false;
 
     public GeorgeRedAuto() {}
 
@@ -46,7 +47,7 @@ public class GeorgeRedAuto extends GeorgeOp {
         driveBL = hardwareMap.dcMotor.get("dbl");
         driveBL.setDirection(DcMotorSimple.Direction.REVERSE);
         glyphLift = hardwareMap.dcMotor.get("gl");
-        glyphLift.setDirection(DcMotorSimple.Direction.REVERSE);
+        glyphLift.setDirection(DcMotorSimple.Direction.FORWARD);
         relicMotor = hardwareMap.dcMotor.get("rm");
         relicMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -190,10 +191,19 @@ public class GeorgeRedAuto extends GeorgeOp {
                 break;
 
             case 8:
-                stateName = "Drive forwards to detect crypto key";
+                stateName = "Drive backwards to detect crypto key";
+                disableEncoderCalibration = true; //carry over encoder values to next state
                 updateVuforia();
-                moveForward(0.075);
-                if (keyDetected)
+                //continuously drive back and forth in a specific range until cryptograph is detected or 5 after 5 seconds
+                if (!checkedBack) {
+                    moveForward(-0.075);
+                }
+                else {
+                    moveForward(0.075);
+                }
+                if (driveFR.getCurrentPosition() <= -0.5 * COUNTS_PER_REVOLUTION || driveFR.getCurrentPosition() >= 0.1 * COUNTS_PER_REVOLUTION)
+                    checkedBack = !checkedBack;
+                if (keyDetected || waitSec(5))
                     state++;
                 break;
 

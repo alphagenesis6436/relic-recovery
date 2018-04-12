@@ -53,7 +53,7 @@ public class GeorgeBlue2Auto extends GeorgeOp {
         driveBL = hardwareMap.dcMotor.get("dbl");
         driveBL.setDirection(DcMotorSimple.Direction.REVERSE);
         glyphLift = hardwareMap.dcMotor.get("gl");
-        glyphLift.setDirection(DcMotorSimple.Direction.REVERSE);
+        glyphLift.setDirection(DcMotorSimple.Direction.FORWARD);
         relicMotor = hardwareMap.dcMotor.get("rm");
         relicMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 

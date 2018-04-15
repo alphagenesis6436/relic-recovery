@@ -78,7 +78,7 @@ public class GeorgeOp extends OpMode {
     DcMotor relicMotor;     //40:1, relic lift
 
     //Mecanum Drive Train Variables and Constants
-    final double DRIVE_PWR_MAX = 0.70;
+    final double DRIVE_PWR_MAX = 0.65;
     final double TURN_PWR_MAX = 1.00;
 
 
@@ -120,6 +120,7 @@ public class GeorgeOp extends OpMode {
     boolean glpyhBtnPressed = false;
     double clawDelta = 0.0075;
     double pivotDelta = 1 / 225.0f; //rotated 180 degrees???
+    boolean glyphModeOn = true;
 
     //Jewel Mechanism Variables and Constants
     final float LEFTRIGHT_MID = 110 / 255.0f;
@@ -142,8 +143,8 @@ public class GeorgeOp extends OpMode {
     double downUpServoPos = DU_SERVO_MAX;
     double openCloseServoPos = OC_SERVO_CLOSE;
     final double RELIC_PWR_MAX = 0.80;
-    boolean relicPwrSustained = false;
-    boolean relicBtnPressed = false;
+    boolean relicModeOn = false;
+    boolean modeBtnPressed = false;
     double relicPower = 0;
     double relicDelta = 0.05;
 
@@ -216,10 +217,20 @@ public class GeorgeOp extends OpMode {
 
     void updateData() {
         //Add in update methods for specific robot mechanisms
+        if (gamepad2.dpad_right && !modeBtnPressed) {
+            relicModeOn = !relicModeOn;
+            modeBtnPressed = true;
+        }
+        else if (!gamepad2.dpad_right && modeBtnPressed) {
+            modeBtnPressed = false;
+        }
+        glyphModeOn = !relicModeOn;
         updateDriveTrain();
-        updateGlyphClaw();
+        if (relicModeOn)
+            updateRelic();
+        if (glyphModeOn)
+            updateGlyphClaw();
         //updateJewel();
-        updateRelic();
         //updateVuforia();
     }
 
@@ -280,6 +291,8 @@ public class GeorgeOp extends OpMode {
         telemetry.addData("DU Pos", String.format("%.0f", downUpServo.getPosition() * 255));
         telemetry.addData("OC Pos", String.format("%.0f", openCloseServo.getPosition() * 255));
         telemetry.addData("RM Pwr", String.format("%.2f", relicMotor.getPower()));
+        telemetry.addData("RelicModeOn", relicModeOn);
+        telemetry.addData("GlyphModeOn", glyphModeOn);
     }
 
     //Create Methods that will update the driver data
@@ -294,10 +307,6 @@ public class GeorgeOp extends OpMode {
         }
         else if (gamepad1.left_bumper) {
             drivePreciseIsOn = true;
-            if (Math.round(this.time) % 2 == 0 || Math.round(this.time) % 3 == 0)
-                colorSensor.enableLed(true);
-            else
-                colorSensor.enableLed(false);
         }
         if (drivePreciseIsOn) {
             runConstantSpeed();
@@ -305,7 +314,7 @@ public class GeorgeOp extends OpMode {
             forwardLeftPower = preciseDriveScaling(forwardLeftPower);
             backwardRightPower = preciseDriveScaling(backwardRightPower);
             backwardLeftPower = preciseDriveScaling(backwardLeftPower);
-            if (Math.round(this.time * 5) % 2 == 0) //flash led 5 times per second when one
+            if (Math.round(this.time * 10) % 2 == 0) //flash led 5 times per second when one
                 colorSensor.enableLed(true);
             else
                 colorSensor.enableLed(false);
@@ -325,12 +334,6 @@ public class GeorgeOp extends OpMode {
     //Step 1: Open Left/Right Claw by pressing the Left/Right Bumper
     //Step 2: Close the Left/Right Claw by pressing the Left/Right Trigger
     void updateGlyphClaw() {
-        glyphLiftPower = -gamepad2.left_stick_y * GLYPH_LIFT_PWR_MAX;
-        if (gamepad2.dpad_left) {
-            pivotPos -= pivotDelta;
-        }
-        else if (gamepad2.dpad_right)
-            pivotPos += pivotDelta;
         if (gamepad2.right_stick_button && !glpyhBtnPressed) {
             glpyhBtnPressed = true;
             clawIsUpRight = !clawIsUpRight;
@@ -400,23 +403,13 @@ public class GeorgeOp extends OpMode {
     }
 
     void updateRelic() {
-        if (!relicPwrSustained) {
-            relicPower = -gamepad2.right_stick_y * RELIC_PWR_MAX;
-        }
-        if (gamepad2.right_trigger >= 0.50 && !relicBtnPressed) {
-            relicBtnPressed = true;
-            relicPwrSustained = !relicPwrSustained;
-        }
-        else if (gamepad2.right_trigger < 0.30 && relicBtnPressed
-                || gamepad2.back) {
-            relicBtnPressed = false;
-        }
+        relicPower = -gamepad2.right_stick_y * RELIC_PWR_MAX;
 
         if (gamepad2.dpad_up)
             openCloseServoPos = OC_SERVO_MAX;
         else if (gamepad2.dpad_down)
             openCloseServoPos = OC_SERVO_CLOSE;
-        else if (gamepad2.dpad_left)
+        else if (gamepad2.x)
             openCloseServoPos = (OC_SERVO_MAX + OC_SERVO_CLOSE) / 2;
         if (gamepad2.a) //down
             downUpServoPos += relicDelta;

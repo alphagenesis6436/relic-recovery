@@ -19,15 +19,17 @@ public class RangerOp extends OpMode {
     final double DRIVE_PWR_MAX = 0.80;
     double currentLeftPwr = 0.0;
     double currentRightPwr = 0.0;
+    double drive = 0.0;
+    double turn = 0.0;
 
     public RangerOp() {}
 
     @Override public void init() {
         //Initialize motors & set direction
         leftDrive = hardwareMap.dcMotor.get("ld");
-        leftDrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         rightDrive = hardwareMap.dcMotor.get("rd");
-        rightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightDrive.setDirection(DcMotorSimple.Direction.FORWARD);
         //Initialize servos
 
         //Initialize sensors
@@ -63,7 +65,8 @@ public class RangerOp extends OpMode {
 }
     void telemetry() {
         //Show Data for Specific Robot Mechanisms
-
+        telemetry.addData("Left Drive Pwr", leftDrive.getPower());
+        telemetry.addData("Drive Drive Pwr", rightDrive.getPower());
     }
 
     //Create Methods that will update the driver data
@@ -79,8 +82,11 @@ public class RangerOp extends OpMode {
     //Controlled by Driver 1
     //Step 1: Push Up/Down on the Left/Right Control Stick to Drive Forward/Backward
     void updateDriveTrain() {
-        currentLeftPwr = -gamepad1.left_stick_y * DRIVE_PWR_MAX;
-        currentRightPwr = -gamepad1.right_stick_y * DRIVE_PWR_MAX;
+        drive = -gamepad1.left_stick_y * DRIVE_PWR_MAX;
+        turn  =  gamepad1.left_stick_x * DRIVE_PWR_MAX;
+        currentLeftPwr = drive + turn;
+        currentRightPwr = drive - turn;
+
     }
 
     //Create variables/methods that will be used in ALL autonomous programs for this specific robot

@@ -10,15 +10,15 @@ import com.qualcomm.robotcore.util.Range;
  * Created by Alex on 4/27/2017.
  */
 
-@TeleOp(name = "TryoutTemplateOp", group = "Default")
+@TeleOp(name = "JuanOp", group = "Default")
 @Disabled
-public class TryoutTemplateOp extends OpMode {
+public class JuanOp extends OpMode {
     //Declare any motors on robot
     DcMotor motor1;
     DcMotor motor2;
     DcMotor motor3;
 
-    public TryoutTemplateOp() {}
+    public JuanOp() {}
 
     @Override public void init() {
         //Initialize motors & set direction
@@ -26,10 +26,8 @@ public class TryoutTemplateOp extends OpMode {
         motor1.setDirection(DcMotorSimple.Direction.FORWARD);
         motor2 = hardwareMap.dcMotor.get("m2");
         motor2.setDirection(DcMotorSimple.Direction.FORWARD);
-        //motor3 = hardwareMap.dcMotor.get("m3");
-        //
-        //
-        // motor3.setDirection(DcMotorSimple.Direction.FORWARD);
+        motor3 = hardwareMap.dcMotor.get("m3");
+        motor3.setDirection(DcMotorSimple.Direction.FORWARD);
     }
     @Override public void loop() {
         //Update all the data based on driver input
@@ -52,7 +50,8 @@ public class TryoutTemplateOp extends OpMode {
         rightMotor.setPower(rightPower);
     }
     void updateArm() {
-
+        motor3.setPower(gamepad1.right_trigger);
+        //make it go forwards and backwards
     }
 }
 

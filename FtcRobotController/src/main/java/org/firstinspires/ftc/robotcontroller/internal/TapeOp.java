@@ -10,26 +10,23 @@ import com.qualcomm.robotcore.util.Range;
  * Created by Alex on 4/27/2017.
  */
 
-@TeleOp(name = "TryoutTemplateOp", group = "Default")
-@Disabled
-public class TryoutTemplateOp extends OpMode {
+@TeleOp(name = "TapeOp", group = "Default")
+public class TapeOp extends OpMode {
     //Declare any motors on robot
-    DcMotor motor1;
-    DcMotor motor2;
-    DcMotor motor3;
+    DcMotor rightMotor ;
+    DcMotor leftMotor;
+    DcMotor armMotor;
 
-    public TryoutTemplateOp() {}
+    public TapeOp() {}
 
     @Override public void init() {
         //Initialize motors & set direction
-        motor1 = hardwareMap.dcMotor.get("m1");
-        motor1.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor2 = hardwareMap.dcMotor.get("m2");
-        motor2.setDirection(DcMotorSimple.Direction.FORWARD);
-        //motor3 = hardwareMap.dcMotor.get("m3");
-        //
-        //
-        // motor3.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftMotor = hardwareMap.dcMotor.get("lm");
+        leftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightMotor = hardwareMap.dcMotor.get("rm");
+        rightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        armMotor = hardwareMap.dcMotor.get("am");
+        armMotor.setDirection(DcMotorSimple.Direction.FORWARD);
     }
     @Override public void loop() {
         //Update all the data based on driver input
@@ -38,7 +35,7 @@ public class TryoutTemplateOp extends OpMode {
 
     void updateData() {
         //Add in update methods for specific robot mechanisms
-        updateTankDrive2(motor1, motor2, 0.75);
+        updateTankDrive2(leftMotor, rightMotor, 0.75);
         updateArm();
     }
 
@@ -52,7 +49,7 @@ public class TryoutTemplateOp extends OpMode {
         rightMotor.setPower(rightPower);
     }
     void updateArm() {
-
+        armMotor.setPower(gamepad1.right_trigger);
     }
 }
 

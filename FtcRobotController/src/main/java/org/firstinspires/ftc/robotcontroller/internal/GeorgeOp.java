@@ -57,7 +57,7 @@ import java.util.ArrayList;
  * ----Adds updateVuforia method for autonomous
  */
 @TeleOp(name = "GeorgeOp", group = "Default")
-@Disabled
+//@Disabled
 public class GeorgeOp extends OpMode {
     //Declare any motors, servos, and sensors
     DcMotor driveFR; //AndyMark, 40:1
@@ -217,7 +217,8 @@ public class GeorgeOp extends OpMode {
         telemetry();
     }
 
-    void updateData() {
+    void
+    updateData() {
         //Add in update methods for specific robot mechanisms
         if (gamepad2.dpad_right && !modeBtnPressed) {
             relicModeOn = !relicModeOn;

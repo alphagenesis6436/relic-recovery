@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name = "CatapultOp", group = "Default")
+//@Disabled
 public class CatapultOp extends OpMode {
     //Declare any motors, servos, and sensors
     DcMotor catapultMotor;

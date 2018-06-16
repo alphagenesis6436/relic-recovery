@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.Range;
  * Updated by Alex on 6/22/2017.
  */
 @TeleOp(name = "RangerOp", group = "Default")
-@Disabled
+//@Disabled
 public class RangerOp extends OpMode {
     //Declare any motors, servos, and sensors
     DcMotor leftDrive;
@@ -27,9 +27,9 @@ public class RangerOp extends OpMode {
     @Override public void init() {
         //Initialize motors & set direction
         leftDrive = hardwareMap.dcMotor.get("ld");
-        leftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftDrive.setDirection(DcMotorSimple.Direction.FORWARD);
         rightDrive = hardwareMap.dcMotor.get("rd");
-        rightDrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         //Initialize servos
 
         //Initialize sensors

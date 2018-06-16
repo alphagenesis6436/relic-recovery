@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name = "TapeOp", group = "Default")
+@Disabled
 public class TapeOp extends OpMode {
     //Declare any motors on robot
     DcMotor rightMotor ;

@@ -81,7 +81,7 @@ public class GeorgeOp extends OpMode {
 
     //Mecanum Drive Train Variables and Constants
     final double DRIVE_PWR_MAX = 0.65;
-    final double TURN_PWR_MAX = 1.00;
+    final double TURN_PWR_MAX = 2.00;
 
 
 
